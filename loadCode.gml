@@ -384,296 +384,20 @@ object_event_add(LoadoutMenu,ev_other,ev_user1,'
 
 	if instance_exists(LoadoutSwitcher) with(LoadoutSwitcher) instance_destroy();
 ');
-object_event_add(LoadoutMenu,ev_other,ev_user2,'
-	switch(mousedclass){
-	    case 0:
-	        class = "RUNNER";
-	        load1 = instance_create(40, 192, LoadoutSwitcher);
-	        load1.value = 0;
-	        load1.loaded = real(string_copy(string(global.scoutLoadout),2,2));
-	        load1.description[0,0] = " •6 Ammo# •6 Bullets per Shot# •.66 Second Refire Rate# •8 Damage per Bullet";
-	        load1.description[1,0] = " •Causes knockback";
-	        load1.description[1,1] = " +100% bullets per shot"
-	        load1.description[1,2] = " -50% damage per bullet# -50% clip size# -10 max hp# •Reloads entire clip at once";
-	        load1.description[2,0] = "";
-	        load1.description[2,1] = " +40% accuracy# +40% refire speed# +30% bullet damage";
-	        load1.description[2,2] = " -33% clip size# -50% bullets per shot";
-	        load1.description[3,0] = " •Running & jumping fills hype";
-	        load1.description[3,1] = " •Deals minicrits when hyped# +50% firing speed# +25% Reload Speed";
-	        load1.description[3,2] = " -66% ammo loaded"
-	        load1.description[4,0] = " •Fires a blast of laserbeams"
-	        load1.description[4,1] = " •Crits against sentries"
-	        load1.description[4,2] = " -33% ammo loaded"
-	        load2 = instance_create(464, 192, LoadoutSwitcher);
-	        load2.value = 5;
-	        load2.loaded = real(string_copy(string(global.scoutLoadout),4,2));
-	        load2.description[0,0] = " •12 Ammo# •.16 Second Refire Rate# •8 Damage";
-	        load2.description[1,0] = " •Invincible while active# •Cannot shoot, pick up intel,#  or capture points when active";
-	        load2.description[2,0] = " •Secondary fire shoots a ball# •Headshots stun enemies# •Bodyshots deal 15 damage# •Each bounce weakens effects# •Can Tauntkill";
-	        load2.description[2,2] = " -28% melee damage";
-	        load2.description[3,0] = " •Soaking enemies heals 20 hp# •Extinguishes fire# •Reveals spies";
-	        load2.description[4,1] = " •Grants triple jump# •Can Tauntkill";
-	        load2.description[4,2] = " -20 max hp# -28% melee damage";
-	        offset = 0;
-	        break;
-	    case 1:
-	        class = "FIREBUG";
-	        load1 = instance_create(40, 192, LoadoutSwitcher);
-	        load1.value = 80;
-	        load1.loaded = real(string_copy(string(global.pyroLoadout),2,2));
-	        load1.description[0,0] = " •Secondary Fire: Airblast# •200 Ammo# •3.3 Damage per Flame# -50 Ammo per Airblast";
-	        load1.description[1,1] = " +20% flame damage";
-	        load1.description[1,2] = " +30 airblast cost";
-	        load1.description[2,0] = " •Converts projectiles into hp# •Sucks players";
-	        load1.description[2,2] = " -66% afterburn duration";
-	        load1.description[3,0] = " •Airblast damages enemies";
-	        load1.description[3,1] = " •Slows down frozen enemies# •Extra strong airblast";
-	        load1.description[3,2] = " -50% afterburn damage";
-	        load1.description[3,2] = " •Airblast does not reflect";
-	        load1.description[4,0] = " •Fill Mmph by dealing damage# •Secondary Fire: Start Mmph";
-	        load1.description[4,1] = " •While Mmph is active...#   •Damage deals crits#   +50 Overheal";
-	        load1.description[4,2] = " •Cannot airblast# -30% damage";
-	        load2 = instance_create(464, 192, LoadoutSwitcher);
-	        load2.value = 85;
-	        load2.loaded = real(string_copy(string(global.pyroLoadout),4,2));
-	        load2.description[0,0] = " •6 Ammo# •5 Bullets per Shot# •.66 Second Refire Rate# •7 Damage per Bullet";
-	        load2.description[1,0] = " •Sets enemies on fire when hit";
-	        load2.description[1,1] = " •Crits burning targets";
-	        load2.description[2,0] = " •Sets enemies on fire when hit# •Secondary fire detonates flare";
-	        load2.description[3,0] = " •Erupts into a ring of flames"
-	        load2.description[3,1] = " +Recharges while not equipped"
-	        load2.description[3,2] = " -30% flame damage vs sentries"
-	        load2.description[4,1] = " +50% against burning players# •80 damage against sentries";
-	        load2.description[4,2] = " -40% damage penalty# •No random critical hits"
-	        offset = 10;
-	        break;
-	    case 2:
-	        class = "ROCKETMAN";
-	        load1 = instance_create(40, 192, LoadoutSwitcher);
-	        load1.value = 10;
-	        load1.loaded = real(string_copy(string(global.soldierLoadout),2,2));
-	        load1.description[0,0] = " •4 Ammo# •.5 Second Refire Rate# •45 Damage per Rocket";
-	        load1.description[1,0] = "";
-	        load1.description[1,1] = " +80% rocket speed# +20% damage";
-	        load1.description[1,2] = " -80% blast radius# -30% refire rate # •Bad for rocket jumping";
-	        load1.description[2,0] = " •Crits light enemies on fire# •Secondary fire charges shot";
-	        load1.description[2,2] = " -80% damage against sentries# -10% damage";
-	        load1.description[3,0] = "";
-	        load1.description[3,1] = " +15 hp on direct hit";
-	        load1.description[3,2] = " -1 rocket loaded";
-	        load1.description[4,0] = " •Secondary fire bends trajectory";
-	        load1.description[4,2] = " •Shoots only 1 rocket at a time";
-	        load2 = instance_create(464, 192, LoadoutSwitcher);
-	        load2.value = 15;
-	        load2.loaded = real(string_copy(string(global.soldierLoadout),4,2));
-	        load2.description[0,0] = " •6 Ammo# •5 Bullets per Shot# •.66 Second Refire Rate# •7 Damage per Bullet";
-	        load2.description[1,0] = " •Kills charge rage meter";
-	        load2.description[1,1] = " •Teammates minicrit while active";
-	        load2.description[2,0] = " •May hit target multiple times";
-	        load2.description[2,1] = " •Projectiles penetrate enemies";
-	        load2.description[2,2] = " -80% damage against sentries";
-	        load2.description[3,0] = " •Low hp increases damage/speed";
-	        load2.description[3,2] = " •No random minicrits# -28% melee damage if hp full";
-	        load2.description[4,1] = " •Minicrits airborne targets# •Fires instantly";
-	        load2.description[4,2] = " -33% ammo loaded# •Must reload to switch weapons";
-	        offset = 2;
-	        break;
-	    case 3:
-	        class = "OVERWEIGHT";
-	        load1 = instance_create(40, 192, LoadoutSwitcher);
-	        load1.value = 60;
-	        load1.loaded = real(string_copy(string(global.heavyLoadout),2,2));
-	        load1.description[0,0] = " •200 Ammo# •.06 Second Refire Rate# •8 Damage per Bullet";
-	        load1.description[1,0] = "";
-	        load1.description[1,1] = " -100% bullet spread# +10% run speed# +100% speed while shooting";
-	        load1.description[1,2] = " -50% firing speed";
-	        load1.description[2,1] = " •Slows down players on hit";
-	        load1.description[2,2] = " -25% damage";
-	        load1.description[3,1] = " +20% damage";
-	        load1.description[3,2] = " -20% run speed# -80% speed while shooting# •Cannot jump while shooting";
-	        load1.description[4,0] = " •Maximum 300 ammo";
-	        load1.description[4,1] = " •Each kill ups max ammo by 20# +70 ammo reloaded per kill# +35 ammo reloaded per assist";
-	        load1.description[4,2] = " •Starts with 100 ammo# -50% reload time for base ammo# -75% reload for extra ammo";
-	        load2 = instance_create(464, 192, LoadoutSwitcher);
-	        load2.value = 65;
-	        load2.loaded = real(string_copy(string(global.heavyLoadout),4,2));
-	        load2.description[0,0] = " •6 Ammo# •5 Bullets per Shot# •.66 Second Refire Rate# •7 Damage per Bullet";
-	        load2.description[1,0] = " •Heals 50 hp# •Secondary fire drops sandvich";
-	        load2.description[2,1] = " +33% clip size# +15% refire speed";
-	        load2.description[2,2] = " -15% damage penalty";
-	        load2.description[3,0] = " •Heals 40 hp";
-	        load2.description[3,1] = " •Can overheal user";
-	        load2.description[3,2] = " •Cant be dropped";
-	        load2.description[4,1] = " •On kill deals crits# +30% damage";
-	        load2.description[4,2] = " •Slower swing speed";
-	        offset = 8;
-	        break;
-	    case 4:
-	        class = "DETONATOR";
-	        load1 = instance_create(40,192,LoadoutSwitcher);
-	        load1.value = 30;
-	        load1.loaded = real(string_copy(string(global.demomanLoadout),2,2));
-	        load1.description[0,0] = " •Secondary Fire: Detonate# •8 Ammo# •.86 Second Refire Rate# •45 Damage per Sticky";
-	        load1.description[1,0] = "";
-	        load1.description[1,1] = " •Faster refire & reload speed# •Invisible mines# +38 damage on airborne targets";
-	        load1.description[1,2] = " -46% damage# •Can place 5 stickies";
-	        load1.description[2,0] = " •Can detonate individual stickies";
-	        load1.description[2,1] = " •Can place up to 14 stickies";
-	        load1.description[3,0] = " •Stickies deal no damage";
-	        load1.description[3,1] = " +50% ammo";
-	        load1.description[3,2] = " -20 max hp";
-	        load1.description[4,0] = " •Stickies stick to players";
-	        load1.description[4,1] = " +10% damage";
-	        load1.description[4,2] = " •Stickies only stick to players# •Stickies cannot be detonated# •Stickies only damage targets";
-	        load2 = instance_create(464, 192, LoadoutSwitcher);
-	        load2.value = 35;
-	        load2.loaded = real(string_copy(string(global.demomanLoadout),4,2));
-	        load2.description[0,0] = " •4 Ammo# •.73 Second Refire Rate# •40 Damage per Grenade ";
-	        load2.description[0,1] = " •Can Tauntkill";
-	        load2.description[1,0] = "";
-	        load2.description[1,1] = " •Fires 2 grenades at once# •Can Tauntkill";
-	        load2.description[1,2] = " -50% ammo loaded";
-	        load2.description[2,0] = " •Secondary fire charges# •Deals minicrits while charging";
-	        load2.description[3,1] = " •Double capspeed# +30 max hp on ctf# •Pierces generator shield";
-	        load2.description[4,0] = " •Hold fire to delay throw";
-	        load2.description[4,1] = " +10% blast radius# +50% damage# •Can Tauntkill";
-	        offset = -4;
-	        break;
-	    case 5:
-	        class = "HEALER";
-	        load1 = instance_create(40, 192, LoadoutSwitcher);
-	        load1.value = 40;
-	        load1.loaded = real(string_copy(string(global.medicLoadout),2,2));
-	        load1.description[0,0] = " •40 Ammo# •.1 Second Refire Rate# •4 Damage per Bullet";
-	        load1.description[1,0] = "";
-	        load1.description[1,1] = " +2 hp on hit";
-	        load1.description[1,2] = " -40% health regen speed";
-	        load1.description[2,0] = " •If killed with 75% ubercharge#  all teammates are healed";
-	        load1.description[2,2] = " -20 max hp"
-	        load1.description[3,0] = " •Heals allies on hit";
-	        load1.description[3,1] = " •Long range shots";
-	        load1.description[3,2] = " •Shots dont penetrate allies";
-	        load1.description[4,0] = " •Secondary fire heals nearby#  teammates";
-	        load1.description[4,1] = " •Damage increases uber# •Can taunt kill";
-	        load1.description[4,2] = " •No random melee crits";
-	        load2 = instance_create(464, 192, LoadoutSwitcher);
-	        load2.value = 45;
-	        load2.loaded = real(string_copy(string(global.medicLoadout),4,2));
-	        load2.description[0,0] = " •Ubercharge grants #  invincibility";
-	        load2.description[1,0] = "";
-	        load2.description[1,1] = " +25% ubercharge speed# •Ubercharge grants crits";
-	        load2.description[1,2] = " •Not invincible while ubering";
-	        load2.description[2,0] = ""
-	        load2.description[2,1] = " +40% heal rate# •3x heal rate while ubering";
-	        load2.description[2,2] = " •Doesnt refill ammo# •Not invincible while ubering";
-	        load2.description[3,0] = "";
-	        load2.description[3,1] = " •Overheals teammates";
-	        load2.description[3,2] = " -25% ubercharge speed";
-	        load2.description[4,0] = " •Shoots one potion per second# •Unlimited ammo";
-	        load2.description[4,1] = " •Can heal multiple teammates# •Damages enemies when ubered";
-	        load2.description[4,2] = "";
-	        offset = 3;
-	        break;
-	    case 6:
-	        class = "CONSTRUCTOR";
-	        load1 = instance_create(40, 192, LoadoutSwitcher);
-	        load1.value = 50;
-	        load1.loaded = real(string_copy(string(global.engineerLoadout),2,2));
-	        load1.description[0,0] = " •6 Ammo# •5 Bullets per Shot# •.66 Second Refire Rate# •7 Damage per Bullet";
-	        load1.description[1,0] = "";
-	        load1.description[1,1] = " •Gain 2 revenge crits for#  each sentry kill when your#  sentry is destroyed.";
-	        load1.description[1,2] = " -50% clip size";
-	        load1.description[2,0] = "";
-	        load1.description[2,1] = " +40% damage";
-	        load1.description[2,2] = " -50% clip size# •Buildings destroyed on death";
-	        load1.description[3,0] = "";
-	        load1.description[3,1] = " •Shots penetrate enemies# •Takes 7% uber from medics# •Spies strobe into view";
-	        load1.description[3,2] = " -60% damage"
-	        load1.description[4,0] = " •Uses nuts n bolts for ammo";
-	        load1.description[4,1] = " +20 per enemy shot";
-	        load1.description[4,2] = " -20 per enemy missed";
-	        load2 = instance_create(464, 192, LoadoutSwitcher);
-	        load2.value = 55;
-	        load2.loaded = real(string_copy(string(global.engineerLoadout),4,2));
-	        load2.description[0,0] = " •Builds mini-sentries# -2 Nuts N Bolts per Shot# •.2 Second Refire Rate# •7 Damage";
-	        load2.description[0,1] = " •Destroys sappers# •User can build dispensers";
-	        load2.description[1,0] = " •Builds mini-sentries# •Stuns tagets on hit";
-	        load2.description[2,0] = " •Builds upgradable sentries";
-	        load2.description[2,1] = " •User can move sentries# •User can repair sentries";
-	        load2.description[3,0] = " •Builds mini-sentries# •Can fire 100 shots per sentry";
-	        load2.description[3,1] = " •Can directly control sentry# •Wrangled sentry has a shield# •Shield is 50% resistant#  against everything but...";
-	        load2.description[3,2] = "   •Potions#   •Melee weapons";
-	        load2.description[4,0] = " •Builds upgradable sentries# •Taunt to teleport to sentry#  (uses 60 nuts n bolts)";
-	        load2.description[4,1] = " •User can repair sentries";
-	        offset = 3;
-	        break;
-	    case 7:
-	        class = "INFILTRATOR";
-	        load1 = instance_create(40, 192, LoadoutSwitcher);
-	        load1.value = 70;
-	        load1.loaded = real(string_copy(string(global.spyLoadout),2,2));
-	        load1.description[0,0] = " •Secondary Fire: Cloak# •Cloaked Primary: Sapper# •6 Ammo# •.6 Refire Rate# •28 Damage per Bullet";
-	        load1.description[1,0] = "";
-	        load1.description[1,1] = " +2 seconds of ubercloak on kill# •Ubercloak is resistant to#  everything but melee weapons";
-	        load1.description[1,2] = " -20% damage"
-	        load1.description[2,0] = "";
-	        load1.description[2,1] = " •Gains a crit shot for each#  player backstabbed";
-	        load1.description[2,2] = " -15% damage# •Incompatible with the Zapper";
-	        load1.description[3,0] = "";
-	        load1.description[3,1] = " +50% damage on headshot";
-	        load1.description[3,2] = " -25% damage on bodyshot# -30% refire speed";
-	        load1.description[4,1] = " •Drops health kits on kill";
-	        load1.description[4,2] = " •Slower movement speed# -10% damage";
-	        load2 = instance_create(464,192,LoadoutSwitcher);
-	        load2.value = 75;
-	        load2.loaded = real(string_copy(string(global.spyLoadout),4,2));
-	        load2.description[0,0] = " •While uncloaked, damage#  increases with each#  consecutive hit# •While cloaked...#  •200 damage against players#  •40 damage against sentries#  •50 dmg against generators";
-	        load2.description[1,0] = "";
-	        load2.description[1,1] = " •On kill also kills enemys#  patient";
-	        load2.description[1,2] = " -10 hp on missed stab";
-	        load2.description[2,0] = "";
-	        load2.description[2,1] = " +100% backstab speed on#  successful backstab"
-	        load2.description[2,2] = " -20% max health# •Cant stab multiple enemies";
-	        load2.description[3,0] = " •Turns people into icicles.";
-	        load2.description[3,1] = " •Puts out fires by melting";
-	        load2.description[3,2] = " •Cant be used for 15 seconds#  after melting";
-	        load2.description[4,1] = " +25% backstab speed# •Backstab stuns# +300% dmg against sentries";
-	        load2.description[4,2] = " -66% damage# •Cant stab multiple enemies";
-	        offset = 4;
-	        break;
-	    case 8:
-	        class = "RIFLEMAN";
-	        load1 = instance_create(40,192,LoadoutSwitcher);
-	        load1.value = 20;
-	        load1.loaded = real(string_copy(string(global.sniperLoadout),2,2));
-	        load1.description[0,0] = " •Secondary Fire: Scope# •2.66 Second Refire Rate# •Min Damage: 35# •Max Damage: 75";
-	        load1.description[0,2] = " •No bonus damage on headshots";
-	        load1.description[1,0] = " •Each headshot decreases#  charge time";
-	        load1.description[1,1] = " •Headshots cause extra damage";
-	        load1.description[1,2] = " -40% unscoped damage";
-	        load1.description[2,1] = " •Headshots cause extra damage# •Faster reload# •Can Tauntkill";
-	        load1.description[2,2] = " •Cannot scope";
-	        load1.description[3,1] = " +22% damage on fully charged#  headshot (110 damage total)";
-	        load1.description[3,2] = " •Cant shoot while unscoped# +75% reload time";
-	        load1.description[4,0] = " •Charged shots shoot Jarate";
-	        load1.description[4,1] = " •Soaked enemies take crits";
-	        load1.description[4,2] = " -15% damage# •No bonus damage on headshots";
-	        load2 = instance_create(464, 192, LoadoutSwitcher);
-	        load2.value = 25;
-	        load2.loaded = real(string_copy(string(global.sniperLoadout),4,2));
-	        load2.description[0,0] = " •25 Ammo# •.1 Second Refire Rate# •5 Damage per Bullet";
-	        load2.description[1,0] = " •Soaks enemies in piss";
-	        load2.description[1,1] = " •Soaked enemies take crits# •Puts out fire# •Reveals spies";
-	        load2.description[2,0] = " ";
-	        load2.description[2,1] = " +20 max health";
-	        load2.description[3,0] = " •Causes bleed damage for 3s# •Blocks 1 backstab attempt";
-	        load2.description[3,2] = " -33% dmg";
-	        load2.description[4,0] = " •Allows user to float# •Drops intel when floating";
-	        offset = 10;
-	        break;
-	}
-	currentclass = mousedclass;
-');
+
+
+// Read the step script from file
+var fd, readScript;
+readScript = "";
+fd = file_text_open_read(pluginFilePath + "\loadout_menu_ev_user2.gml");
+while(not file_text_eof(fd)) {
+	readScript += file_text_read_string(fd) + "
+	";
+	file_text_readln(fd);
+}
+file_text_close(fd);
+object_event_add(LoadoutMenu,ev_other,ev_user2, readScript);
+
 object_event_add(LoadoutMenu,ev_other,ev_user3,'
 	if(mousedclass>=0 and mousedclass<=8) {
 	    if instance_exists(LoadoutSwitcher) event_user(1); //get rid of the loadout for the old class and write their loadout to the file
@@ -694,6 +418,7 @@ object_event_add(LoadoutMenu,ev_draw,0,'
 	if newclass != -1 draw_sprite_ext(ClassSelectSpritesS,newclass,drawx+xoffset+xoffset2,16+yoffset,1,1,0,c_white, 1);
 	    
 	draw_sprite(DescriptionBoardS,0,160+xoffset,352+yoffset);
+	draw_set_font(global.gg2Font); //Not sure if this is needed
 	draw_set_color(c_white);
 	draw_set_halign(fa_left);
 	draw_set_valign(fa_top);
@@ -726,45 +451,62 @@ object_event_add(LoadoutMenu, ev_keypress, vk_escape,'
 
 
 //Adds loadout to ingame menu
+object_event_clear(InGameMenuController,ev_create,0);
 object_event_add(InGameMenuController,ev_create,0,'
+    cursor_sprite = CrosshairS;
+    global.levelchoice = 1
+
+    menu_create(40, 300, 200, 200, 32);
+    menu_background(212, 24, 8, 12, 4);
+    menu_setdimmed();
+    
+    menu_addlink("Return to Game", "
+        instance_destroy();
+    ");
+    menu_addback("", "
+        instance_destroy();
+    ");
+    if (global.isHost) {
+        menu_addlink("Kick players", "
+            if(!instance_exists(ScoreTableController)) instance_create(0,0,ScoreTableController);
+            ScoreTableController.showadmin = true;
+            instance_destroy();
+        ");
+    }
+    menu_addlink("Options", "
+        instance_destroy();
+        instance_create(0,0,OptionsController);
+    ");
     menu_addlink("Loadout", "
         instance_destroy();
         instance_create(0,0,LoadoutMenu);
     ");
-');
-
-object_event_add(Character, ev_create, 0,'
-	radioactive = false;
-	bkpmaxspeed = basemaxspeed;
-	trip = false;
-	speedboost = 0;
-');
-object_event_add(Character, ev_draw, 0, '
-	if radioactive {
-		for (i=0; i<6; i+=1) {
-			draw_sprite_ext(sprite_index, 0 + team, x-hspeed*1.2, y-vspeed*1.2, image_xscale, 1, 0, c_white, 0.2);
-						}
-	}
-');
-
-object_event_add(Player, ev_other, ev_user13, '
-    var temp;
-    if(global.updateType == FULL_UPDATE) {
-        receiveCompleteMessage(global.serverSocket,1,global.deserializeBuffer);
-        temp = read_ubyte(global.deserializeBuffer);
-        if (object != -1) {
-			if (object.currentWeapon.object_index == Shovel) {
-				object.runPower = object.baseRunPower + (object.maxHp+40)/(objectt.hp+40)*0.1;
-				object.basemaxspeed = abs(object.runPower * object.baseControl / (object.baseFriction-1));
-            } else {
-				object.runPower = object.baseRunPower;
-				object.basemaxspeed = abs(object.runPower * object.baseControl / (object.baseFriction-1));
-			}
-            object.runBkp = object.runPower; 
+    forcedWorkaroundOne = "Do you really want to leave this match?";
+    menu_addlink("Disconnect", "
+        // Force dedicated mode to off so you can go to main menu instead of just restarting server
+        if (show_question(forcedWorkaroundOne)) {
+            if (global.serverPluginsInUse)
+            {
+                pluginscleanup(true);
+            }
+            else
+            {
+                global.dedicatedMode = 0;
+                with(Client)
+                    instance_destroy();
+                    
+                with(GameServer)
+                    instance_destroy();
+            }
         }
-    }
-'); 
-
+    ");
+    forcedWorkaroundTwo = "Do you really want to quit?";
+    menu_addlink("Quit Game", "
+        if (show_question(forcedWorkaroundTwo)) {
+            game_end();
+        }
+    ");
+');
 
 object_event_clear(Character,ev_step,ev_step_end);
 object_event_add(Character,ev_step,ev_step_end,'
@@ -1126,53 +868,6 @@ object_event_add(Soldier,ev_create,0,'
 	// Override defaults
 	numFlames = 4;
 ');
-
-object_event_clear(Demoman,ev_create,0);
-object_event_add(Demoman,ev_create,0,'
-	maxHp = 120;
-	baseRunPower = 1;
-	weapons[0] = global.weapons[real(string_copy(string(global.demomanLoadout), 2, 2))];
-	weapons[1] = global.weapons[real(string_copy(string(global.demomanLoadout), 4, 2))];
-	haxxyStatue = DemomanHaxxyStatueS;
-
-	if (global.paramPlayer.team == TEAM_RED)
-	{
-		sprite_index = DemomanRedS;
-	}
-	else if (global.paramPlayer.team == TEAM_BLUE)
-	{
-		sprite_index = DemomanBlueS;
-	}
-
-	event_inherited();
-
-	// Override defaults
-	numFlames = 4;
-');
-
-object_event_clear(Engineer,ev_create,0);
-object_event_add(Engineer,ev_create,0,'
-	maxHp = 120;
-	baseRunPower = 1;
-	weapons[0] = global.weapons[real(string_copy(string(global.engineerLoadout), 2, 2))];
-	weapons[1] = global.weapons[real(string_copy(string(global.engineerLoadout), 4, 2))];
-	haxxyStatue = EngineerHaxxyStatueS;
-
-	if (global.paramPlayer.team == TEAM_RED)
-	{
-		sprite_index = EngineerRedS;
-	}
-	else if (global.paramPlayer.team == TEAM_BLUE)
-	{
-		sprite_index = EngineerBlueS;
-	}
-
-	event_inherited();
-
-	// Override defaults
-	numFlames = 4;
-');
-
 object_event_clear(Medic,ev_create,0);
 object_event_add(Medic,ev_create,0,'
 	maxHp = 120;
@@ -1198,31 +893,118 @@ object_event_add(Medic,ev_create,0,'
 	numFlames = 4;
 ');
 
-object_event_clear(Quote,ev_create,0);
-object_event_add(Quote,ev_create,0,'
-	baseRunPower = 1.07;
-	maxHp = 140;
-	weapons[0] = global.weapons[real(string_copy(string(global.qcLoadout), 2, 2))];
-	weapons[1] = global.weapons[real(string_copy(string(global.qcLoadout), 4, 2))];
-	haxxyStatue = QuoteHaxxyStatueS;
+//This event sucks
+object_event_clear(PlayerControl,ev_step,ev_step_begin);
+object_event_add(PlayerControl,ev_step,ev_step_begin,'
+	if(instance_exists(MenuController))
+	    exit;
+	    
+	var kickOpen;
+	kickOpen = false
+	if (instance_exists(ScoreTableController))
+	    if (ScoreTableController.showadmin)
+	        kickOpen = true;
+	    
+	if(instance_exists(TeamSelectController) || instance_exists(ClassSelectController) || kickOpen)
+	    menuOpen = true;
+	else
+	    menuOpen = false;
 
-	if (global.paramPlayer.team == TEAM_RED)
+	//Checking for input - Mapped Keys
+	if(keyboard_check_pressed(global.changeTeam))
+	    inputChangeTeam();
+	if(keyboard_check_pressed(global.changeClass))
+	    inputChangeClass();
+
+	event_user(8);
+	    
+	var keybyte;
+	keybyte = 0;
+
+	/* KeyByte flags:
+	    02 - down
+	    
+	    08 - primary
+	    10 - secondary
+	    
+	    20 - right
+	    40 - left
+	    80 - up
+	*/
+
+	//character object exists
+	if(global.myself.object != -1)
 	{
-		sprite_index = QuerlyRedS;
-		haxxyStatue = QuoteHaxxyStatueS;
+	    if(!menuOpen)
+	    {
+	        if(keyboard_check(global.left) || keyboard_check(global.left2)) keybyte |= $40;
+	        if(keyboard_check(global.right) || keyboard_check(global.right2)) keybyte |= $20;
+	        if(keyboard_check(global.jump) || keyboard_check(global.jump2)) keybyte |= $80;
+	        if(keyboard_check(global.down) || keyboard_check(global.down2)) keybyte |= $02;
+	        if(keyboard_check(global.taunt)) keybyte |= $01;
+	        if(keyboard_check_pressed(global.chat1)) inputChat1();
+	        if(keyboard_check_pressed(global.chat2)) inputChat2();
+	        if(keyboard_check_pressed(global.chat3)) inputChat3();
+	        if(keyboard_check_pressed(global.drop)) inputDrop();
+	        
+	        if(keyboard_check_pressed(global.medic))
+	        {
+	            inputCallMedic();
+	        }
+	        
+	        if(!global.myself.humiliated)
+	        {
+	            if(keyboard_check(global.attack)) keybyte |= $10;
+	            if(keyboard_check(global.special)) keybyte |= $08;
+	            if(keyboard_check_pressed(global.special)) inputSpecial();
+	            if(keyboard_check_pressed(global.taunt)) inputTaunt();
+	            
+	            if(mouse_check_button(mb_left))
+	            {
+	                if(global.attack == MOUSE_LEFT) keybyte |= $10;
+	                if(global.special == MOUSE_LEFT) keybyte |= $08;
+	            }
+	            if(mouse_check_button_pressed(mb_left) and global.special == MOUSE_LEFT)
+	                execute_file(pluginFilePath + "\input_special_but_better.gml");
+
+	            if(mouse_check_button(mb_right))
+	            {
+	                if(global.attack == MOUSE_RIGHT) keybyte |= $10;
+	                if(global.special == MOUSE_RIGHT) keybyte |= $08;
+	            }
+	            if(mouse_check_button_pressed(mb_right) and global.special == MOUSE_RIGHT)
+	                execute_file(pluginFilePath + "\input_special_but_better.gml");
+	            
+	        }
+	    }
+	    
+	    if(global.run_virtual_ticks)
+	        ClientInputstate(global.serverSocket, keybyte);
+	    socket_send(global.serverSocket);
 	}
-	else if (global.paramPlayer.team == TEAM_BLUE)
+	// spectator controls
+	else if (instance_exists(Spectator))
 	{
-		sprite_index = QuerlyBlueS;
-		haxxyStatue = CurlyHaxxyStatueS;
+	    if(!menuOpen)
+	    {
+	        if(mouse_check_button_pressed(mb_left))
+	            with (Spectator) event_user(7);
+	        if(mouse_check_button_pressed(mb_right))
+	            with (Spectator) event_user(8);
+	    }
 	}
 
-	event_inherited();
-
-	// Override defaults
-	numFlames = 4;
+	if(keybyte != 0
+	        or keyboard_check(global.left) or keyboard_check(global.left2)
+	        or keyboard_check(global.right) or keyboard_check(global.right2)
+	        or keyboard_check(global.jump) or keyboard_check(global.jump2)
+	        or keyboard_check(global.down) or keyboard_check(global.down2)) {
+	    afktimer = afktimeout;
+	}
 ');
+
 //Handles swapping out loadout weapons and the active weapon shown
+object_event_clear(PlayerControl,ev_step,ev_step_end);
 object_event_add(PlayerControl,ev_step,ev_step_end,'
 	globalvar AmmoCounterID;
     with(AmmoCounter) AmmoCounterID = id;
@@ -1273,6 +1055,55 @@ object_event_add(PlayerControl,ev_step,ev_step_end,'
             }
         }
     }
+
+	if(global.myself.object != -1){
+		//AFK Check -- double length for server host
+		if(global.isHost)
+		    afktimer -= 0.5 * global.delta_factor
+		else
+		    afktimer -= 1 * global.delta_factor;
+
+		if ((afktimer <= 0) and !global.myself.object.afk)
+		{
+		    global.myself.object.afk = true;
+		    if !instance_exists(TeamSelectController)
+		        instance_create(0,0,TeamSelectController);
+		    with(TeamSelectController)
+		        afk = true;
+		}
+		   
+		if(global.myself.class == CLASS_ENGINEER)
+		{
+		    if(global.myself.sentry and !instance_exists(SentryHealthHud))
+		        instance_create(0,0,SentryHealthHud);
+
+		    if(!instance_exists(NutsNBoltsHud))
+		        instance_create(0,0,NutsNBoltsHud);
+		}
+		if(global.myself.class == CLASS_HEAVY and global.myself.object.weapons[1] == SandvichHand)
+		{
+		    if(!instance_exists(SandwichHud))
+		        instance_create(0,0,SandwichHud);
+		}
+
+		// Sticky HUD. Because real men let computers count for them.
+		else if (global.myself.class == CLASS_DEMOMAN) && !instance_exists(StickyCounter) instance_create(0,0,StickyCounter);
+		  
+		else if global.myself.class == CLASS_MEDIC {
+		    //Uber HUD
+		    if !instance_exists(UberHud) instance_create(0,0,UberHud);
+		    //Healing Hud
+		    if !instance_exists(HealingHud) && global.showHealing = 1 instance_create(0,0,HealingHud);
+		    //Medic Radar
+		    if global.medicRadar == 1 && !instance_exists(MedicRadar) instance_create(0,0,MedicRadar);
+		}
+		        
+		// Health HUD
+		if  !instance_exists(HealthHud) instance_create(0,0,HealthHud);
+
+		// Healed HUD
+		if !instance_exists(HealedHud) && global.showHealer = 1 instance_create(0,0,HealedHud);
+	}
 ');
 
 //Changes the number telling randomizer what weapon should be shown
