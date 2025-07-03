@@ -58,9 +58,12 @@ object_event_add(MeleeMask,ev_step,ev_step_normal,'
     x=owner.x;
     y=owner.y;
 ');
+globalvar MeleeHitMapSnd, MeeleHitSnd;
+MeeleHitMapSnd = sound_add(directory + '/randomizer_sounds/MeeleHitSnd.wav', 0, 1);
+MeeleHitSnd = sound_add(directory + '/randomizer_sounds/MeeleHitSnd.wav', 0, 1);
 object_event_add(MeleeMask,ev_collision,Obstacle,'
     if hit == 0 {
-        //playsound(x,y,MeleeHitMapSnd);
+        playsound(x,y,MeleeHitMapSnd);
         hit = 1;
     }
 ');
@@ -76,7 +79,7 @@ object_event_add(MeleeMask,ev_collision,Character,'
             //    instance_destroy();
             //    exit;
             //}
-            //playsound(x,y,MeleeHitSnd);
+            playsound(x,y,MeleeHitSnd);
             if weapon == WEAPON_WRECKER && other.burnDuration > 0 hitDamage*= 1;
             if true other.hp -= hitDamage*(1+0*0.35)*1;
             //if weapon == WEAPON_WRENCH && other.hp <= 0 && instance_exists(owner) owner.nutsNBolts = min(100,owner.nutsNBolts+25);
@@ -165,7 +168,7 @@ object_event_add(MeleeMask,ev_collision,Sentry,'
             other.lastDamageDealer = ownerPlayer;
             other.lastDamageSource = weapon;
             other.lastDamageCrit = crit;
-            //playsound(x,y,MeleeHitMapSnd);
+            playsound(x,y,MeleeHitMapSnd);
             instance_destroy();
         }
         else
@@ -276,10 +279,6 @@ object_event_add(DetonationFlare,ev_create,0,'
     exploded = false;
     reflector = noone;
     event_inherited();
-');
-object_event_add(DetonationFlare,ev_collision,Obstacle,'
-    //event_user(5);
-    instance_destroy();
 ');
 object_event_add(DetonationFlare,ev_collision,Character,'
     if team != other.team event_user(5);
@@ -1118,7 +1117,7 @@ object_event_add(Ball,ev_collision,Character,'
             other.currentWeapon.ammoCount =1;
             other.currentWeapon.alarm[5]=-1;
             other.ammo[107] = -1;
-            //playsound(x,y,PickupSnd);
+            playsound(x,y,PickupSnd);
             instance_destroy(); 
         }
     }
@@ -1510,8 +1509,10 @@ object_event_add(Lasergun,ev_other,ev_user1,'
         doEventFireWeapon(ownerPlayer, seed);
     }
 ');
+globalvar FlashlightSnd;
+FlashlightSnd = sound_add(directory + '/randomizer_sounds/FlashlightSnd.wav', 0, 1);
 object_event_add(Lasergun,ev_other,ev_user3,'
-    //playsound(x,y,FlashlightSnd);
+    playsound(x,y,FlashlightSnd);
     shot=true;
     justShot=true;        
     readyToShoot = false;
@@ -1724,6 +1725,7 @@ object_event_add(Pistol,ev_other,ev_user3,'
 ');
 WEAPON_BONK = 6;
 BonkHand = object_add();
+object_set_sprite(BonkHand, sprite_add(pluginFilePath + "\randomizer_sprites\BonkHandS.png", 2, 1, 0, 21, 25));
 object_set_parent(BonkHand, Weapon);
 object_event_add(BonkHand,ev_create,0,'
     xoffset=-3;
@@ -1737,7 +1739,87 @@ object_event_add(BonkHand,ev_create,0,'
     idle=true;
     readyToStab=false;
     unscopedDamage = 0;
+	
+	normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\BonkHandS.png", 4, 0, 0, 21, 25);
+	recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\BonkHandS.png", 4, 0, 1, 21, 25);
+	reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\BonkHandS.png", 4, 0, 1, 21, 25);
+	
+	sprite_index = normalSprite;
+	
+	recoilTime = refireTime;
+    recoilAnimLength = sprite_get_number(recoilSprite)/2;
+    recoilImageSpeed = recoilAnimLength/recoilTime;
+
+    reloadAnimLength = sprite_get_number(reloadSprite)/2;
+    reloadImageSpeed = reloadAnimLength/reloadTime;
 ');
+object_event_add(BonkHand,ev_other,ev_user1,'
+    if(readyToShoot and ammoCount >0 and global.isHost)
+    {
+        sendEventFireWeapon(ownerPlayer, 0);
+        doEventFireWeapon(ownerPlayer, 0);
+    }
+');
+object_event_clear(BonkHand, ev_draw,0);
+
+object_event_add(BonkHand,ev_draw,0,'
+	if (distance_to_point(view_xview + view_wview/2, view_yview + view_hview/2) > 800)
+	    exit;
+	    
+	var imageOffset;
+	if ((alarm[6] <= 0 and alarm[5] <= 0) or object_index == Blade) {
+	    //if we are not shooting or recoiling
+	    imageOffset = owner.team;
+	} else {
+	    //Play the current animation normally
+	    var animLength;
+	    if (object_index != Rifle && object_index != BazaarBargain && object_index != Machina && alarm[5] <= 0)
+	        animLength = recoilAnimLength;
+	    else if (sprite_index == recoilSprite)
+	        animLength = recoilAnimLength;
+	    else
+	        animLength = reloadAnimLength;
+	        
+	    imageOffset = floor(image_index mod animLength) + animLength*owner.team;
+	}
+	if (!owner.invisible and !owner.taunting and !owner.omnomnomnom and !owner.player.humiliated)
+	{
+	    if (!owner.cloak)
+	        image_alpha = power(owner.cloakAlpha, 0.5);
+	    else
+	        image_alpha = power(owner.cloakAlpha, 2);
+	    draw_sprite_ext(sprite_index, imageOffset, round(x+xoffset*image_xscale), round(y+yoffset) + owner.equipmentOffset, image_xscale, image_yscale, 0, c_white, image_alpha);
+	    if (variable_local_exists("charging"))
+	    {
+	    	if(charging == 1){
+		        if (owner.team == TEAM_RED)
+		            ubercolour = c_orange;
+		        else if (owner.team == TEAM_BLUE)
+		            ubercolour = c_aqua;
+		        //draw_sprite_ext(sprite_index, imageOffset, round(x+xoffset*image_xscale), round(y+yoffset) + owner.equipmentOffset, image_xscale, image_yscale, image_angle, ubercolour, 0.7*image_alpha);
+		        draw_sprite_ext(sprite_index,4+imageOffset/2,round(x+xoffset*image_xscale),round(y+yoffset),image_xscale,image_yscale,image_angle,ubercolour,0.7);
+                draw_sprite_ext(Spark2S,spark,round(x+xoffset*image_xscale),round(y+yoffset),image_xscale,image_yscale,image_angle,ubercolour,0.3);
+			}
+	    }
+	    if (owner.ubered)
+	    {
+	        if (owner.team == TEAM_RED)
+	            ubercolour = c_red;
+	        else if (owner.team == TEAM_BLUE)
+	            ubercolour = c_blue;
+	        draw_sprite_ext(sprite_index, imageOffset, round(x+xoffset*image_xscale), round(y+yoffset) + owner.equipmentOffset, image_xscale, image_yscale, image_angle, ubercolour, 0.7*image_alpha);
+	    }
+	}
+');
+
+object_event_add(BonkHand,ev_other,ev_user3,'
+    ammoCount = max(0, ammoCount-1);
+    playsound(x,y,PickupSnd);
+    justShot = true;
+    readyToShoot = false;
+	owner.radioactive = true;
+');
+
 WEAPON_SANDMAN = 7;
 Sandman = object_add();
 object_set_parent(Sandman, Weapon);
@@ -1830,6 +1912,9 @@ object_event_add(Sandman,ev_step,ev_step_normal,'
         alarm[5] = owner.ammo[107];
     }
 ');
+globalvar swingSnd, BallSnd;
+swingSnd = sound_add(directory + '/randomizer_sounds/swingSnd.wav', 0, 1);
+BallSnd = sound_add(directory + '/randomizer_sounds/BallSnd.wav', 0, 1);
 object_event_add(Sandman,ev_other,ev_user1,'
     if(readyToStab && !owner.cloak){
         //owner.runPower = 0;
@@ -1839,13 +1924,13 @@ object_event_add(Sandman,ev_other,ev_user1,'
         justShot=true;
         readyToStab = false;
         alarm[1] = StabreloadTime / global.delta_factor;
-        //playsound(x,y,swingSnd);
+        playsound(x,y,swingSnd);
     }
 ');
 object_event_add(Sandman,ev_other,ev_user2,'
     if (readyToStab && !owner.cloak && ammoCount>=1) {
         var oid, newx, newy;
-        //playsound(x,y,BallSnd);
+        playsound(x,y,BallSnd);
         ammoCount -= 1;
 
         oid = instance_create(x+lengthdir_x(10,owner.aimDirection),y+lengthdir_y(10,owner.aimDirection), Ball);
@@ -1983,7 +2068,7 @@ object_event_add(Atomizer,ev_other,ev_user1,'
         justShot=true;
         readyToStab = false;
         alarm[1] = StabreloadTime / global.delta_factor;
-        //playsound(x,y,swingSnd);
+        playsound(x,y,swingSnd);
     }
 ');
 
@@ -2064,6 +2149,8 @@ object_event_add(DirectHit,ev_other,ev_user1,'
         doEventFireWeapon(ownerPlayer, seed);
     }
 ');
+globalvar DirecthitSnd;
+DirecthitSnd = sound_add(directory + '/randomizer_sounds/DirecthitSnd.wav', 0, 1);
 object_event_add(DirectHit,ev_other,ev_user3,'
     ammoCount = max(0, ammoCount-1);    
     playsound(x,y,DirecthitSnd);
@@ -2160,10 +2247,13 @@ object_event_add(CowMangler,ev_other,ev_user1,'
         doEventFireWeapon(ownerPlayer, seed);
     }
 ');
+
+globalvar ManglerChargesnd;
+ManglerChargesnd = sound_add(directory + '/randomizer_sounds/ManglerchargeSnd.wav', 0, 1);
 object_event_add(CowMangler,ev_other,ev_user2,'
     if(readyToShoot == true && ammoCount >= maxAmmo && !owner.cloak && charging==0) {
         charging = 1;
-        //playsound(x,y,ManglerChargesnd);
+        playsound(x,y,ManglerChargesnd);
     }   
 ');
 object_event_add(CowMangler,ev_other,ev_user3,'
@@ -2489,10 +2579,13 @@ object_event_add(RBison,ev_alarm,5,'
         image_speed = reloadImageSpeed * global.delta_factor;
     }
 ');
+
+globalvar LaserShotSnd;
+LaserShotSnd = sound_add(directory + '/randomizer_sounds/LaserShotSnd.wav', 0, 1);
 object_event_add(RBison,ev_other,ev_user1,'
     if(readyToShoot && ammoCount >0 && !owner.cloak) {
         ammoCount-=1;
-        //playsound(x,y,LaserShotSnd);
+        playsound(x,y,LaserShotSnd);
         var shot;
         randomize();
         shot = instance_create(x,y,LaserShot);
@@ -2606,7 +2699,7 @@ object_event_add(Shovel,ev_other,ev_user1,'
         justShot=true;
         readyToStab = false;
         alarm[1] = StabreloadTime / global.delta_factor;
-        //playsound(x,y,swingSnd);
+        playsound(x,y,swingSnd);
     }
 ');
 WEAPON_RESERVESHOOTER = 19;
@@ -3044,9 +3137,12 @@ object_event_add(HuntsMan,ev_create,0,'
 object_event_add(HuntsMan,ev_alarm,1,'
     charging=false;
 ');
+
+globalvar BowSnd;
+BowSnd = sound_add(directory + '/randomizer_sounds/BowSnd.wav', 0, 1);
 object_event_add(HuntsMan,ev_step,ev_step_begin,'
     if bonus > 0 && !charging {
-            //playsound(x,y,BowSnd);
+            playsound(x,y,BowSnd);
             var shot;
             randomize();
             
@@ -3836,7 +3932,7 @@ object_event_add(Kukri,ev_other,ev_user1,'
         justShot=true;
         readyToStab = false;
         alarm[1] = StabreloadTime / global.delta_factor;
-        //playsound(x,y,swingSnd);
+        playsound(x,y,swingSnd);
     }
 ');
 WEAPON_SHIV = 28;
@@ -3931,7 +4027,7 @@ object_event_add(Shiv,ev_other,ev_user1,'
         justShot=true;
         readyToStab = false;
         alarm[1] = StabreloadTime / global.delta_factor;
-        //playsound(x,y,swingSnd);
+        playsound(x,y,swingSnd);
     }
 ');
 WEAPON_BOOTS = 29;
@@ -5405,7 +5501,7 @@ object_event_add(KGOB,ev_other,ev_user1,'
         justShot=true;
         readyToStab = false;
         alarm[1] = StabreloadTime / global.delta_factor;
-        //playsound(x,y,swingSnd);
+        playsound(x,y,swingSnd);
     }
 ');
 
@@ -6140,7 +6236,7 @@ object_event_add(Knife,ev_other,ev_user1,'
 
         readyToStab = false;
         alarm[1] = StabreloadTime;
-        //playsound(x,y,swingSnd);
+        playsound(x,y,swingSnd);
     } else if(readyToStab && owner.cloak){
         owner.runPower = 0;
         owner.jumpStrength = 0;
@@ -6286,7 +6382,7 @@ object_event_add(ChainStab,ev_other,ev_user1,'
 
         readyToStab = false;
         alarm[1] = StabreloadTime;
-        //playsound(x,y,swingSnd);
+        playsound(x,y,swingSnd);
     } else if(readyToStab && owner.cloak){
         owner.runPower = 0;
         owner.jumpStrength = 0;
@@ -6432,7 +6528,7 @@ object_event_add(BigEarner,ev_other,ev_user1,'
 
         readyToStab = false;
         alarm[1] = StabreloadTime;
-        //playsound(x,y,swingSnd);
+        playsound(x,y,swingSnd);
     } else if(readyToStab && owner.cloak){
         owner.runPower = 0;
         owner.jumpStrength = 0;
@@ -6590,7 +6686,7 @@ object_event_add(Spycicle,ev_other,ev_user1,'
 
         readyToStab = false;
         alarm[1] = StabreloadTime;
-        //playsound(x,y,swingSnd);
+        playsound(x,y,swingSnd);
     } else if(readyToStab && owner.cloak){
         owner.runPower = 0;
         owner.jumpStrength = 0;
@@ -6736,7 +6832,7 @@ object_event_add(Zapper,ev_other,ev_user1,'
 
         readyToStab = false;
         alarm[1] = StabreloadTime;
-        //playsound(x,y,swingSnd);
+        playsound(x,y,swingSnd);
     } else if(readyToStab && owner.cloak){
         owner.runPower = 0;
         owner.jumpStrength = 0;
@@ -8399,6 +8495,12 @@ object_event_add(Detonator,ev_other,ev_user1,'
     }
     */
 ');
+object_event_add(Detonator,ev_other,ev_user2,'
+    with(DetonationFlare) {
+        event_user(5);
+    }
+');
+
 WEAPON_NAPALM = 88;
 NapalmHand = object_add();
 object_set_parent(NapalmHand, Weapon);
@@ -8417,9 +8519,9 @@ object_event_add(NapalmHand,ev_create,0,' //Do this later
     readyToStab=false;
     isMelee = true;
 
-    //normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\NapalmHandS.png", 2, 1, 0, -2, -2);
-    //recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\NapalmHandFS.png", 8, 1, 0, -2, -2);
-    //reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\NapalmHandS.png", 2, 1, 0, -2, -2);
+    normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\NapalmHandS.png", 2, 1, 0, -2, -2);
+    recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\NapalmHandFS.png", 8, 1, 0, -2, -2);
+    reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\NapalmHandS.png", 2, 1, 0, -2, -2);
 
     sprite_index = normalSprite;
 
@@ -8430,13 +8532,16 @@ object_event_add(NapalmHand,ev_create,0,' //Do this later
     reloadAnimLength = sprite_get_number(reloadSprite)/2;
     reloadImageSpeed = reloadAnimLength/reloadTime;
 ');
+
 object_event_add(NapalmHand,ev_destroy,0,'
     if owner != -1 owner.ammo[114] = alarm[5];
 ');
+
 object_event_add(NapalmHand,ev_alarm,5,'
     ammoCount = maxAmmo;
     owner.ammo[114] = -1;
 ');
+
 object_event_add(NapalmHand,ev_step,ev_step_normal,'
     if 1 == 1 image_index = owner.team+2*ammoCount;
     else image_index = 4+ammoCount;
@@ -8446,11 +8551,13 @@ object_event_add(NapalmHand,ev_step,ev_step_normal,'
         alarm[5] = owner.ammo[114];
     }
 ');
+
 object_event_add(NapalmHand,ev_other,ev_user0,'
     alarm[0]=refireTime;
     if owner.ammo[114] == -1 alarm[5] = reloadBuffer + reloadTime;
     else alarm[5] = reloadBuffer + owner.ammo[114];
 ');
+
 object_event_add(NapalmHand,ev_other,ev_user1,'
     if(readyToShoot && !owner.cloak && ammoCount > 0) {
         with(NapalmGrenade) {
@@ -8571,7 +8678,7 @@ object_event_add(Axe,ev_other,ev_user1,'
         justShot=true;
         readyToStab = false;
         alarm[1] = StabreloadTime / global.delta_factor;
-        //playsound(x,y,swingSnd);
+        playsound(x,y,swingSnd);
     }
 ');
 
@@ -8665,6 +8772,7 @@ global.medicLoadout=ini_read_real("Class","Medic",real("1"+string(WEAPON_NEEDLEG
 global.engineerLoadout=ini_read_real("Class","Engineer",real("1"+string(WEAPON_SHOTGUN)+string(WEAPON_NAILGUN)));
 global.spyLoadout=ini_read_real("Class","Spy",real("1"+string(WEAPON_REVOLVER)+string(WEAPON_KNIFE)));
 global.sniperLoadout=ini_read_real("Class","sniper",real("1"+string(WEAPON_RIFLE)+string(WEAPON_SMG)));
+global.qcLoadout=ini_read_real("Class","QC",real("1"+string(WEAPON_BLADE)+string(WEAPON_MACHINEGUN)));
 
 ini_write_real("Class","Scout",global.scoutLoadout);
 ini_write_real("Class","Pyro",global.pyroLoadout);
@@ -8675,6 +8783,7 @@ ini_write_real("Class","Medic",global.medicLoadout);
 ini_write_real("Class","Engineer",global.engineerLoadout);
 ini_write_real("Class","Spy",global.spyLoadout);
 ini_write_real("Class","sniper",global.sniperLoadout);
+ini_write_real("Class","QC",global.qcLoadout);
 
 ini_close(); 
 

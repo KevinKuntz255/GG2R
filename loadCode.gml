@@ -726,62 +726,45 @@ object_event_add(LoadoutMenu, ev_keypress, vk_escape,'
 
 
 //Adds loadout to ingame menu
-object_event_clear(InGameMenuController,ev_create,0);
 object_event_add(InGameMenuController,ev_create,0,'
-    cursor_sprite = CrosshairS;
-    global.levelchoice = 1
-
-    menu_create(40, 300, 200, 200, 32);
-    menu_background(212, 24, 8, 12, 4);
-    menu_setdimmed();
-    
-    menu_addlink("Return to Game", "
-        instance_destroy();
-    ");
-    menu_addback("", "
-        instance_destroy();
-    ");
-    if (global.isHost) {
-        menu_addlink("Kick players", "
-            if(!instance_exists(ScoreTableController)) instance_create(0,0,ScoreTableController);
-            ScoreTableController.showadmin = true;
-            instance_destroy();
-        ");
-    }
-    menu_addlink("Options", "
-        instance_destroy();
-        instance_create(0,0,OptionsController);
-    ");
     menu_addlink("Loadout", "
         instance_destroy();
         instance_create(0,0,LoadoutMenu);
     ");
-    forcedWorkaroundOne = "Do you really want to leave this match?";
-    menu_addlink("Disconnect", "
-        // Force dedicated mode to off so you can go to main menu instead of just restarting server
-        if (show_question(forcedWorkaroundOne)) {
-            if (global.serverPluginsInUse)
-            {
-                pluginscleanup(true);
-            }
-            else
-            {
-                global.dedicatedMode = 0;
-                with(Client)
-                    instance_destroy();
-                    
-                with(GameServer)
-                    instance_destroy();
-            }
-        }
-    ");
-    forcedWorkaroundTwo = "Do you really want to quit?";
-    menu_addlink("Quit Game", "
-        if (show_question(forcedWorkaroundTwo)) {
-            game_end();
-        }
-    ");
 ');
+
+object_event_add(Character, ev_create, 0,'
+	radioactive = false;
+	bkpmaxspeed = basemaxspeed;
+	trip = false;
+	speedboost = 0;
+');
+object_event_add(Character, ev_draw, 0, '
+	if radioactive {
+		for (i=0; i<6; i+=1) {
+			draw_sprite_ext(sprite_index, 0 + team, x-hspeed*1.2, y-vspeed*1.2, image_xscale, 1, 0, c_white, 0.2);
+						}
+	}
+');
+
+object_event_add(Player, ev_other, ev_user13, '
+    var temp;
+    if(global.updateType == FULL_UPDATE) {
+        receiveCompleteMessage(global.serverSocket,1,global.deserializeBuffer);
+        temp = read_ubyte(global.deserializeBuffer);
+        if (object != -1) {
+			if (object.currentWeapon.object_index == Shovel) {
+				object.runPower = object.baseRunPower + (object.maxHp+40)/(objectt.hp+40)*0.1;
+				object.basemaxspeed = abs(object.runPower * object.baseControl / (object.baseFriction-1));
+            } else {
+				object.runPower = object.baseRunPower;
+				object.basemaxspeed = abs(object.runPower * object.baseControl / (object.baseFriction-1));
+			}
+            object.runBkp = object.runPower; 
+        }
+    }
+'); 
+
 
 object_event_clear(Character,ev_step,ev_step_end);
 object_event_add(Character,ev_step,ev_step_end,'
@@ -1143,6 +1126,53 @@ object_event_add(Soldier,ev_create,0,'
 	// Override defaults
 	numFlames = 4;
 ');
+
+object_event_clear(Demoman,ev_create,0);
+object_event_add(Demoman,ev_create,0,'
+	maxHp = 120;
+	baseRunPower = 1;
+	weapons[0] = global.weapons[real(string_copy(string(global.demomanLoadout), 2, 2))];
+	weapons[1] = global.weapons[real(string_copy(string(global.demomanLoadout), 4, 2))];
+	haxxyStatue = DemomanHaxxyStatueS;
+
+	if (global.paramPlayer.team == TEAM_RED)
+	{
+		sprite_index = DemomanRedS;
+	}
+	else if (global.paramPlayer.team == TEAM_BLUE)
+	{
+		sprite_index = DemomanBlueS;
+	}
+
+	event_inherited();
+
+	// Override defaults
+	numFlames = 4;
+');
+
+object_event_clear(Engineer,ev_create,0);
+object_event_add(Engineer,ev_create,0,'
+	maxHp = 120;
+	baseRunPower = 1;
+	weapons[0] = global.weapons[real(string_copy(string(global.engineerLoadout), 2, 2))];
+	weapons[1] = global.weapons[real(string_copy(string(global.engineerLoadout), 4, 2))];
+	haxxyStatue = EngineerHaxxyStatueS;
+
+	if (global.paramPlayer.team == TEAM_RED)
+	{
+		sprite_index = EngineerRedS;
+	}
+	else if (global.paramPlayer.team == TEAM_BLUE)
+	{
+		sprite_index = EngineerBlueS;
+	}
+
+	event_inherited();
+
+	// Override defaults
+	numFlames = 4;
+');
+
 object_event_clear(Medic,ev_create,0);
 object_event_add(Medic,ev_create,0,'
 	maxHp = 120;
@@ -1168,6 +1198,30 @@ object_event_add(Medic,ev_create,0,'
 	numFlames = 4;
 ');
 
+object_event_clear(Quote,ev_create,0);
+object_event_add(Quote,ev_create,0,'
+	baseRunPower = 1.07;
+	maxHp = 140;
+	weapons[0] = global.weapons[real(string_copy(string(global.qcLoadout), 2, 2))];
+	weapons[1] = global.weapons[real(string_copy(string(global.qcLoadout), 4, 2))];
+	haxxyStatue = QuoteHaxxyStatueS;
+
+	if (global.paramPlayer.team == TEAM_RED)
+	{
+		sprite_index = QuerlyRedS;
+		haxxyStatue = QuoteHaxxyStatueS;
+	}
+	else if (global.paramPlayer.team == TEAM_BLUE)
+	{
+		sprite_index = QuerlyBlueS;
+		haxxyStatue = CurlyHaxxyStatueS;
+	}
+
+	event_inherited();
+
+	// Override defaults
+	numFlames = 4;
+');
 //Handles swapping out loadout weapons and the active weapon shown
 object_event_add(PlayerControl,ev_step,ev_step_end,'
 	globalvar AmmoCounterID;
