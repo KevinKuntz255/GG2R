@@ -338,8 +338,10 @@ object_event_add(Lasergun,ev_other,ev_user1,'
         doEventFireWeapon(ownerPlayer, seed);
     }
 ');
+globalvar FlashlightSnd;
+FlashlightSnd = sound_add(directory + '/randomizer_sounds/FlashlightSnd.wav', 0, 1);
 object_event_add(Lasergun,ev_other,ev_user3,'
-    //playsound(x,y,FlashlightSnd);
+    playsound(x,y,FlashlightSnd);
     shot=true;
     justShot=true;        
     readyToShoot = false;
@@ -658,6 +660,9 @@ object_event_add(Sandman,ev_step,ev_step_normal,'
         alarm[5] = owner.ammo[107];
     }
 ');
+globalvar swingSnd, BallSnd;
+swingSnd = sound_add(directory + '/randomizer_sounds/swingSnd.wav', 0, 1);
+BallSnd = sound_add(directory + '/randomizer_sounds/BallSnd.wav', 0, 1);
 object_event_add(Sandman,ev_other,ev_user1,'
     if(readyToStab && !owner.cloak){
         //owner.runPower = 0;
@@ -667,13 +672,13 @@ object_event_add(Sandman,ev_other,ev_user1,'
         justShot=true;
         readyToStab = false;
         alarm[1] = StabreloadTime / global.delta_factor;
-        //playsound(x,y,swingSnd);
+        playsound(x,y,swingSnd);
     }
 ');
 object_event_add(Sandman,ev_other,ev_user2,'
     if (readyToStab && !owner.cloak && ammoCount>=1) {
         var oid, newx, newy;
-        //playsound(x,y,BallSnd);
+        playsound(x,y,BallSnd);
         ammoCount -= 1;
 
         oid = instance_create(x+lengthdir_x(10,owner.aimDirection),y+lengthdir_y(10,owner.aimDirection), Ball);
@@ -811,7 +816,7 @@ object_event_add(Atomizer,ev_other,ev_user1,'
         justShot=true;
         readyToStab = false;
         alarm[1] = StabreloadTime / global.delta_factor;
-        //playsound(x,y,swingSnd);
+        playsound(x,y,swingSnd);
     }
 ');
 
@@ -892,6 +897,8 @@ object_event_add(DirectHit,ev_other,ev_user1,'
         doEventFireWeapon(ownerPlayer, seed);
     }
 ');
+globalvar DirecthitSnd;
+DirecthitSnd = sound_add(directory + '/randomizer_sounds/DirecthitSnd.wav', 0, 1);
 object_event_add(DirectHit,ev_other,ev_user3,'
     ammoCount = max(0, ammoCount-1);    
     playsound(x,y,DirecthitSnd);
@@ -988,10 +995,13 @@ object_event_add(CowMangler,ev_other,ev_user1,'
         doEventFireWeapon(ownerPlayer, seed);
     }
 ');
+
+globalvar ManglerChargesnd;
+ManglerChargesnd = sound_add(directory + '/randomizer_sounds/ManglerchargeSnd.wav', 0, 1);
 object_event_add(CowMangler,ev_other,ev_user2,'
     if(readyToShoot == true && ammoCount >= maxAmmo && !owner.cloak && charging==0) {
         charging = 1;
-        //playsound(x,y,ManglerChargesnd);
+        playsound(x,y,ManglerChargesnd);
     }   
 ');
 object_event_add(CowMangler,ev_other,ev_user3,'
@@ -1317,10 +1327,12 @@ object_event_add(RBison,ev_alarm,5,'
         image_speed = reloadImageSpeed * global.delta_factor;
     }
 ');
+globalvar LaserShotSnd;
+LaserShotSnd = sound_add(directory + '/randomizer_sounds/LaserShotSnd.wav', 0, 1);
 object_event_add(RBison,ev_other,ev_user1,'
     if(readyToShoot && ammoCount >0 && !owner.cloak) {
         ammoCount-=1;
-        //playsound(x,y,LaserShotSnd);
+        playsound(x,y,LaserShotSnd);
         var shot;
         randomize();
         shot = instance_create(x,y,LaserShot);
@@ -1434,7 +1446,7 @@ object_event_add(Shovel,ev_other,ev_user1,'
         justShot=true;
         readyToStab = false;
         alarm[1] = StabreloadTime / global.delta_factor;
-        //playsound(x,y,swingSnd);
+        playsound(x,y,swingSnd);
     }
 ');
 WEAPON_RESERVESHOOTER = 19;
@@ -1872,9 +1884,11 @@ object_event_add(HuntsMan,ev_create,0,'
 object_event_add(HuntsMan,ev_alarm,1,'
     charging=false;
 ');
+globalvar BowSnd;
+BowSnd = sound_add(directory + '/randomizer_sounds/BowSnd.wav', 0, 1);
 object_event_add(HuntsMan,ev_step,ev_step_begin,'
     if bonus > 0 && !charging {
-            //playsound(x,y,BowSnd);
+            playsound(x,y,BowSnd);
             var shot;
             randomize();
             
@@ -2664,7 +2678,7 @@ object_event_add(Kukri,ev_other,ev_user1,'
         justShot=true;
         readyToStab = false;
         alarm[1] = StabreloadTime / global.delta_factor;
-        //playsound(x,y,swingSnd);
+        playsound(x,y,swingSnd);
     }
 ');
 WEAPON_SHIV = 28;
@@ -2759,7 +2773,7 @@ object_event_add(Shiv,ev_other,ev_user1,'
         justShot=true;
         readyToStab = false;
         alarm[1] = StabreloadTime / global.delta_factor;
-        //playsound(x,y,swingSnd);
+        playsound(x,y,swingSnd);
     }
 ');
 WEAPON_BOOTS = 29;
@@ -4370,7 +4384,7 @@ object_event_add(KGOB,ev_other,ev_user1,'
         justShot=true;
         readyToStab = false;
         alarm[1] = StabreloadTime / global.delta_factor;
-        //playsound(x,y,swingSnd);
+        playsound(x,y,swingSnd);
     }
 ');
 
@@ -5105,7 +5119,7 @@ object_event_add(Knife,ev_other,ev_user1,'
 
         readyToStab = false;
         alarm[1] = StabreloadTime;
-        //playsound(x,y,swingSnd);
+        playsound(x,y,swingSnd);
     } else if(readyToStab && owner.cloak){
         owner.runPower = 0;
         owner.jumpStrength = 0;
@@ -5251,7 +5265,7 @@ object_event_add(ChainStab,ev_other,ev_user1,'
 
         readyToStab = false;
         alarm[1] = StabreloadTime;
-        //playsound(x,y,swingSnd);
+        playsound(x,y,swingSnd);
     } else if(readyToStab && owner.cloak){
         owner.runPower = 0;
         owner.jumpStrength = 0;
@@ -5397,7 +5411,7 @@ object_event_add(BigEarner,ev_other,ev_user1,'
 
         readyToStab = false;
         alarm[1] = StabreloadTime;
-        //playsound(x,y,swingSnd);
+        playsound(x,y,swingSnd);
     } else if(readyToStab && owner.cloak){
         owner.runPower = 0;
         owner.jumpStrength = 0;
@@ -5555,7 +5569,7 @@ object_event_add(Spycicle,ev_other,ev_user1,'
 
         readyToStab = false;
         alarm[1] = StabreloadTime;
-        //playsound(x,y,swingSnd);
+        playsound(x,y,swingSnd);
     } else if(readyToStab && owner.cloak){
         owner.runPower = 0;
         owner.jumpStrength = 0;
@@ -5701,7 +5715,7 @@ object_event_add(Zapper,ev_other,ev_user1,'
 
         readyToStab = false;
         alarm[1] = StabreloadTime;
-        //playsound(x,y,swingSnd);
+        playsound(x,y,swingSnd);
     } else if(readyToStab && owner.cloak){
         owner.runPower = 0;
         owner.jumpStrength = 0;
@@ -7283,7 +7297,7 @@ object_event_add(Flaregun,ev_alarm,5,'
 object_event_add(Flaregun,ev_other,ev_user1,'
     if(readyToShoot && ammoCount >0 && !owner.cloak) {
         ammoCount-=1;
-            //playsound(x,y,FlaregunSnd); This sound is actually painful
+            //playsound(x,y,FlaregunSnd); This sound is actually painful im not turnin dat on
             var shot;
             if !collision_line(x,y,x+lengthdir_x(15,owner.aimDirection),y+lengthdir_y(15,owner.aimDirection),Obstacle,1,0) and !place_meeting(x+lengthdir_x(15,owner.aimDirection),y+lengthdir_y(15,owner.aimDirection),TeamGate) {
                 shot = instance_create(x+lengthdir_x(13,owner.aimDirection),y+lengthdir_y(13,owner.aimDirection),Flare);
@@ -7536,7 +7550,7 @@ object_event_add(Axe,ev_other,ev_user1,'
         justShot=true;
         readyToStab = false;
         alarm[1] = StabreloadTime / global.delta_factor;
-        //playsound(x,y,swingSnd);
+        playsound(x,y,swingSnd);
     }
 ');
 

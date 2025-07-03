@@ -19,9 +19,12 @@ object_event_add(MeleeMask,ev_destroy,0,'
     event_inherited();
     owner.currentWeapon.smashing = false;
 ');
+globalvar MeleeHitMapSnd, MeeleHitSnd;
+MeeleHitMapSnd = sound_add(directory + '/randomizer_sounds/MeeleHitSnd.wav', 0, 1);
+MeeleHitSnd = sound_add(directory + '/randomizer_sounds/MeeleHitSnd.wav', 0, 1);
 object_event_add(MeleeMask,ev_collision,Obstacle,'
     if hit == 0 {
-        //playsound(x,y,MeleeHitMapSnd);
+        playsound(x,y,MeleeHitMapSnd);
         hit = 1;
     }
 ');
@@ -37,7 +40,7 @@ object_event_add(MeleeMask,ev_collision,Character,'
             //    instance_destroy();
             //    exit;
             //}
-            //playsound(x,y,MeleeHitSnd);
+            playsound(x,y,MeleeHitSnd);
             if weapon == WEAPON_WRECKER && other.burnDuration > 0 hitDamage*= 1;
             if true other.hp -= hitDamage*(1+0*0.35)*1;
             //if weapon == WEAPON_WRENCH && other.hp <= 0 && instance_exists(owner) owner.nutsNBolts = min(100,owner.nutsNBolts+25);
@@ -126,7 +129,7 @@ object_event_add(MeleeMask,ev_collision,Sentry,'
             other.lastDamageDealer = ownerPlayer;
             other.lastDamageSource = weapon;
             other.lastDamageCrit = crit;
-            //playsound(x,y,MeleeHitMapSnd);
+            playsound(x,y,MeleeHitMapSnd);
             instance_destroy();
         }
         else
@@ -1178,7 +1181,7 @@ object_event_add(Ball,ev_collision,Character,'
             other.currentWeapon.ammoCount =1;
             other.currentWeapon.alarm[5]=-1;
             other.ammo[107] = -1;
-            //playsound(x,y,PickupSnd);
+            playsound(x,y,PickupSnd);
             instance_destroy(); 
         }
     }
