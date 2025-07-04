@@ -1250,3 +1250,35 @@ object_event_add(Ball,ev_draw,0,'
     }
     draw_sprite_ext(sprite_index,image_index,x,y,1,1,0,c_white,image_alpha);
 ');
+globalvar NapalmGrenade;
+NapalmGrenade = object_add();
+object_event_add(NapalmGrenade,ev_create,0,'
+    {
+        explosionDamage = 50;
+        animationState = 1;
+        stickied = false;
+        blastRadius = 60;
+        exploded = false;
+        bubbled = false;
+        reflector = noone;
+        alarm[1]=29;
+        hfric=0.9;
+        rotfric=0.9;
+        rotspeed=random(20)-10;
+        image_speed=0;
+        crit = 1;
+        used=0;
+        damage=15;
+        bounced=0;
+        sprite_index = sprite_add(pluginFilePath + "\randomizer_sprites\NapalmS.png", 3, 1, 0, 3, 3);
+        mask_index = sprite_index;
+        team = -1;
+        intel = 0;
+        vis_angle = 0;
+    }
+');
+object_event_add(NapalmGrenade,ev_draw,0,'
+	if team == TEAM_RED color = c_orange;
+	else color = c_aqua;   
+    draw_sprite_ext(sprite_index,0,x,y,image_xscale,image_yscale,image_angle,color,1);
+');

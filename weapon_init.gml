@@ -7409,7 +7409,7 @@ object_event_add(Detonator,ev_other,ev_user2,'
 WEAPON_NAPALM = 88;
 NapalmHand = object_add();
 object_set_parent(NapalmHand, Weapon);
-object_event_add(NapalmHand,ev_create,0,' //Do this later
+object_event_add(NapalmHand,ev_create,0,' //do this later
     xoffset=2;
     yoffset=-2;
     refireTime=18;
@@ -7424,11 +7424,13 @@ object_event_add(NapalmHand,ev_create,0,' //Do this later
     readyToStab=false;
     isMelee = true;
 
-    //normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\NapalmHandS.png", 2, 1, 0, -2, -2);
-    //recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\NapalmHandFS.png", 8, 1, 0, -2, -2);
-    //reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\NapalmHandS.png", 2, 1, 0, -2, -2);
+    normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\NapalmHandS.png", 4, 1, 0, -2, -2);
+    recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\NapalmHandS.png", 4, 1, 0, -2, -2);
+    //recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\NapalmHandFS.png", 4, 1, 0, 0, 11);
+    reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\NapalmHandS.png", 4, 1, 0, -2, -2);
 
     sprite_index = normalSprite;
+    image_speed = 0;
 
     recoilTime = refireTime;
     recoilAnimLength = sprite_get_number(recoilSprite)/2;
@@ -7459,29 +7461,51 @@ object_event_add(NapalmHand,ev_other,ev_user0,'
     else alarm[5] = reloadBuffer + owner.ammo[114];
 ');
 object_event_add(NapalmHand,ev_other,ev_user1,'
-    if(readyToShoot && !owner.cloak && ammoCount > 0) {
-        with(NapalmGrenade) {
+    //if(readyToShoot && !owner.cloak && ammoCount > 0) {
+        //with(NapalmGrenade) {
             //if ownerPlayer == other.ownerPlayer instance_destroy(); //Lorgan. Why.
-        }
-        ammoCount -= 1;  
-        shot = instance_create(x,y + yoffset + 1,NapalmGrenade);
-        shot.direction=owner.aimDirection+0 //random(7)-4;
-        shot.speed=12.5;
-        shot.owner=owner;
+        //}
+        //ammoCount -= 1;  
+        //shot = instance_create(x,y + yoffset + 1,NapalmGrenade);
+        //shot.direction=owner.aimDirection+0 //random(7)-4;
+        //shot.speed=12.5;
+        //shot.owner=owner;
         //shot.crit=crit;
-        shot.ownerPlayer=ownerPlayer;
-        shot.team=owner.team;
-        with(shot) {
-            hspeed+=owner.hspeed;
-            vspeed+=owner.vspeed;
+        //shot.ownerPlayer=ownerPlayer;
+        //shot.team=owner.team;
+        //with(shot) {
+        //    hspeed+=owner.hspeed;
+        //    vspeed+=owner.vspeed;
+        //}
+        //justShot=true;
+        //readyToShoot=false;
+        //alarm[5] = reloadBuffer + reloadTime;
+        //alarm[0] = refireTime;
+        //owner.ammo[114] = -1;
+    //}
+');
+object_event_add(NapalmHand,ev_draw,0,'
+    if (distance_to_point(view_xview + view_wview/2, view_yview + view_hview/2) > 800)
+        exit;
+
+    if (!owner.invisible and !owner.taunting and !owner.omnomnomnom and !owner.player.humiliated)
+    {
+        if (!owner.cloak)
+            image_alpha = power(owner.cloakAlpha, 0.5);
+        else
+            image_alpha = power(owner.cloakAlpha, 2);
+        draw_sprite_ext(sprite_index, image_index, round(x+xoffset*image_xscale), round(y+yoffset) + owner.equipmentOffset, image_xscale, image_yscale, image_angle, c_white, image_alpha);
+        if (owner.ubered)
+        {
+            if (owner.team == TEAM_RED)
+                ubercolour = c_red;
+            else if (owner.team == TEAM_BLUE)
+                ubercolour = c_blue;
+            draw_sprite_ext(sprite_index, image_index, round(x+xoffset*image_xscale), round(y+yoffset) + owner.equipmentOffset, image_xscale, image_yscale, image_angle, ubercolour, 0.7*image_alpha);
         }
-        justShot=true;
-        readyToShoot=false;
-        alarm[5] = reloadBuffer + reloadTime;
-        alarm[0] = refireTime;
-        owner.ammo[114] = -1;
     }
 ');
+
 WEAPON_WRECKER = 89;
 Axe = object_add();
 object_set_parent(Axe, Weapon);
