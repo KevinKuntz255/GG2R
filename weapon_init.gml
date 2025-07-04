@@ -5,6 +5,8 @@
 //Updating this for modern gg2 was a LOT LOT of work
 
 
+globalvar SwitchSnd;
+SwitchSnd = sound_add(directory + '/randomizer_sounds/switchSnd.wav', 0, 1);
 object_event_add(Weapon,ev_create,0,'
 	//wrangled = false;
 	//readyToStab=false;
@@ -19,6 +21,8 @@ object_event_add(Weapon,ev_create,0,'
     //alarm[9]=2;
 
     isMelee = false;
+	
+	playsound(x,y,SwitchSnd);
 ');
 
 
@@ -737,6 +741,7 @@ object_event_add(Atomizer,ev_create,0,'
     owner.ammo[107] = -1;
     depth = 1;
     isMelee = true;
+	trip = false;
 
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\AtomizerS.png", 2, 1, 0, 21, 25);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\AtomizerFS.png", 8, 1, 0, 21, 25);
@@ -784,7 +789,13 @@ object_event_add(Atomizer,ev_alarm,5,'
     owner.ammo[107] = -1;
 ');
 object_event_add(Atomizer,ev_step,ev_step_normal,'
-    if smashing {
+	if (owner.doublejumpUsed and !trip){
+		owner.doublejumpUsed = false;
+		trip = true;
+	}
+	if (owner.onground)
+		trip = false;
+	if smashing {
         image_speed=0.3;
         if 1 != 1 { //Removed crit here
             if image_index >= 11{
@@ -1388,8 +1399,12 @@ object_event_add(Shovel,ev_create,0,'
 
     reloadAnimLength = sprite_get_number(reloadSprite)/2;
     reloadImageSpeed = reloadAnimLength/reloadTime;
+	
+	//owner.runPower = 5;
 ');
 object_event_add(Shovel,ev_destroy,0,'
+	owner.runPower = owner.baseRunPower;
+	owner.basemaxspeed = abs(owner.runPower * owner.baseControl / (owner.baseFriction-1));
     with (MeleeMask) {
         if (ownerPlayer == other.ownerPlayer) {
             instance_destroy();
@@ -1436,6 +1451,13 @@ object_event_add(Shovel,ev_step,ev_step_normal,'
         if 1 <= 1  image_index=4*owner.team;
         else image_index = 8;
     }
+	if (owner.hp != owner.maxHp){
+		owner.runPower = owner.baseRunPower + (owner.maxHp + 40) / (owner.hp + 40) * 0.2;
+		owner.basemaxspeed = abs(owner.runPower * owner.baseControl / (owner.baseFriction-1));
+	} else {
+		owner.runPower = owner.baseRunPower;
+		owner.basemaxspeed = abs(owner.runPower * owner.baseControl / (owner.baseFriction-1));
+	}
 ');
 object_event_add(Shovel,ev_other,ev_user1,'
     if(readyToStab && !owner.cloak){
