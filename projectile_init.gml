@@ -19,9 +19,9 @@ object_event_add(MeleeMask,ev_destroy,0,'
     event_inherited();
     owner.currentWeapon.smashing = false;
 ');
-globalvar MeleeHitMapSnd, MeeleHitSnd;
-MeeleHitMapSnd = sound_add(directory + '/randomizer_sounds/MeeleHitSnd.wav', 0, 1);
-MeeleHitSnd = sound_add(directory + '/randomizer_sounds/MeeleHitSnd.wav', 0, 1);
+globalvar MeleeHitMapSnd, MeleeHitSnd;
+MeleeHitMapSnd = sound_add(directory + '/randomizer_sounds/MeleeHitMapSnd.wav', 0, 1);
+MeleeHitSnd = sound_add(directory + '/randomizer_sounds/MeleeHitSnd.wav', 0, 1);
 object_event_add(MeleeMask,ev_collision,Obstacle,'
     if hit == 0 {
         playsound(x,y,MeleeHitMapSnd);
