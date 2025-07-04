@@ -7661,6 +7661,7 @@ ini_write_real("Class","Medic",global.loadout[CLASS_MEDIC]);
 ini_write_real("Class","Engineer",global.loadout[CLASS_ENGINEER]);
 ini_write_real("Class","Spy",global.loadout[CLASS_SPY]);
 ini_write_real("Class","sniper",global.loadout[CLASS_SNIPER]);
+ini_write_real("Class","querly",global.loadout[CLASS_QUOTE]);
 
 ini_close(); 
 
