@@ -300,32 +300,32 @@ object_event_add(LoadoutMenu,ev_other,ev_user1,'
 	        ini_write_real("Class","Pyro",global.loadout[CLASS_PYRO]);
 	        break;
 	    case 2:
-	        global.soldierLoadout=real(string(1)+load1+load2);
-	        ini_write_real("Class","Soldier",global.soldierLoadout);
+	        global.loadout[CLASS_SOLDIER]=real(string(1)+load1+load2);
+	        ini_write_real("Class","Soldier",global.loadout[CLASS_SOLDIER]);
 	        break;
 	    case 3:
-	        global.heavyLoadout=real(string(1)+load1+load2);
-	        ini_write_real("Class","heavy",global.heavyLoadout);
+	        global.loadout[CLASS_HEAVY]=real(string(1)+load1+load2);
+	        ini_write_real("Class","heavy",global.loadout[CLASS_HEAVY]);
 	        break;
 	    case 4:
-	        global.demomanLoadout=real(string(1)+load1+load2);
-	        ini_write_real("Class","Demoman",global.demomanLoadout);
+	        global.loadout[CLASS_DEMOMAN]=real(string(1)+load1+load2);
+	        ini_write_real("Class","Demoman",global.loadout[CLASS_DEMOMAN]);
 	        break;
 	    case 5:
-	        global.medicLoadout=real(string(1)+load1+load2);
-	        ini_write_real("Class","Medic",global.medicLoadout);
+	        global.loadout[CLASS_MEDIC]=real(string(1)+load1+load2);
+	        ini_write_real("Class","Medic",global.loadout[CLASS_MEDIC]);
 	        break;
 	    case 6:
-	        global.engineerLoadout=real(string(1)+load1+load2);
-	        ini_write_real("Class","Engineer",global.engineerLoadout);
+	        global.loadout[CLASS_ENGINEER]=real(string(1)+load1+load2);
+	        ini_write_real("Class","Engineer",global.loadout[CLASS_ENGINEER]);
 	        break;
 	    case 7:
-	        global.spyLoadout=real(string(1)+load1+load2);
-	        ini_write_real("Class","Spy",global.spyLoadout);
+	        global.loadout[CLASS_SPY]=real(string(1)+load1+load2);
+	        ini_write_real("Class","Spy",global.loadout[CLASS_SPY]);
 	        break;
 	    case 8:
-	        global.sniperLoadout=real(string(1)+load1+load2);
-	        ini_write_real("Class","sniper",global.sniperLoadout);
+	        global.loadout[CLASS_SNIPER]=real(string(1)+load1+load2);
+	        ini_write_real("Class","sniper",global.loadout[CLASS_SNIPER]);
 	        break;
 	}
 	ini_close(); 
