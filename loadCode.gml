@@ -292,12 +292,12 @@ object_event_add(LoadoutMenu,ev_other,ev_user1,'
 
 	switch(currentclass){
 	    case 0:
-	        global.loadout[CLASS_SCOUT]=real(string(1)+load1+load2);
-	        ini_write_real("Class","Scout",global.loadout[CLASS_SCOUT]);
+	        global.scoutLoadout=real(string(1)+load1+load2);
+	        ini_write_real("Class","Scout",global.scoutLoadout);
 	        break;
 	    case 1:
-	        global.loadout[CLASS_PYRO]=real(string(1)+load1+load2);
-	        ini_write_real("Class","Pyro",global.loadout[CLASS_PYRO]);
+	        global.pyroLoadout=real(string(1)+load1+load2);
+	        ini_write_real("Class","Pyro",global.pyroLoadout);
 	        break;
 	    case 2:
 	        global.loadout[CLASS_SOLDIER]=real(string(1)+load1+load2);
@@ -329,8 +329,45 @@ object_event_add(LoadoutMenu,ev_other,ev_user1,'
 	        break;
 	}
 	ini_close(); 
-	
-	global.currentLoadout = global.loadout[global.myself.class];
+
+	switch (global.myself.class)
+	{
+	case CLASS_SCOUT:
+		global.currentLoadout = global.scoutLoadout;
+		break;
+
+	case CLASS_PYRO:
+		global.currentLoadout = global.pyroLoadout;
+		break;
+
+	case CLASS_SOLDIER:
+		global.currentLoadout = global.soldierLoadout;
+		break;
+
+	case CLASS_HEAVY:
+		global.currentLoadout = global.heavyLoadout;
+		break;
+
+	case CLASS_DEMOMAN:
+		global.currentLoadout = global.demomanLoadout;
+		break;
+
+	case CLASS_MEDIC:
+		global.currentLoadout = global.medicLoadout;
+		break;
+
+	case CLASS_ENGINEER:
+		global.currentLoadout = global.engineerLoadout;
+		break;
+
+	case CLASS_SPY:
+		global.currentLoadout = global.spyLoadout;
+		break;
+
+	case CLASS_SNIPER:
+		global.currentLoadout = global.sniperLoadout;
+		break;
+	}
 
 	var coolSendBuffer;
 	coolSendBuffer = buffer_create();
@@ -694,11 +731,166 @@ object_event_add(Weapon,ev_draw,0,'
 	}
 ');
 
-object_event_add(Character,ev_create,0,'
-	if(variable_local_exists("player")){
-		weapons[0] = global.weapons[real(string_copy(string(global.loadout[player.class]), 2, 2))];
-		weapons[1] = global.weapons[real(string_copy(string(global.loadout[player.class]), 4, 2))];
+object_event_clear(Scout,ev_create,0);
+object_event_add(Scout,ev_create,0,'
+	baseRunPower = 1.4;
+	maxHp = 100;
+	weapons[0] = global.weapons[real(string_copy(string(global.scoutLoadout), 2, 2))];
+	weapons[1] = global.weapons[real(string_copy(string(global.scoutLoadout), 4, 2))];
+	haxxyStatue = ScoutHaxxyStatueS;
+
+	if (global.paramPlayer.team == TEAM_RED)
+	{
+	    sprite_index = ScoutRedS;
 	}
+	else if (global.paramPlayer.team == TEAM_BLUE)
+	{
+	    sprite_index = ScoutBlueS;
+	}
+
+	event_inherited();
+
+	// Override defaults
+	capStrength = 2;
+	canDoublejump = 1;
+	numFlames = 3;
+');
+object_event_clear(Heavy,ev_create,0);
+object_event_add(Heavy,ev_create,0,'
+	baseRunPower = 0.8;
+	maxHp = 200;
+	weapons[0] = global.weapons[real(string_copy(string(global.heavyLoadout), 2, 2))];
+	weapons[1] = global.weapons[real(string_copy(string(global.heavyLoadout), 4, 2))];
+	haxxyStatue = HeavyHaxxyStatueS;
+
+	if (global.paramPlayer.team == TEAM_RED)
+	{
+	    sprite_index = HeavyRedS;
+	}
+	else if (global.paramPlayer.team == TEAM_BLUE)
+	{
+	    sprite_index = HeavyBlueS;
+	}
+
+	event_inherited();
+
+	// Override defaults
+	numFlames = 5;
+');
+object_event_clear(Pyro,ev_create,0);
+object_event_add(Pyro,ev_create,0,'
+	baseRunPower = 1.1;
+	maxHp = 120;
+	weapons[0] = global.weapons[real(string_copy(string(global.pyroLoadout), 2, 2))];
+	weapons[1] = global.weapons[real(string_copy(string(global.pyroLoadout), 4, 2))];
+	haxxyStatue = PyroHaxxyStatueS;
+
+	if (global.paramPlayer.team == TEAM_RED)
+	{
+	    sprite_index = PyroRedS;
+	}
+	else if (global.paramPlayer.team == TEAM_BLUE)
+	{
+	    sprite_index = PyroBlueS;
+	}
+
+	event_inherited();
+
+	numFlames = 3;
+	maxDuration = 10;
+');
+object_event_clear(Spy,ev_create,0);
+object_event_add(Spy,ev_create,0,'
+	maxHp = 100;
+	baseRunPower = 1.08;
+	weapons[0] = global.weapons[real(string_copy(string(global.spyLoadout), 2, 2))];
+	weapons[1] = global.weapons[real(string_copy(string(global.spyLoadout), 4, 2))];
+	haxxyStatue = SpyHaxxyStatueS;
+
+	if (global.paramPlayer.team == TEAM_RED)
+	{
+	    sprite_index = SpyRedS;
+	}
+	else if (global.paramPlayer.team == TEAM_BLUE)
+	{
+	    sprite_index = SpyBlueS;
+	}
+
+	event_inherited();
+
+	// Override defaults
+	canCloak = 1;
+	numFlames = 4;
+
+	stabspeed = 0;
+');
+object_event_clear(Sniper,ev_create,0);
+object_event_add(Sniper,ev_create,0,'
+	maxHp = 120;
+	baseRunPower = 0.9;
+	weapons[0] = global.weapons[real(string_copy(string(global.sniperLoadout), 2, 2))];
+	weapons[1] = global.weapons[real(string_copy(string(global.sniperLoadout), 4, 2))];
+	haxxyStatue = SniperHaxxyStatueS;
+
+	if (global.paramPlayer.team == TEAM_RED)
+	{
+	    sprite_index = SniperRedS;
+	}
+	else if (global.paramPlayer.team == TEAM_BLUE)
+	{
+	    sprite_index = SniperBlueS;
+	}
+
+	event_inherited();
+
+	// Override defaults
+	numFlames = 4;
+');
+object_event_clear(Soldier,ev_create,0);
+object_event_add(Soldier,ev_create,0,'
+	maxHp = 160;
+	baseRunPower = 0.9;
+	weapons[0] = global.weapons[real(string_copy(string(global.soldierLoadout), 2, 2))];
+	weapons[1] = global.weapons[real(string_copy(string(global.soldierLoadout), 4, 2))];
+	haxxyStatue = SoldierHaxxyStatueS;
+
+	if (global.paramPlayer.team == TEAM_RED)
+	{
+	    sprite_index = SoldierRedS;
+	}
+	else if (global.paramPlayer.team == TEAM_BLUE)
+	{
+	    sprite_index = SoldierBlueS;
+	}
+
+	event_inherited();
+
+	// Override defaults
+	numFlames = 4;
+');
+object_event_clear(Medic,ev_create,0);
+object_event_add(Medic,ev_create,0,'
+	maxHp = 120;
+	baseRunPower = 1.09;
+	weapons[0] = global.weapons[real(string_copy(string(global.medicLoadout), 2, 2))];
+	weapons[1] = global.weapons[real(string_copy(string(global.medicLoadout), 4, 2))];
+	haxxyStatue = MedicHaxxyStatueS;
+
+	alarm[11] = 30 / global.delta_factor;
+
+	if (global.paramPlayer.team == TEAM_RED)
+	{
+	    sprite_index = MedicRedS;
+	}
+	else if (global.paramPlayer.team == TEAM_BLUE)
+	{
+	    sprite_index = MedicBlueS;
+	}
+
+	event_inherited();
+
+	// Override defaults
+	numFlames = 4;
 ');
 
 //This event sucks
@@ -941,7 +1133,44 @@ object_event_add(PlayerControl, ev_mouse, ev_global_middle_press,'
 //Keeps the currentLoadout variable REAL nice and updated
 object_event_add(Character,ev_step,ev_step_end,'
 	if(player.id == global.myself){
-		global.currentLoadout = global.loadout[global.myself.class];
+		switch (player.class)
+		{
+		case CLASS_SCOUT:
+			global.currentLoadout = global.scoutLoadout;
+			break;
+
+		case CLASS_PYRO:
+			global.currentLoadout = global.pyroLoadout;
+			break;
+
+		case CLASS_SOLDIER:
+			global.currentLoadout = global.soldierLoadout;
+			break;
+
+		case CLASS_HEAVY:
+			global.currentLoadout = global.heavyLoadout;
+			break;
+
+		case CLASS_DEMOMAN:
+			global.currentLoadout = global.demomanLoadout;
+			break;
+
+		case CLASS_MEDIC:
+			global.currentLoadout = global.medicLoadout;
+			break;
+
+		case CLASS_ENGINEER:
+			global.currentLoadout = global.engineerLoadout;
+			break;
+
+		case CLASS_SPY:
+			global.currentLoadout = global.spyLoadout;
+			break;
+
+		case CLASS_SNIPER:
+			global.currentLoadout = global.sniperLoadout;
+			break;
+		}
 	}
 ');
 
@@ -949,7 +1178,44 @@ object_event_add(Character,ev_step,ev_step_end,'
 object_event_add(ClassSelectController,ev_other,ev_user1,'
 	{
 		global.myself.activeWeapon = 0;
-		global.currentLoadout = global.loadout[global.myself.class];
+		switch (class)
+		{
+		case CLASS_SCOUT:
+			global.currentLoadout = global.scoutLoadout;
+			break;
+
+		case CLASS_PYRO:
+			global.currentLoadout = global.pyroLoadout;
+			break;
+
+		case CLASS_SOLDIER:
+			global.currentLoadout = global.soldierLoadout;
+			break;
+
+		case CLASS_HEAVY:
+			global.currentLoadout = global.heavyLoadout;
+			break;
+
+		case CLASS_DEMOMAN:
+			global.currentLoadout = global.demomanLoadout;
+			break;
+
+		case CLASS_MEDIC:
+			global.currentLoadout = global.medicLoadout;
+			break;
+
+		case CLASS_ENGINEER:
+			global.currentLoadout = global.engineerLoadout;
+			break;
+
+		case CLASS_SPY:
+			global.currentLoadout = global.spyLoadout;
+			break;
+
+		case CLASS_SNIPER:
+			global.currentLoadout = global.sniperLoadout;
+			break;
+		}
 
 		var coolSendBuffer;
 		coolSendBuffer = buffer_create();
