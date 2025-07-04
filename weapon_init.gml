@@ -7378,6 +7378,12 @@ object_event_add(Detonator,ev_other,ev_user1,'
     }
     */
 ');
+object_event_add(Detonator,ev_other,ev_user2,'
+    with(DetonationFlare) {
+        event_user(5);
+    }
+');
+
 WEAPON_NAPALM = 88;
 NapalmHand = object_add();
 object_set_parent(NapalmHand, Weapon);

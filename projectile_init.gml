@@ -241,10 +241,6 @@ object_event_add(DetonationFlare,ev_create,0,'
     reflector = noone;
     event_inherited();
 ');
-object_event_add(DetonationFlare,ev_collision,Obstacle,'
-    //event_user(5);
-    instance_destroy();
-');
 object_event_add(DetonationFlare,ev_collision,Character,'
     if team != other.team event_user(5);
 ');

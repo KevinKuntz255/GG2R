@@ -156,7 +156,7 @@ with(BurningProjectile)
     
     if(object_index == Flame)
         vspeed += 0.15 * global.delta_factor;
-    
+		
     if(global.particles == PARTICLES_NORMAL and global.run_virtual_ticks)
     {
         if(object_index == Snowflake){
@@ -222,7 +222,7 @@ with(BurningProjectile)
     }
 
     if (colliding)
-        instance_destroy();
+        if(object_index == DetonationFlare) event_user(5); else instance_destroy();
 
     x -= hspeed;
     y -= vspeed;
