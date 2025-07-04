@@ -727,6 +727,48 @@ object_event_add(Heavy,ev_create,0,'
 	// Override defaults
 	numFlames = 5;
 ');
+object_event_clear(Demoman,ev_create,0);
+object_event_add(Demoman,ev_create,0,'
+	baseRunPower = 1;
+	maxHp = 120;
+	weapons[0] = global.weapons[real(string_copy(string(global.demomanLoadout), 2, 2))];
+	weapons[1] = global.weapons[real(string_copy(string(global.demomanLoadout), 4, 2))];
+	haxxyStatue = DemomanHaxxyStatueS;
+
+	if (global.paramPlayer.team == TEAM_RED)
+	{
+	    sprite_index = DemomanRedS;
+	}
+	else if (global.paramPlayer.team == TEAM_BLUE)
+	{
+	    sprite_index = DemomanBlueS;
+	}
+
+	event_inherited();
+
+	numFlames = 3;
+');
+object_event_clear(Engineer,ev_create,0);
+object_event_add(Engineer,ev_create,0,'
+	baseRunPower = 1;
+	maxHp = 120;
+	weapons[0] = global.weapons[real(string_copy(string(global.engineerLoadout), 2, 2))];
+	weapons[1] = global.weapons[real(string_copy(string(global.engineerLoadout), 4, 2))];
+	haxxyStatue = EngineerHaxxyStatueS;
+
+	if (global.paramPlayer.team == TEAM_RED)
+	{
+		sprite_index = EngineerRedS;
+	}
+	else if (global.paramPlayer.team == TEAM_BLUE)
+	{
+		sprite_index = EngineerBlueS;
+	}
+
+	event_inherited();
+
+	numFlames = 3;
+');
 object_event_clear(Pyro,ev_create,0);
 object_event_add(Pyro,ev_create,0,'
 	baseRunPower = 1.1;

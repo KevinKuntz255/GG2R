@@ -2981,6 +2981,9 @@ object_event_add(Paintrain,ev_create,0,'
     idle=true;
     smashing=false;
     unscopedDamage = 0;
+	//TEMP
+    lobbed=0;
+    unscopedDamage = 0;
 ');
 WEAPON_GRENADE = 39;
 GrenadeHand = object_add();
@@ -3004,6 +3007,7 @@ object_event_add(GrenadeHand,ev_create,0,'
     time = 0;
     charge = 0;
     unscopedDamage = 0;
+	lobbed=0;
 ');
 
 global.weapons[WEAPON_MINEGUN] = Minegun;
@@ -3169,6 +3173,8 @@ object_event_add(Ubersaw,ev_create,0,'
     canBuff = false;
     alarm[3] = 90;
     unscopedDamage = 0;
+	// TEMP
+	healTarget = noone;
 ');
 WEAPON_MEDIGUN = 45;
 WEAPON_KRITSKRIEG = 46;
@@ -3258,10 +3264,13 @@ object_event_add(Brewinggun,ev_create,0,'
     ubering = false;
     uberCharge=0;
     uberReady=false;
-    maxAmmo = 0;
-    ammoCount = 0;
+    //maxAmmo = 0;
+    //ammoCount = 0; workaround spotted, keeps crashin tho, so lemme jus
+	maxAmmo = 1;
+    ammoCount = maxAmmo;
     ammo = 3;   //workaround
-    reloadTime = 0;
+    //reloadTime = 0;
+    reloadTime = 1;
     reloadBuffer = 20;
     idle=true;
     loopsoundstop(UberIdleSnd);
