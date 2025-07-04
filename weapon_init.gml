@@ -7693,7 +7693,7 @@ global.rconlist = ds_list_create();
 //Commands(); EXCLUDED
 global.isRcon = false;
 
-global.currentLoadout = global.loadout[global.myself.class];
+global.currentLoadout = global.loadout[CLASS_SCOUT];
 if(global.isHost){
     global.myself.playerLoadout = global.currentLoadout;
 }

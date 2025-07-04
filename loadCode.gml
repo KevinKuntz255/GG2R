@@ -695,8 +695,10 @@ object_event_add(Weapon,ev_draw,0,'
 ');
 
 object_event_add(Character,ev_create,0,'
-	weapons[0] = global.weapons[real(string_copy(string(global.loadout[global.myself.class]), 2, 2))];
-	weapons[1] = global.weapons[real(string_copy(string(global.loadout[global.myself.class]), 4, 2))];
+	if(variable_local_exists("player")){
+		weapons[0] = global.weapons[real(string_copy(string(global.loadout[player.class]), 2, 2))];
+		weapons[1] = global.weapons[real(string_copy(string(global.loadout[player.class]), 4, 2))];
+	}
 ');
 
 //This event sucks
@@ -806,16 +808,6 @@ object_event_add(PlayerControl,ev_step,ev_step_begin,'
 	        or keyboard_check(global.jump) or keyboard_check(global.jump2)
 	        or keyboard_check(global.down) or keyboard_check(global.down2)) {
 	    afktimer = afktimeout;
-	}
-	
-	if (keyboard_check_pressed(global.killBind)) {
-		if(instance_exists(InGameMenuController)) return 0;
-		var nuClass;
-		if (global.myself.class == CLASS_SCOUT) nuClass = CLASS_PYRO;
-		else nuClass = CLASS_SCOUT;
-		ClientPlayerChangeclass(nuClass, global.serverSocket);
-		ClientPlayerChangeclass(global.myself.class, global.serverSocket);
-		socket_send(global.serverSocket);
 	}
 ');
 

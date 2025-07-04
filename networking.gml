@@ -108,12 +108,19 @@ object_event_add(PlayerControl, ev_step, ev_step_end, '
                 //Reads sent active weapon
                 sender.activeWeapon = read_ubyte(randomizerBuffer);
 
+				with(Player){
+					if(variable_local_exists("activeWeapon")){
+					}
+				}
                 write_ubyte(randomizer.sendBuffer, randomizer.activeWeapon);
                 //Make request case as this updates every characters active weapon on a client
                 write_ubyte(randomizer.sendBuffer, ds_list_size(global.players));
                 for(i = 0; i < ds_list_size(global.players); i += 1) {
                     player = ds_list_find_value(global.players, i);
                     write_ushort(randomizer.sendBuffer, i);
+					with(player){
+						if(!variable_local_exists("activeWeapon")) exit;
+					}
                     write_ushort(randomizer.sendBuffer, player.activeWeapon);
                 }
 
