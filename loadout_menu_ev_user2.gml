@@ -3,7 +3,7 @@ switch(mousedclass){
         class = "RUNNER";
         load1 = instance_create(40, 192, LoadoutSwitcher);
         load1.value = 0;
-        load1.loaded = real(string_copy(string(global.scoutLoadout),2,2));
+        load1.loaded = real(string_copy(string(global.loadout[global.myself.class]),2,2));
         load1.description[0,0] = " " + chr(149) + "6 Ammo# " + chr(149) + "6 Bullets per Shot# " + chr(149) + ".66 Second Refire Rate# " + chr(149) + "8 Damage per Bullet";
         load1.description[1,0] = " " + chr(149) + "Causes knockback";
         load1.description[1,1] = " +100% bullets per shot"
@@ -19,7 +19,7 @@ switch(mousedclass){
         load1.description[4,2] = " -33% ammo loaded"
         load2 = instance_create(464, 192, LoadoutSwitcher);
         load2.value = 5;
-        load2.loaded = real(string_copy(string(global.scoutLoadout),4,2));
+        load2.loaded = real(string_copy(string(global.loadout[global.myself.class]),4,2));
         load2.description[0,0] = " " + chr(149) + "12 Ammo# " + chr(149) + ".16 Second Refire Rate# " + chr(149) + "8 Damage";
         load2.description[1,0] = " " + chr(149) + "Invincible while active# " + chr(149) + "Cannot shoot, pick up intel,#  or capture points when active";
         load2.description[2,0] = " " + chr(149) + "Secondary fire shoots a ball# " + chr(149) + "Headshots stun enemies# " + chr(149) + "Bodyshots deal 15 damage# " + chr(149) + "Each bounce weakens effects# " + chr(149) + "Can Tauntkill";
@@ -33,7 +33,7 @@ switch(mousedclass){
         class = "FIREBUG";
         load1 = instance_create(40, 192, LoadoutSwitcher);
         load1.value = 80;
-        load1.loaded = real(string_copy(string(global.pyroLoadout),2,2));
+        load1.loaded = real(string_copy(string(global.loadout[global.myself.class]),2,2));
         load1.description[0,0] = " " + chr(149) + "Secondary Fire: Airblast# " + chr(149) + "200 Ammo# " + chr(149) + "3.3 Damage per Flame# -50 Ammo per Airblast";
         load1.description[1,1] = " +20% flame damage";
         load1.description[1,2] = " +30 airblast cost";
@@ -48,7 +48,7 @@ switch(mousedclass){
         load1.description[4,2] = " " + chr(149) + "Cannot airblast# -30% damage";
         load2 = instance_create(464, 192, LoadoutSwitcher);
         load2.value = 85;
-        load2.loaded = real(string_copy(string(global.pyroLoadout),4,2));
+        load2.loaded = real(string_copy(string(global.loadout[global.myself.class]),4,2));
         load2.description[0,0] = " " + chr(149) + "6 Ammo# " + chr(149) + "5 Bullets per Shot# " + chr(149) + ".66 Second Refire Rate# " + chr(149) + "7 Damage per Bullet";
         load2.description[1,0] = " " + chr(149) + "Sets enemies on fire when hit";
         load2.description[1,1] = " " + chr(149) + "Crits burning targets";
@@ -64,7 +64,7 @@ switch(mousedclass){
         class = "ROCKETMAN";
         load1 = instance_create(40, 192, LoadoutSwitcher);
         load1.value = 10;
-        load1.loaded = real(string_copy(string(global.soldierLoadout),2,2));
+        load1.loaded = real(string_copy(string(global.loadout[global.myself.class]),2,2));
         load1.description[0,0] = " " + chr(149) + "4 Ammo# " + chr(149) + ".5 Second Refire Rate# " + chr(149) + "45 Damage per Rocket";
         load1.description[1,0] = "";
         load1.description[1,1] = " +80% rocket speed# +20% damage";
@@ -78,7 +78,7 @@ switch(mousedclass){
         load1.description[4,2] = " " + chr(149) + "Shoots only 1 rocket at a time";
         load2 = instance_create(464, 192, LoadoutSwitcher);
         load2.value = 15;
-        load2.loaded = real(string_copy(string(global.soldierLoadout),4,2));
+        load2.loaded = real(string_copy(string(global.loadout[global.myself.class]),4,2));
         load2.description[0,0] = " " + chr(149) + "6 Ammo# " + chr(149) + "5 Bullets per Shot# " + chr(149) + ".66 Second Refire Rate# " + chr(149) + "7 Damage per Bullet";
         load2.description[1,0] = " " + chr(149) + "Kills charge rage meter";
         load2.description[1,1] = " " + chr(149) + "Teammates minicrit while active";
@@ -95,7 +95,7 @@ switch(mousedclass){
         class = "OVERWEIGHT";
         load1 = instance_create(40, 192, LoadoutSwitcher);
         load1.value = 60;
-        load1.loaded = real(string_copy(string(global.heavyLoadout),2,2));
+        load1.loaded = real(string_copy(string(global.loadout[global.myself.class]),2,2));
         load1.description[0,0] = " " + chr(149) + "200 Ammo# " + chr(149) + ".06 Second Refire Rate# " + chr(149) + "8 Damage per Bullet";
         load1.description[1,0] = "";
         load1.description[1,1] = " -100% bullet spread# +10% run speed# +100% speed while shooting";
@@ -109,7 +109,7 @@ switch(mousedclass){
         load1.description[4,2] = " " + chr(149) + "Starts with 100 ammo# -50% reload time for base ammo# -75% reload for extra ammo";
         load2 = instance_create(464, 192, LoadoutSwitcher);
         load2.value = 65;
-        load2.loaded = real(string_copy(string(global.heavyLoadout),4,2));
+        load2.loaded = real(string_copy(string(global.loadout[global.myself.class]),4,2));
         load2.description[0,0] = " " + chr(149) + "6 Ammo# " + chr(149) + "5 Bullets per Shot# " + chr(149) + ".66 Second Refire Rate# " + chr(149) + "7 Damage per Bullet";
         load2.description[1,0] = " " + chr(149) + "Heals 50 hp# " + chr(149) + "Secondary fire drops sandvich";
         load2.description[2,1] = " +33% clip size# +15% refire speed";
@@ -125,7 +125,7 @@ switch(mousedclass){
         class = "DETONATOR";
         load1 = instance_create(40,192,LoadoutSwitcher);
         load1.value = 30;
-        load1.loaded = real(string_copy(string(global.demomanLoadout),2,2));
+        load1.loaded = real(string_copy(string(global.loadout[global.myself.class]),2,2));
         load1.description[0,0] = " " + chr(149) + "Secondary Fire: Detonate# " + chr(149) + "8 Ammo# " + chr(149) + ".86 Second Refire Rate# " + chr(149) + "45 Damage per Sticky";
         load1.description[1,0] = "";
         load1.description[1,1] = " " + chr(149) + "Faster refire & reload speed# " + chr(149) + "Invisible mines# +38 damage on airborne targets";
@@ -140,7 +140,7 @@ switch(mousedclass){
         load1.description[4,2] = " " + chr(149) + "Stickies only stick to players# " + chr(149) + "Stickies cannot be detonated# " + chr(149) + "Stickies only damage targets";
         load2 = instance_create(464, 192, LoadoutSwitcher);
         load2.value = 35;
-        load2.loaded = real(string_copy(string(global.demomanLoadout),4,2));
+        load2.loaded = real(string_copy(string(global.loadout[global.myself.class]),4,2));
         load2.description[0,0] = " " + chr(149) + "4 Ammo# " + chr(149) + ".73 Second Refire Rate# " + chr(149) + "40 Damage per Grenade ";
         load2.description[0,1] = " " + chr(149) + "Can Tauntkill";
         load2.description[1,0] = "";
@@ -156,7 +156,7 @@ switch(mousedclass){
         class = "HEALER";
         load1 = instance_create(40, 192, LoadoutSwitcher);
         load1.value = 40;
-        load1.loaded = real(string_copy(string(global.medicLoadout),2,2));
+        load1.loaded = real(string_copy(string(global.loadout[global.myself.class]),2,2));
         load1.description[0,0] = " " + chr(149) + "40 Ammo# " + chr(149) + ".1 Second Refire Rate# " + chr(149) + "4 Damage per Bullet";
         load1.description[1,0] = "";
         load1.description[1,1] = " +2 hp on hit";
@@ -171,7 +171,7 @@ switch(mousedclass){
         load1.description[4,2] = " " + chr(149) + "No random melee crits";
         load2 = instance_create(464, 192, LoadoutSwitcher);
         load2.value = 45;
-        load2.loaded = real(string_copy(string(global.medicLoadout),4,2));
+        load2.loaded = real(string_copy(string(global.loadout[global.myself.class]),4,2));
         load2.description[0,0] = " " + chr(149) + "Ubercharge grants #  invincibility";
         load2.description[1,0] = "";
         load2.description[1,1] = " +25% ubercharge speed# " + chr(149) + "Ubercharge grants crits";
@@ -191,7 +191,7 @@ switch(mousedclass){
         class = "CONSTRUCTOR";
         load1 = instance_create(40, 192, LoadoutSwitcher);
         load1.value = 50;
-        load1.loaded = real(string_copy(string(global.engineerLoadout),2,2));
+        load1.loaded = real(string_copy(string(global.loadout[global.myself.class]),2,2));
         load1.description[0,0] = " " + chr(149) + "6 Ammo# " + chr(149) + "5 Bullets per Shot# " + chr(149) + ".66 Second Refire Rate# " + chr(149) + "7 Damage per Bullet";
         load1.description[1,0] = "";
         load1.description[1,1] = " " + chr(149) + "Gain 2 revenge crits for#  each sentry kill when your#  sentry is destroyed.";
@@ -207,7 +207,7 @@ switch(mousedclass){
         load1.description[4,2] = " -20 per enemy missed";
         load2 = instance_create(464, 192, LoadoutSwitcher);
         load2.value = 55;
-        load2.loaded = real(string_copy(string(global.engineerLoadout),4,2));
+        load2.loaded = real(string_copy(string(global.loadout[global.myself.class]),4,2));
         load2.description[0,0] = " " + chr(149) + "Builds mini-sentries# -2 Nuts 'N' Bolts per Shot# " + chr(149) + ".2 Second Refire Rate# " + chr(149) + "7 Damage";
         load2.description[0,1] = " " + chr(149) + "Destroys sappers# " + chr(149) + "User can build dispensers";
         load2.description[1,0] = " " + chr(149) + "Builds mini-sentries# " + chr(149) + "Stuns tagets on hit";
@@ -224,7 +224,7 @@ switch(mousedclass){
         class = "INFILTRATOR";
         load1 = instance_create(40, 192, LoadoutSwitcher);
         load1.value = 70;
-        load1.loaded = real(string_copy(string(global.spyLoadout),2,2));
+        load1.loaded = real(string_copy(string(global.loadout[global.myself.class]),2,2));
         load1.description[0,0] = " " + chr(149) + "Secondary Fire: Cloak# " + chr(149) + "Cloaked Primary: Sapper# " + chr(149) + "6 Ammo# " + chr(149) + ".6 Refire Rate# " + chr(149) + "28 Damage per Bullet";
         load1.description[1,0] = "";
         load1.description[1,1] = " +2 seconds of ubercloak on kill# " + chr(149) + "Ubercloak is resistant to#  everything but melee weapons";
@@ -239,7 +239,7 @@ switch(mousedclass){
         load1.description[4,2] = " " + chr(149) + "Slower movement speed# -10% damage";
         load2 = instance_create(464,192,LoadoutSwitcher);
         load2.value = 75;
-        load2.loaded = real(string_copy(string(global.spyLoadout),4,2));
+        load2.loaded = real(string_copy(string(global.loadout[global.myself.class]),4,2));
         load2.description[0,0] = " " + chr(149) + "While uncloaked, damage#  increases with each#  consecutive hit# " + chr(149) + "While cloaked...#  " + chr(149) + "200 damage against players#  " + chr(149) + "40 damage against sentries#  " + chr(149) + "50 dmg against generators";
         load2.description[1,0] = "";
         load2.description[1,1] = " " + chr(149) + "On kill also kills enemy's#  patient";
@@ -258,7 +258,7 @@ switch(mousedclass){
         class = "RIFLEMAN";
         load1 = instance_create(40,192,LoadoutSwitcher);
         load1.value = 20;
-        load1.loaded = real(string_copy(string(global.sniperLoadout),2,2));
+        load1.loaded = real(string_copy(string(global.loadout[global.myself.class]),2,2));
         load1.description[0,0] = " " + chr(149) + "Secondary Fire: Scope# " + chr(149) + "2.66 Second Refire Rate# " + chr(149) + "Min Damage: 35# " + chr(149) + "Max Damage: 75";
         load1.description[0,2] = " " + chr(149) + "No bonus damage on headshots";
         load1.description[1,0] = " " + chr(149) + "Each headshot decreases#  charge time";
@@ -273,7 +273,7 @@ switch(mousedclass){
         load1.description[4,2] = " -15% damage# " + chr(149) + "No bonus damage on headshots";
         load2 = instance_create(464, 192, LoadoutSwitcher);
         load2.value = 25;
-        load2.loaded = real(string_copy(string(global.sniperLoadout),4,2));
+        load2.loaded = real(string_copy(string(global.loadout[global.myself.class]),4,2));
         load2.description[0,0] = " " + chr(149) + "25 Ammo# " + chr(149) + ".1 Second Refire Rate# " + chr(149) + "5 Damage per Bullet";
         load2.description[1,0] = " " + chr(149) + "Soaks enemies in piss";
         load2.description[1,1] = " " + chr(149) + "Soaked enemies take crits# " + chr(149) + "Puts out fire# " + chr(149) + "Reveals spies";

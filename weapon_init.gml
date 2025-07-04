@@ -7641,25 +7641,26 @@ global.name[WEAPON_SAXTONHALE] = "HAXTON SAAAAAAAAALE";
 
 //read the loadout file
 ini_open("Loadout.gg2");
-global.scoutLoadout=ini_read_real("Class","Scout",real("10"+string(WEAPON_SCATTERGUN)+"0"+string(WEAPON_PISTOL)));
-global.pyroLoadout=ini_read_real("Class","Pyro",real("1"+string(WEAPON_FLAMETHROWER)+string(WEAPON_PYROSHOTGUN)));
-global.soldierLoadout=ini_read_real("Class","Soldier",real("1"+string(WEAPON_ROCKETLAUNCHER)+string(WEAPON_SOLDIERSHOTGUN)));
-global.heavyLoadout=ini_read_real("Class","heavy",real("1"+string(WEAPON_MINIGUN)+string(WEAPON_HEAVYSHOTGUN)));
-global.demomanLoadout=ini_read_real("Class","Demoman",real("1"+string(WEAPON_MINEGUN)+string(WEAPON_GRENADELAUNCHER)));
-global.medicLoadout=ini_read_real("Class","Medic",real("1"+string(WEAPON_NEEDLEGUN)+string(WEAPON_MEDIGUN)));
-global.engineerLoadout=ini_read_real("Class","Engineer",real("1"+string(WEAPON_SHOTGUN)+string(WEAPON_NAILGUN)));
-global.spyLoadout=ini_read_real("Class","Spy",real("1"+string(WEAPON_REVOLVER)+string(WEAPON_KNIFE)));
-global.sniperLoadout=ini_read_real("Class","sniper",real("1"+string(WEAPON_RIFLE)+string(WEAPON_SMG)));
+global.loadout[CLASS_SCOUT]=ini_read_real("Class","Scout",real("10"+string(WEAPON_SCATTERGUN)+"0"+string(WEAPON_PISTOL)));
+global.loadout[CLASS_PYRO]=ini_read_real("Class","Pyro",real("1"+string(WEAPON_FLAMETHROWER)+string(WEAPON_PYROSHOTGUN)));
+global.loadout[CLASS_SOLDIER]=ini_read_real("Class","Soldier",real("1"+string(WEAPON_ROCKETLAUNCHER)+string(WEAPON_SOLDIERSHOTGUN)));
+global.loadout[CLASS_HEAVY]=ini_read_real("Class","heavy",real("1"+string(WEAPON_MINIGUN)+string(WEAPON_HEAVYSHOTGUN)));
+global.loadout[CLASS_DEMOMAN]=ini_read_real("Class","Demoman",real("1"+string(WEAPON_MINEGUN)+string(WEAPON_GRENADELAUNCHER)));
+global.loadout[CLASS_MEDIC]=ini_read_real("Class","Medic",real("1"+string(WEAPON_NEEDLEGUN)+string(WEAPON_MEDIGUN)));
+global.loadout[CLASS_ENGINEER]=ini_read_real("Class","Engineer",real("1"+string(WEAPON_SHOTGUN)+string(WEAPON_NAILGUN)));
+global.loadout[CLASS_SPY]=ini_read_real("Class","Spy",real("1"+string(WEAPON_REVOLVER)+string(WEAPON_KNIFE)));
+global.loadout[CLASS_SNIPER]=ini_read_real("Class","sniper",real("1"+string(WEAPON_RIFLE)+string(WEAPON_SMG)));
+global.loadout[CLASS_QUOTE]=ini_read_real("Class","querly",real("1"+string(WEAPON_BLADE)+string(WEAPON_MACHINEGUN)));
 
-ini_write_real("Class","Scout",global.scoutLoadout);
-ini_write_real("Class","Pyro",global.pyroLoadout);
-ini_write_real("Class","Soldier",global.soldierLoadout);
-ini_write_real("Class","heavy",global.heavyLoadout);
-ini_write_real("Class","Demoman",global.demomanLoadout);
-ini_write_real("Class","Medic",global.medicLoadout);
-ini_write_real("Class","Engineer",global.engineerLoadout);
-ini_write_real("Class","Spy",global.spyLoadout);
-ini_write_real("Class","sniper",global.sniperLoadout);
+ini_write_real("Class","Scout",global.loadout[CLASS_SCOUT]);
+ini_write_real("Class","Pyro",global.loadout[CLASS_PYRO]);
+ini_write_real("Class","Soldier",global.loadout[CLASS_SOLDIER]);
+ini_write_real("Class","heavy",global.loadout[CLASS_HEAVY]);
+ini_write_real("Class","Demoman",global.loadout[CLASS_DEMOMAN]);
+ini_write_real("Class","Medic",global.loadout[CLASS_MEDIC]);
+ini_write_real("Class","Engineer",global.loadout[CLASS_ENGINEER]);
+ini_write_real("Class","Spy",global.loadout[CLASS_SPY]);
+ini_write_real("Class","sniper",global.loadout[CLASS_SNIPER]);
 
 ini_close(); 
 
@@ -7691,7 +7692,7 @@ global.rconlist = ds_list_create();
 //Commands(); EXCLUDED
 global.isRcon = false;
 
-global.currentLoadout = global.scoutLoadout;
+global.currentLoadout = global.loadout[global.myself.class];
 if(global.isHost){
     global.myself.playerLoadout = global.currentLoadout;
 }
