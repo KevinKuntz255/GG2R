@@ -3058,7 +3058,6 @@ object_event_add(Eyelander,ev_other,ev_user2,'
         playsound(x,y,BallSnd);
         ammoCount -= 1;
         //alarm[0] = refireTime;
-        readyToStab = false;
         alarm[2]=20;
         alarm[5] = reloadBuffer + reloadTime;
     }
