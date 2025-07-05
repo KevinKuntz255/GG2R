@@ -993,8 +993,7 @@ object_event_add(CowMangler,ev_step,ev_step_normal,'
         else if ammoCount <= maxAmmo ammoCount +=0.9;
     } else {
         owner.runPower = 0.9;
-        owner.jumpStrength = 8;
-
+        owner.jumpStrength = 8+(0.6/2);
     }
 ');
 object_event_add(CowMangler,ev_other,ev_user1,'
@@ -1934,7 +1933,7 @@ object_event_add(HuntsMan,ev_step,ev_step_begin,'
             bonus=0;
             overheat=0;
             owner.runPower = 0.9;
-            owner.jumpStrength = 8;
+            owner.jumpStrength = 8+(0.6/2);
             burning = false;
     }
 
@@ -1976,7 +1975,7 @@ object_event_add(HuntsMan,ev_other,ev_user2,'
     charging = 0;
     bonus = 0;
     owner.runPower = 0.9;
-    owner.jumpStrength = 8;
+    owner.jumpStrength = 8+(0.6/2);
 ');
 WEAPON_MACHINA = 23;
 Machina = object_add();
@@ -2945,19 +2944,126 @@ object_event_add(Eyelander,ev_create,0,'
     alarm[2] = 15;
     smashing = false;
     image_speed=0;
+    charging = 0;
     
     stabbing=false;
-    stabdirection=0;
+    stabdirection= owner.aimDirection;
     maxAmmo = 100;
     ammoCount = maxAmmo;
     reloadTime = 300;
     reloadBuffer = 18;
     idle=true;
     smashing=false;
+	isMelee = true;
     //TEMP
     lobbed=0;
     unscopedDamage = 0;
+	
+	normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\EyelanderS.png", 2, 1, 0, 2, 0);
+    recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\EyelanderFS.png", 4, 1, 0, 2, -5);
+    reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\EyelanderS.png", 2, 1, 0, 2, 0);
+
+    sprite_index = normalSprite;
+
+    recoilTime = refireTime;
+    recoilAnimLength = sprite_get_number(recoilSprite)/2;
+    recoilImageSpeed = recoilAnimLength/recoilTime;
+
+    reloadAnimLength = sprite_get_number(reloadSprite)/2;
+    reloadImageSpeed = reloadAnimLength/reloadTime;
 ');
+object_event_add(Eyelander,ev_alarm,1,'
+    { 
+        shot = instance_create(x,y,MeleeMask);
+        shot.direction= owner.aimDirection;
+        shot.speed=owner.speed;
+        shot.owner=owner;
+        shot.ownerPlayer=ownerPlayer;
+        shot.team=owner.team;
+        if (charging == 1) shot.hitDamage = 45; else shot.hitDamage = 35;
+        shot.weapon=WEAPON_EYELANDER;
+        //Removed crit thing here
+        alarm[2] = 10;
+    }
+');
+object_event_add(Eyelander,ev_alarm,2,'
+    {
+    readyToStab = true;
+    }
+');
+object_event_add(Eyelander,ev_alarm,5,'
+    ammoCount = 100;
+');
+
+object_event_add(Eyelander,ev_step,ev_step_normal,'
+	if charging == 1 {
+		image_speed=0.3;
+        owner.jumpStrength = 0;
+        justShot=true;
+        ammoCount -= 2;
+        if ammoCount <= 0 {
+			owner.jumpStrength = 8+(0.6/2);
+            charging = 0;
+        }
+		if (owner.image_xscale == -1) {
+			owner.hspeed -= 3;
+		} else if (owner.image_xscale == 1) {
+			owner.hspeed += 3;
+		}
+    } else if readyToShoot {
+        if ammoCount < 0 ammoCount = 0;
+        else if ammoCount <= maxAmmo ammoCount +=0.9;
+    } else {
+        owner.jumpStrength = 8+(0.6/2);
+    }
+	
+    if smashing {
+        image_speed=0.3;
+        if 1 != 1 { //Removed crit here
+            if image_index >= 11{
+                image_speed=0;
+                image_index=8;
+                stabbing = false;
+            } 
+        } else if image_index >= 4*owner.team+3 {
+            image_speed=0;
+            image_index=4*owner.team;
+            stabbing = false;
+        }    
+    } else {
+        if 1 <= 1  image_index=4*owner.team;
+        else image_index = 8;
+    }
+');
+object_event_add(Eyelander,ev_other,ev_user1,'
+    if(readyToStab && !owner.cloak){
+        smashing = 1;
+        justShot=true;
+        readyToShoot = false;
+		owner.jumpStrength = 8+(0.6/2);
+		if (charging = 1){
+			alarm[1] = 2 / global.delta_factor;
+			charging = 0;
+		} else {
+			alarm[1] = StabreloadTime / global.delta_factor;
+		}
+        playsound(x,y,swingSnd);
+		
+	}
+');
+object_event_add(Eyelander,ev_other,ev_user2,'
+    if (charging == 0 && !owner.cloak && ammoCount>= maxAmmo) {
+		stabdirection = owner.aimDirection;
+        charging = 1;
+        playsound(x,y,BallSnd);
+        ammoCount -= 1;
+        //alarm[0] = refireTime;
+        readyToStab = false;
+        alarm[2]=20;
+        alarm[5] = reloadBuffer + reloadTime;
+    }
+');
+
 WEAPON_PAINTRAIN = 38;
 Paintrain = object_add();
 object_set_parent(Paintrain, Weapon);
@@ -2981,9 +3087,88 @@ object_event_add(Paintrain,ev_create,0,'
     idle=true;
     smashing=false;
     unscopedDamage = 0;
+	
 	//TEMP
     lobbed=0;
     unscopedDamage = 0;
+	
+	isMelee = true;
+	normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\PainTrainS.png", 2, 1, 0, 0, 0);
+    recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\PainTrainFS.png", 2, 1, 0, 0, 0);
+    reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\PainTrainS.png", 2, 1, 0, 0, 0);
+
+    sprite_index = normalSprite;
+
+    recoilTime = refireTime;
+    recoilAnimLength = sprite_get_number(recoilSprite)/2;
+    recoilImageSpeed = recoilAnimLength/recoilTime;
+
+    reloadAnimLength = sprite_get_number(reloadSprite)/2;
+    reloadImageSpeed = reloadAnimLength/reloadTime;
+	
+	//owner.runPower = 5;
+	owner.capStrength = 2;
+');
+object_event_add(Paintrain,ev_destroy,0,'
+    with (MeleeMask) {
+        if (ownerPlayer == other.ownerPlayer) {
+            instance_destroy();
+        }
+    }
+	owner.capStrength = 1;
+');
+object_event_add(Paintrain,ev_alarm,1,'
+    { 
+        shot = instance_create(x,y,MeleeMask);
+        shot.direction=owner.aimDirection;
+        shot.speed=owner.speed;
+        shot.owner=owner;
+        shot.ownerPlayer=ownerPlayer;
+        shot.team=owner.team;
+        shot.hitDamage = 14+(((owner.maxHp+40)/(owner.hp+40))*11);
+        shot.weapon=WEAPON_PAINTRAIN;
+        //Removed crit thing here
+        alarm[2] = 10;
+    }
+');
+object_event_add(Paintrain,ev_alarm,2,'
+    {
+    readyToStab = true;
+    }
+');
+object_event_add(Paintrain,ev_alarm,5,'
+    ammoCount = 1;
+');
+object_event_add(Paintrain,ev_step,ev_step_normal,'
+    if smashing {
+        image_speed=0.3;
+        if 1 != 1 { //Removed crit here
+            if image_index >= 11{
+                image_speed=0;
+                image_index=8;
+                stabbing = false;
+            } 
+        } else if image_index >= 4*owner.team+3 {
+            image_speed=0;
+            image_index=4*owner.team;
+            stabbing = false;
+        }    
+    } else {
+        if 1 <= 1  image_index=4*owner.team;
+        else image_index = 8;
+    }
+');
+object_event_add(Paintrain,ev_other,ev_user1,'
+    if(readyToStab && !owner.cloak){
+        //owner.runPower = 0;
+        //owner.jumpStrength = 0;
+        smashing = 1;
+
+        justShot=true;
+        readyToStab = false;
+        alarm[1] = StabreloadTime / global.delta_factor;
+        playsound(x,y,swingSnd);
+    }
 ');
 WEAPON_GRENADE = 39;
 GrenadeHand = object_add();
