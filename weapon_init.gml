@@ -2960,7 +2960,7 @@ object_event_add(Eyelander,ev_create,0,'
     unscopedDamage = 0;
 	
 	normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\EyelanderS.png", 2, 1, 0, 2, 0);
-    recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\EyelanderFS.png", 4, 1, 0, 2, -5);
+    recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\EyelanderFS.png", 8, 1, 0, 2, 0);
     reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\EyelanderS.png", 2, 1, 0, 2, 0);
 
     sprite_index = normalSprite;
@@ -2999,7 +2999,6 @@ object_event_add(Eyelander,ev_step,ev_step_normal,'
 	if charging == 1 {
 		image_speed=0.3;
         owner.jumpStrength = 0;
-        justShot=true;
         ammoCount -= 2;
         if ammoCount <= 0 {
 			owner.jumpStrength = 8+(0.6/2);
@@ -3039,28 +3038,26 @@ object_event_add(Eyelander,ev_other,ev_user1,'
     if(readyToStab && !owner.cloak){
         smashing = 1;
         justShot=true;
-        readyToShoot = false;
+        readyToStab = false;
 		owner.jumpStrength = 8+(0.6/2);
 		if (charging == 1){
-			StabreloadTime = 2; 
 			charging = 0;
-		} else {
-			StabreloadTime = 5; 
+			ammoCount = 0;
 		}
-		alarm[1] = (StabreloadTime*0.5) / global.delta_factor;
+		alarm[1] = StabreloadTime / global.delta_factor;
         playsound(x,y,swingSnd);
-		
 	}
 ');
 object_event_add(Eyelander,ev_other,ev_user2,'
-    if (charging == 0 && !owner.cloak && ammoCount>= maxAmmo) {
-		stabdirection = owner.aimDirection;
+    if (charging == 0 && !owner.cloak && ammoCount >= maxAmmo) {
         charging = 1;
         playsound(x,y,BallSnd);
-        ammoCount -= 1;
-        //alarm[0] = refireTime;
-        alarm[2]=20;
-        alarm[5] = reloadBuffer + reloadTime;
+		// THRUST players forward
+		if (owner.image_xscale == -1) {
+			owner.hspeed -= 25;
+		} else if (owner.image_xscale == 1) {
+			owner.hspeed += 25;
+		}
     }
 ');
 

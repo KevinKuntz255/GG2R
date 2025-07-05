@@ -667,7 +667,10 @@ object_event_add(Weapon,ev_draw,0,'
 		            ubercolour = c_aqua;
 		        //draw_sprite_ext(sprite_index, imageOffset, round(x+xoffset*image_xscale), round(y+yoffset) + owner.equipmentOffset, image_xscale, image_yscale, image_angle, ubercolour, 0.7*image_alpha);
 		        draw_sprite_ext(sprite_index,4+imageOffset/2,round(x+xoffset*image_xscale),round(y+yoffset),image_xscale,image_yscale,image_angle,ubercolour,0.7);
-                draw_sprite_ext(Spark2S,spark,round(x+xoffset*image_xscale),round(y+yoffset),image_xscale,image_yscale,image_angle,ubercolour,0.3);
+                if (!isMelee) 
+					draw_sprite_ext(Spark2S,spark,round(x+xoffset*image_xscale),round(y+yoffset),image_xscale,image_yscale,image_angle,ubercolour,0.3);
+				else
+					draw_sprite_ext(Spark2S,spark,round(x+xoffset*image_xscale),round(y+yoffset+40),image_xscale,image_yscale,image_angle,ubercolour,0.3);
 			}
 	    }
 	    if (owner.ubered)
