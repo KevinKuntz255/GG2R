@@ -3042,11 +3042,12 @@ object_event_add(Eyelander,ev_other,ev_user1,'
         readyToShoot = false;
 		owner.jumpStrength = 8+(0.6/2);
 		if (charging == 1){
-			alarm[1] = 2 / global.delta_factor;
+			StabreloadTime = 2; 
 			charging = 0;
 		} else {
-			alarm[1] = StabreloadTime / global.delta_factor;
+			StabreloadTime = 5; 
 		}
+		alarm[1] = (StabreloadTime*0.5) / global.delta_factor;
         playsound(x,y,swingSnd);
 		
 	}
