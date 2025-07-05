@@ -118,12 +118,7 @@ object_event_add(PlayerControl, ev_step, ev_step_end, '
                 for(i = 0; i < ds_list_size(global.players); i += 1) {
                     player = ds_list_find_value(global.players, i);
                     write_ushort(randomizer.sendBuffer, i);
-					with(player){
-						if(!variable_local_exists("activeWeapon")) 
-							write_ushort(randomizer.sendBuffer, 0);
-					} else {
-						write_ushort(randomizer.sendBuffer, player.activeWeapon);
-					}
+					write_ushort(randomizer.sendBuffer, player.activeWeapon);
 				}
 
                 //write_ubyte(randomizer.sendBuffer, 1);
