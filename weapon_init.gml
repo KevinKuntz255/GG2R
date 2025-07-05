@@ -3041,7 +3041,7 @@ object_event_add(Eyelander,ev_other,ev_user1,'
         justShot=true;
         readyToShoot = false;
 		owner.jumpStrength = 8+(0.6/2);
-		if (charging = 1){
+		if (charging == 1){
 			alarm[1] = 2 / global.delta_factor;
 			charging = 0;
 		} else {
