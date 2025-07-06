@@ -3075,7 +3075,7 @@ object_event_add(Eyelander,ev_alarm,1,'
         shot.owner=owner;
         shot.ownerPlayer=ownerPlayer;
         shot.team=owner.team;
-        if (charging == 1) shot.hitDamage = 45; else shot.hitDamage = 35;
+        if (charging == 1) shot.hitDamage = 50; else shot.hitDamage = 35;
         shot.weapon=WEAPON_EYELANDER;
         //Removed crit thing here
         alarm[2] = 10;
@@ -3135,11 +3135,11 @@ object_event_add(Eyelander,ev_other,ev_user1,'
         justShot=true;
         readyToStab = false;
 		owner.jumpStrength = 8+(0.6/2);
+		alarm[1] = StabreloadTime / global.delta_factor;
 		if (charging == 1){
 			charging = 0;
 			ammoCount = 0;
 		}
-		alarm[1] = StabreloadTime / global.delta_factor;
         playsound(x,y,swingSnd);
 	}
 ');
@@ -3147,12 +3147,6 @@ object_event_add(Eyelander,ev_other,ev_user2,'
     if (charging == 0 && !owner.cloak && ammoCount >= maxAmmo) {
         charging = 1;
         playsound(x,y,BallSnd);
-		// THRUST players forward
-		if (owner.image_xscale == -1) {
-			owner.hspeed -= 25;
-		} else if (owner.image_xscale == 1) {
-			owner.hspeed += 25;
-		}
     }
 ');
 
