@@ -558,6 +558,7 @@ object_event_add(Pistol,ev_other,ev_user3,'
 ');
 WEAPON_BONK = 6;
 BonkHand = object_add();
+object_set_sprite(BonkHand, sprite_add(pluginFilePath + "\randomizer_sprites\BonkHandS.png", 2, 1, 0, 21, 25));
 object_set_parent(BonkHand, Weapon);
 object_event_add(BonkHand,ev_create,0,'
     xoffset=-3;
@@ -571,7 +572,101 @@ object_event_add(BonkHand,ev_create,0,'
     idle=true;
     readyToStab=false;
     unscopedDamage = 0;
+	owner.ammo[105] = -1;
+	isMelee = true;
+	
+	normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\BonkHandS.png", 4, 0, 0, 21, 25);
+	recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\BonkHandS.png", 4, 0, 1, 21, 25);
+	reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\BonkHandS.png", 4, 0, 1, 21, 25);
+	
+	sprite_index = normalSprite;
+	image_speed = 0;
+	
+	recoilTime = refireTime;
+    recoilAnimLength = sprite_get_number(recoilSprite)/2;
+    recoilImageSpeed = recoilAnimLength/recoilTime;
+
+    reloadAnimLength = sprite_get_number(reloadSprite)/2;
+    reloadImageSpeed = reloadAnimLength/reloadTime;
 ');
+object_event_add(BonkHand,ev_destroy,0,'
+    if owner != -1 owner.ammo[105] = alarm[5];
+');
+object_event_add(BonkHand,ev_alarm,5,'
+    ammoCount = maxAmmo;
+    owner.ammo[105] = -1;
+');
+object_event_add(BonkHand,ev_alarm,6,'
+    if (reloadSprite != -1 && object_index != Rifle && alarm[5] > 0)
+    {
+        sprite_index = reloadSprite;
+        image_index = 0;
+        image_speed = 0;
+    } 
+    else
+    {
+        sprite_index = normalSprite;
+        image_speed = 0;
+    }
+');
+object_event_add(BonkHand,ev_step,ev_step_normal,'
+    //if(ammoCount >= 1){
+    //    owner.canEat = true;
+    //}else{
+    //    owner.canEat = false;
+    //}
+    image_index = owner.team+2*real(ammoCount);
+
+    if !variable_local_exists("ammoCheck") {
+        ammoCheck = 1;
+        alarm[5] = owner.ammo[105];
+    }
+');
+object_event_add(BonkHand,ev_step,ev_step_end,'
+    if(!instance_exists(AmmoCounter))
+        instance_create(0,0,AmmoCounter);
+');
+object_event_add(BonkHand,ev_other,ev_user0,'
+    alarm[0]=refireTime;
+    if owner.ammo[105] == -1 alarm[5] = reloadBuffer + reloadTime;
+    else alarm[5] = reloadBuffer + owner.ammo[105];
+');
+object_event_add(BonkHand,ev_other,ev_user1,'
+    if(global.isHost){
+        if(owner != -1) {
+            if(!ownerPlayer.humiliated
+                and !owner.taunting)
+            {
+				owner.taunting = true;
+				owner.tauntindex=0;
+				ammoCount = max(0, ammoCount-1);
+				playsound(x,y,PickupSnd);
+            }
+        }
+    }
+');
+object_event_add(BonkHand,ev_draw,0,'
+    if (distance_to_point(view_xview + view_wview/2, view_yview + view_hview/2) > 800)
+        exit;
+
+    if (!owner.invisible and !owner.taunting and !owner.player.humiliated)
+    {
+        if (!owner.cloak)
+            image_alpha = power(owner.cloakAlpha, 0.5);
+        else
+            image_alpha = power(owner.cloakAlpha, 2);
+        draw_sprite_ext(sprite_index, image_index, round(x+xoffset*image_xscale), round(y+yoffset) + owner.equipmentOffset, image_xscale, image_yscale, image_angle, c_white, image_alpha);
+        if (owner.ubered)
+        {
+            if (owner.team == TEAM_RED)
+                ubercolour = c_red;
+            else if (owner.team == TEAM_BLUE)
+                ubercolour = c_blue;
+            draw_sprite_ext(sprite_index, image_index, round(x+xoffset*image_xscale), round(y+yoffset) + owner.equipmentOffset, image_xscale, image_yscale, image_angle, ubercolour, 0.7*image_alpha);
+        }
+    }
+');
+
 WEAPON_SANDMAN = 7;
 Sandman = object_add();
 object_set_parent(Sandman, Weapon);
