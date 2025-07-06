@@ -3075,7 +3075,14 @@ object_event_add(Eyelander,ev_alarm,1,'
         shot.owner=owner;
         shot.ownerPlayer=ownerPlayer;
         shot.team=owner.team;
-        if (charging == 1) shot.hitDamage = 50; else shot.hitDamage = 35;
+        if (charging == 1) {
+			shot.hitDamage = 50; 
+			playsound(x,y,UberEndSnd);
+			charging = 0;
+			ammoCount = 0;
+		} else {
+			shot.hitDamage = 35;
+		}
         shot.weapon=WEAPON_EYELANDER;
         //Removed crit thing here
         alarm[2] = 10;
@@ -3136,10 +3143,6 @@ object_event_add(Eyelander,ev_other,ev_user1,'
         readyToStab = false;
 		owner.jumpStrength = 8+(0.6/2);
 		alarm[1] = StabreloadTime / global.delta_factor;
-		if (charging == 1){
-			charging = 0;
-			ammoCount = 0;
-		}
         playsound(x,y,swingSnd);
 	}
 ');
