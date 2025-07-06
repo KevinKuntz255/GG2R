@@ -1,6 +1,172 @@
 //Some needed things for weapons
-globalvar MeleeMask;
+// create RadioBlur here so that It's in the first file callled in plugin.gml
+globalvar MeleeMask, RadioBlur;
 MeleeMask = object_add();
+RadioBlur=object_add();
+object_set_depth(RadioBlur, 130000);
+object_event_add(RadioBlur,ev_create,0,'
+	owner=-1;
+	charging=-1;
+');
+object_event_add(RadioBlur,ev_draw,0,'
+	if !variable_local_exists("old_pos") {
+		a = 0
+		while a < 12 {
+			old_pos[a,0] = x;
+			old_pos[a,1] = y;  
+			a += 1;
+		}
+	}
+	a = 12-1
+	while a > 0 {
+		old_pos[a,0] = old_pos[a-1,0]
+		old_pos[a,1] = old_pos[a-1,1]        
+		a -= 1
+	}       
+	old_pos[0,0] = x
+	old_pos[0,1] = y   
+    a = 0
+	// fatass copy of Character create/draw
+	if(owner.player.class == CLASS_QUOTE)
+    {
+        spriteRun = owner.sprite_index;
+        spriteJump = owner.sprite_index;
+        spriteStand = owner.sprite_index;
+        spriteLeanR = owner.sprite_index;
+        spriteLeanL = owner.sprite_index;
+        spriteIntel = owner.sprite_index; // its an underlay
+    }
+    else
+    {
+        spriteRun = getCharacterSpriteId(owner.player.class, owner.player.team, "Run");
+        spriteJump = getCharacterSpriteId(owner.player.class, owner.player.team, "Jump");
+        spriteStand = getCharacterSpriteId(owner.player.class, owner.player.team, "Stand");
+        spriteLeanR = getCharacterSpriteId(owner.player.class, owner.player.team, "LeanR");
+        spriteLeanL = getCharacterSpriteId(owner.player.class, owner.player.team, "LeanL");
+        spriteIntel = getCharacterSpriteId(owner.player.class, owner.player.team, "Intel");
+    }
+	
+	var sprite, overlayList, noNewAnim, sprite_tilt_left, sprite_tilt_right, overlays_tilt_left, overlays_tilt_right;
+	noNewAnim = owner.player.class == CLASS_QUOTE or owner.sprite_special or owner.player.humiliated;
+	
+	if (owner.zoomed)
+	{
+		if (owner.team == TEAM_RED)
+			sprite = SniperRedCrouchS;
+		else
+			sprite = SniperBlueCrouchS;
+		overlayList = owner.crouchOverlays;
+		owner.animationImage = animationImage mod 2; // sniper crouch only has two frames, avoid overflow
+	}
+	else if (!noNewAnim)
+	{
+		if(!owner.onground)
+		{
+			sprite = spriteJump;
+			overlayList = owner.jumpOverlays;
+		}
+		else
+		{
+			if(owner.hspeed==0)
+			{
+				// set up vars for slope detection
+				charSetSolids();
+				if(owner.image_xscale > 0)
+				{
+					sprite_tilt_left = spriteLeanL;
+					sprite_tilt_right = spriteLeanR;
+					overlays_tilt_left = leanLOverlays;
+					overlays_tilt_right = leanROverlays;
+				}
+				else
+				{
+					sprite_tilt_left = spriteLeanR;
+					sprite_tilt_right = spriteLeanL;
+					overlays_tilt_left = leanROverlays;
+					overlays_tilt_right = leanLOverlays;
+				}
+				
+				// default still sprite
+				sprite = spriteStand;
+				overlayList = owner.stillOverlays;
+				
+				{ // detect slopes
+					var openright, openleft;
+					openright = !collision_point_solid(x+6, y+bottom_bound_offset+2) and !collision_point_solid(x+2, y+bottom_bound_offset+2);
+					openleft = !collision_point_solid(x-7, y+bottom_bound_offset+2) and !collision_point_solid(x-3, y+bottom_bound_offset+2);
+					if (openright)
+					{
+						sprite = sprite_tilt_right;
+						overlayList = owner.overlays_tilt_right;
+					}
+					if (openleft)
+					{
+						sprite = sprite_tilt_left;
+						overlayList = owner.overlays_tilt_left;
+					}
+					if (openright and openleft)
+					{
+						openright = !collision_point_solid(x+right_bound_offset, y+bottom_bound_offset+2);
+						openleft = !collision_point_solid(x-left_bound_offset, y+bottom_bound_offset+2);
+						if (openright)
+						{
+							sprite = sprite_tilt_right;
+							overlayList = owner.overlays_tilt_right;
+						}
+						if (openleft)
+						{
+							sprite = sprite_tilt_left;
+							overlayList = owner.overlays_tilt_left;
+						}
+					}
+				}
+					
+				charUnsetSolids();
+			}
+			else
+			{
+				sprite = spriteRun;
+				overlayList = owner.runOverlays;
+				if (owner.player.class == CLASS_HEAVY and abs(owner.hspeed) < 3) // alternative sprite for extremely slow moving heavies
+				{
+					if (team == TEAM_RED)
+					{
+						sprite = HeavyRedWalkS;
+						overlayList = owner.walkOverlays;
+					}
+					else
+					{
+						sprite = HeavyBlueWalkS;
+						overlayList = owner.walkOverlays;
+					}
+				}
+			}
+		}
+	}
+	else
+	{
+		sprite = sprite_index;
+		overlayList = owner.stillOverlays;
+	}
+
+    while a < 12-1 {
+		draw_sprite_ext(sprite,floor(owner.animationImage),old_pos[a,0],old_pos[a,1],owner.image_xscale,1,0,c_white,0.1/((a+2)/2));
+		a += 1;
+	}   
+');
+
+object_event_add(RadioBlur,ev_step,ev_step_end,'
+	if instance_exists(owner) {
+		charging = owner.currentWeapon.charging;
+		if /*owner.radioactive==true or*/ charging /*or owner.stomping or owner.raged*/ {
+		x=owner.x;
+		y=owner.y;
+		} else 
+			instance_destroy();
+	} else 
+		instance_destroy();
+');
+
 object_set_parent(MeleeMask, StabMask);
 object_event_add(MeleeMask,ev_create,0,'
     {

@@ -4,7 +4,6 @@
 
 //Updating this for modern gg2 was a LOT LOT of work
 
-
 globalvar SwitchSnd;
 SwitchSnd = sound_add(directory + '/randomizer_sounds/switchSnd.wav', 0, 1);
 object_event_add(Weapon,ev_create,0,'
@@ -23,6 +22,7 @@ object_event_add(Weapon,ev_create,0,'
     isMelee = false;
 	
 	playsound(x,y,SwitchSnd);
+	with(RadioBlur) instance_destroy();
 ');
 
 
@@ -3099,6 +3099,8 @@ object_event_add(Eyelander,ev_alarm,5,'
 
 object_event_add(Eyelander,ev_step,ev_step_normal,'
 	if charging == 1 {
+		blur=instance_create(x,y,RadioBlur);
+        blur.owner=owner;
 		image_speed=0.3;
         owner.jumpStrength = 0;
         ammoCount -= 2;
@@ -3111,9 +3113,12 @@ object_event_add(Eyelander,ev_step,ev_step_normal,'
 		} else if (owner.image_xscale == 1) {
 			owner.hspeed += 3;
 		}
+				
+			
     } else if readyToShoot {
+		owner.jumpStrength = 8+(0.6/2);
         if ammoCount < 0 ammoCount = 0;
-        else if ammoCount <= maxAmmo ammoCount +=0.9;
+        else if ammoCount <= maxAmmo ammoCount +=1;
     } else {
         owner.jumpStrength = 8+(0.6/2);
     }
@@ -3150,6 +3155,7 @@ object_event_add(Eyelander,ev_other,ev_user2,'
     if (charging == 0 && !owner.cloak && ammoCount >= maxAmmo) {
         charging = 1;
         playsound(x,y,BallSnd);
+		if (smashing != 1) readyToStab = true;
     }
 ');
 
