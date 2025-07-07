@@ -466,7 +466,9 @@ object_event_add(InGameMenuController,ev_create,0,'
 
 object_event_add(Character,ev_create,0,'
 	accel = 0;
+	radioactive = false;
 ');
+
 object_event_clear(Character,ev_step,ev_step_end);
 object_event_add(Character,ev_step,ev_step_end,'
 	charSetSolids();
@@ -485,8 +487,9 @@ object_event_add(Character,ev_step,ev_step_end,'
 	xprevious = x;
 	yprevious = y;
 	
-
-	if(currentWeapon.charging == 1 && currentWeapon.object_index == Eyelander) {
+	if(currentWeapon.charging == 1 and currentWeapon.object_index == Eyelander) {
+		blur=instance_create(x,y,RadioBlur);
+		blur.owner=id;
 		if(hspeed != 0 && !place_free(x + sign(hspeed), y)) { // we hit a wall on the left or right
             if(place_free(x + sign(hspeed), y - 6)) // if we could just walk up the step
             {
@@ -500,6 +503,10 @@ object_event_add(Character,ev_step,ev_step_end,'
 			}
 		}
 	} //detected upwards slope, Fly!
+	if (radioactive) {
+		blur=instance_create(x,y,RadioBlur);
+		blur.owner=id;
+	}
 	
 	charUnsetSolids();
 

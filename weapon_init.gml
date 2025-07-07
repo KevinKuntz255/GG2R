@@ -609,18 +609,23 @@ object_event_add(BonkHand,ev_alarm,6,'
         image_speed = 0;
     }
 ');
+object_event_add(BonkHand,ev_alarm,10,'
+    owner.radioactive = false;
+');
 object_event_add(BonkHand,ev_step,ev_step_normal,'
-    //if(ammoCount >= 1){
-    //    owner.canEat = true;
-    //}else{
-    //    owner.canEat = false;
-    //}
     image_index = owner.team+2*real(ammoCount);
 
     if !variable_local_exists("ammoCheck") {
         ammoCheck = 1;
         alarm[5] = owner.ammo[105];
     }
+	if (owner.taunting) {
+		if (owner.tauntindex >= sprite_get_number(owner.tauntsprite)-1 && !owner.radioactive) {
+			owner.radioactive = true;
+			playsound(x,y,BallSnd);
+			
+		}
+	}
 ');
 object_event_add(BonkHand,ev_step,ev_step_end,'
     if(!instance_exists(AmmoCounter))
@@ -632,17 +637,14 @@ object_event_add(BonkHand,ev_other,ev_user0,'
     else alarm[5] = reloadBuffer + owner.ammo[105];
 ');
 object_event_add(BonkHand,ev_other,ev_user1,'
-    if(global.isHost){
-        if(owner != -1) {
-            if(!ownerPlayer.humiliated
-                and !owner.taunting)
-            {
-				owner.taunting = true;
-				owner.tauntindex=0;
-				ammoCount = max(0, ammoCount-1);
-				playsound(x,y,PickupSnd);
-            }
-        }
+	if(!owner.player.humiliated && ammoCount >= 1)  {
+		owner.taunting=true;
+        owner.tauntindex=0;
+        owner.image_speed=owner.tauntspeed;
+		ammoCount = max(0, ammoCount-1);
+		playsound(x,y,PickupSnd);
+		alarm[5] = reloadBuffer + reloadTime;
+		alarm[10] = 150;
     }
 ');
 object_event_add(BonkHand,ev_draw,0,'
@@ -3099,8 +3101,6 @@ object_event_add(Eyelander,ev_alarm,5,'
 
 object_event_add(Eyelander,ev_step,ev_step_normal,'
 	if (charging == 1) {
-		blur=instance_create(x,y,RadioBlur);
-        blur.owner=owner;
 		image_speed=0.3;
         owner.jumpStrength = 0;
         ammoCount -= 2;
@@ -3116,9 +3116,9 @@ object_event_add(Eyelander,ev_step,ev_step_normal,'
 			}
 		} else {
 			if (owner.image_xscale == -1) {
-				owner.hspeed -= 1;
+				owner.hspeed -= 1.8;
 			} else if (owner.image_xscale == 1) {
-				owner.hspeed += 1;
+				owner.hspeed += 1.8;
 			}
 		}
     } else if readyToShoot {
@@ -3128,6 +3128,11 @@ object_event_add(Eyelander,ev_step,ev_step_normal,'
     } else {
         owner.jumpStrength = 8+(0.6/2);
     }
+	
+	if (owner.ubered)
+	{
+		
+	}
 	
     if smashing {
         image_speed=0.3;
@@ -3162,6 +3167,7 @@ object_event_add(Eyelander,ev_other,ev_user2,'
     if (charging == 0 && !owner.cloak && ammoCount >= maxAmmo) {
         charging = 1;
 		owner.accel = 0;
+		owner.moveStatus = 0;
         playsound(x,y,BallSnd);
 		if (smashing != 1) readyToStab = true;
     }

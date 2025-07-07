@@ -7,6 +7,7 @@ object_set_depth(RadioBlur, 130000);
 object_event_add(RadioBlur,ev_create,0,'
 	owner=-1;
 	charging=-1;
+	radioactive =-1;
 ');
 object_event_add(RadioBlur,ev_draw,0,'
 	if !variable_local_exists("old_pos") {
@@ -70,20 +71,20 @@ object_event_add(RadioBlur,ev_draw,0,'
 			if(owner.hspeed==0)
 			{
 				// set up vars for slope detection
-				charSetSolids();
+				//charSetSolids(); i fucked around and found out thanks to bonk
 				if(owner.image_xscale > 0)
 				{
 					sprite_tilt_left = spriteLeanL;
 					sprite_tilt_right = spriteLeanR;
-					overlays_tilt_left = leanLOverlays;
-					overlays_tilt_right = leanROverlays;
+					overlays_tilt_left = owner.leanLOverlays;
+					overlays_tilt_right = owner.leanROverlays;
 				}
 				else
 				{
 					sprite_tilt_left = spriteLeanR;
 					sprite_tilt_right = spriteLeanL;
-					overlays_tilt_left = leanROverlays;
-					overlays_tilt_right = leanLOverlays;
+					overlays_tilt_left = owner.leanROverlays;
+					overlays_tilt_right = owner.leanLOverlays;
 				}
 				
 				// default still sprite
@@ -92,36 +93,36 @@ object_event_add(RadioBlur,ev_draw,0,'
 				
 				{ // detect slopes
 					var openright, openleft;
-					openright = !collision_point_solid(x+6, y+bottom_bound_offset+2) and !collision_point_solid(x+2, y+bottom_bound_offset+2);
-					openleft = !collision_point_solid(x-7, y+bottom_bound_offset+2) and !collision_point_solid(x-3, y+bottom_bound_offset+2);
+					openright = !collision_point_solid(x+6, y+owner.bottom_bound_offset+2) and !collision_point_solid(x+2, y+owner.bottom_bound_offset+2);
+					openleft = !collision_point_solid(x-7, y+owner.bottom_bound_offset+2) and !collision_point_solid(x-3, y+owner.bottom_bound_offset+2);
 					if (openright)
 					{
 						sprite = sprite_tilt_right;
-						overlayList = owner.overlays_tilt_right;
+						overlayList = owner.leanROverlays;
 					}
 					if (openleft)
 					{
 						sprite = sprite_tilt_left;
-						overlayList = owner.overlays_tilt_left;
+						overlayList = owner.leanLOverlays;
 					}
 					if (openright and openleft)
 					{
-						openright = !collision_point_solid(x+right_bound_offset, y+bottom_bound_offset+2);
-						openleft = !collision_point_solid(x-left_bound_offset, y+bottom_bound_offset+2);
+						openright = !collision_point_solid(x+owner.right_bound_offset, y+owner.bottom_bound_offset+2);
+						openleft = !collision_point_solid(x-owner.left_bound_offset, y+owner.bottom_bound_offset+2);
 						if (openright)
 						{
 							sprite = sprite_tilt_right;
-							overlayList = owner.overlays_tilt_right;
+							overlayList = owner.leanROverlays;
 						}
 						if (openleft)
 						{
 							sprite = sprite_tilt_left;
-							overlayList = owner.overlays_tilt_left;
+							overlayList = owner.leanLOverlays;
 						}
 					}
 				}
 					
-				charUnsetSolids();
+				//charUnsetSolids();
 			}
 			else
 			{
@@ -158,13 +159,16 @@ object_event_add(RadioBlur,ev_draw,0,'
 object_event_add(RadioBlur,ev_step,ev_step_end,'
 	if instance_exists(owner) {
 		charging = owner.currentWeapon.charging;
-		if /*owner.radioactive==true or*/ charging /*or owner.stomping or owner.raged*/ {
+		radioactive = owner.radioactive;
+		if radioactive or charging /*or owner.stomping or owner.raged*/ {
 		x=owner.x;
 		y=owner.y;
 		} else 
 			instance_destroy();
 	} else 
 		instance_destroy();
+	if (image_alpha <= 0.1) // dont think this works, Ill ask the fellas abt it l8r
+		instance_destroy(); // wow that is too many RadioBlurs, clean up on aisle blur
 ');
 
 object_set_parent(MeleeMask, StabMask);
