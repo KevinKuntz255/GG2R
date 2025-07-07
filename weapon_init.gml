@@ -15,7 +15,7 @@ object_event_add(Weapon,ev_create,0,'
     //t=0;
     //speedboost=0;
     //lobbed = 0;
-    
+    charging = 0;
     //spark = 0;
     //alarm[9]=2;
 
@@ -3098,7 +3098,7 @@ object_event_add(Eyelander,ev_alarm,5,'
 ');
 
 object_event_add(Eyelander,ev_step,ev_step_normal,'
-	if charging == 1 {
+	if (charging == 1) {
 		blur=instance_create(x,y,RadioBlur);
         blur.owner=owner;
 		image_speed=0.3;
@@ -3108,13 +3108,19 @@ object_event_add(Eyelander,ev_step,ev_step_normal,'
 			owner.jumpStrength = 8+(0.6/2);
             charging = 0;
         }
-		if (owner.image_xscale == -1) {
-			owner.hspeed -= 3;
-		} else if (owner.image_xscale == 1) {
-			owner.hspeed += 3;
+		if (owner.moveStatus != 4) {
+			if (owner.image_xscale == -1) {
+				owner.hspeed -= 3;
+			} else if (owner.image_xscale == 1) {
+				owner.hspeed += 3;
+			}
+		} else {
+			if (owner.image_xscale == -1) {
+				owner.hspeed -= 1;
+			} else if (owner.image_xscale == 1) {
+				owner.hspeed += 1;
+			}
 		}
-				
-			
     } else if readyToShoot {
 		owner.jumpStrength = 8+(0.6/2);
         if ammoCount < 0 ammoCount = 0;
@@ -3141,6 +3147,7 @@ object_event_add(Eyelander,ev_step,ev_step_normal,'
         else image_index = 8;
     }
 ');
+
 object_event_add(Eyelander,ev_other,ev_user1,'
     if(readyToStab && !owner.cloak){
         smashing = 1;
@@ -3154,6 +3161,7 @@ object_event_add(Eyelander,ev_other,ev_user1,'
 object_event_add(Eyelander,ev_other,ev_user2,'
     if (charging == 0 && !owner.cloak && ammoCount >= maxAmmo) {
         charging = 1;
+		owner.accel = 0;
         playsound(x,y,BallSnd);
 		if (smashing != 1) readyToStab = true;
     }

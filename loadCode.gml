@@ -21,7 +21,6 @@ Back=object_add();
 LoadoutSwitcher=object_add();
 LoadoutMenu=object_add();
 
-
 object_event_add(Back,ev_create,0,'
 	BackS = sprite_add(pluginFilePath + "\randomizer_sprites\BackS.png", 2, 0, 0, 0, 0);
 	depth = -140000;
@@ -449,7 +448,6 @@ object_event_add(LoadoutMenu, ev_keypress, vk_escape,'
 ');
 
 
-
 //Adds loadout to ingame menu
 object_event_add(InGameMenuController,ev_create,0,'
     menu_addlink("Loadout", "
@@ -458,6 +456,17 @@ object_event_add(InGameMenuController,ev_create,0,'
     ");
 ');
 
+//object_event_add(Character, ev_draw, 0, '
+//	if (currentWeapon.charging == 1 && player.class == CLASS_DEMO)  {
+//		for (i=0; i<6; i+=1) {
+//			draw_sprite_ext(sprite_index, 0 + team, x-hspeed*1.2, y-vspeed*1.2, image_xscale, 1, 0, c_white, 0.2);
+//						}
+//	}
+//');
+
+object_event_add(Character,ev_create,0,'
+	accel = 0;
+');
 object_event_clear(Character,ev_step,ev_step_end);
 object_event_add(Character,ev_step,ev_step_end,'
 	charSetSolids();
@@ -475,7 +484,23 @@ object_event_add(Character,ev_step,ev_step_end,'
 	}
 	xprevious = x;
 	yprevious = y;
+	
 
+	if(currentWeapon.charging == 1 && currentWeapon.object_index == Eyelander) {
+		if(hspeed != 0 && !place_free(x + sign(hspeed), y)) { // we hit a wall on the left or right
+            if(place_free(x + sign(hspeed), y - 6)) // if we could just walk up the step
+            {
+				playsound(x,y,PickupSnd);
+				vspeed -= 7.3 * accel;
+				//hspeed -= 5;
+				accel += 0.5;
+				if (accel > 1.3) moveStatus = 4;
+			} else {
+				accel = 0;
+			}
+		}
+	} //detected upwards slope, Fly!
+	
 	charUnsetSolids();
 
 	if(global.isHost && hp<=0) {
