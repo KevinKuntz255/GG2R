@@ -490,11 +490,12 @@ object_event_add(Character,ev_step,ev_step_end,'
 	if(currentWeapon.charging == 1 and currentWeapon.object_index == Eyelander) {
 		blur=instance_create(x,y,RadioBlur);
 		blur.owner=id;
-		if(hspeed != 0 && !place_free(x + sign(hspeed), y)) { // we hit a wall on the left or right
-            if(place_free(x + sign(hspeed), y - 6)) // if we could just walk up the step
-            {
+		// the hspeed mod is a light buff to detect more slopes
+		if(hspeed != 0 && !place_free(x + sign(hspeed*0.5), y)) { // we hit a wall on the left or right
+			if(place_free(x + sign(hspeed), y - 6)) // if we could just walk up the step
+			{
 				playsound(x,y,PickupSnd);
-				vspeed -= 7.3 * accel;
+				if (keyState & $80) vspeed -= 7.3 * accel; // hold W to fly
 				//hspeed -= 5;
 				accel += 0.5;
 				if (accel > 1.3) moveStatus = 4;
@@ -502,7 +503,9 @@ object_event_add(Character,ev_step,ev_step_end,'
 				accel = 0;
 			}
 		}
+		if (accel > 1.3 and !onground) moveStatus = 4; // bork it so youre always flyin
 	} //detected upwards slope, Fly!
+	
 	if (radioactive) {
 		blur=instance_create(x,y,RadioBlur);
 		blur.owner=id;
