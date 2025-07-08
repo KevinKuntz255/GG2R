@@ -1565,7 +1565,7 @@ object_event_add(MadMilk,ev_other,ev_user2,'
 
 	repeat(15*global.gibLevel){
 		var blood;
-		blood = instance_create(x+random(20)-10,y+random(20)-10,Milk);
+		//blood = instance_create(x+random(20)-10,y+random(20)-10,Milk);
 		blood.direction = random(360);
 		blood.speed=random(5);
 	}
@@ -1649,14 +1649,35 @@ object_event_add(NapalmGrenade,ev_draw,0,'
     draw_sprite_ext(sprite_index,0,x,y,image_xscale,image_yscale,image_angle,color,1);
 ');
 
+object_event_add(Rocket,ev_collision,Character,'
+    if other.team != team {
+        if owner.weapons[0] >= WEAPON_BLACKBOX && ownerPlayer.object != -1
+			ownerPlayer.object.hp=min(ownerPlayer.object.hp+15,ownerPlayer.object.maxHp);
+    }
+	// somehow, healing on knockback is detected here, test later!!
+	//if (distance_to_object(other) < blastRadius)
+	//{
+			//playsound(x,y,PickupSnd);
+	//}
+');
 object_event_add(Rocket,ev_other,ev_user5,'
-	if(characterHit != -1) {
-		if(characterHit.team != team)
-		{
-			if (owner.weapons[0] >= WEAPON_BLACKBOX) {
-				playsound(x,y,PickupSnd);
-				owner.hp += 20;
+		/*if(characterHit != -1) {
+			if(characterHit.team != team)
+			{
+				if (owner.weapons[0] >= WEAPON_BLACKBOX) {
+					//playsound(x,y,PickupSnd);
+					owner.hp += 15;
+				}
 			}
-		}
-	}
+		} alt heal code
+		// this code to detect knockback healing doesnt work
+		/*with (Character) {
+			if (distance_to_object(other) <= other.blastRadius and !(team == other.team and id != other.ownerPlayer.object and place_meeting(x, y+1, Obstacle)))
+			{
+				if distance_to_object(other) <= other.blastRadius and other.team != team && !ubered and hp > 0 && true
+				{
+					playsound(x,y,PickupSnd);
+				}
+			}
+		}*/
 ');
