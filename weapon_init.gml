@@ -3235,12 +3235,16 @@ object_event_add(Eyelander,ev_other,ev_user1,'
         playsound(x,y,swingSnd);
 	}
 ');
+globalvar ChargeSnd1, ChargeSnd2, ChargeSnd3;
+ChargeSnd1 = sound_add(directory + '/randomizer_sounds/ChargeSnd1.wav', 0, 1);
+ChargeSnd2 = sound_add(directory + '/randomizer_sounds/ChargeSnd2.wav', 0, 1);
+ChargeSnd3 = sound_add(directory + '/randomizer_sounds/ChargeSnd3.wav', 0, 1);
 object_event_add(Eyelander,ev_other,ev_user2,'
     if (charging == 0 && !owner.cloak && ammoCount >= maxAmmo) {
         charging = 1;
 		owner.accel = 0;
 		owner.moveStatus = 0;
-        playsound(x,y,BallSnd);
+        playsound(x,y,choose(ChargeSnd1, ChargeSnd2,ChargeSnd3));
 		if (smashing != 1) readyToStab = true;
     }
 ');
@@ -7673,10 +7677,12 @@ object_event_add(Flaregun,ev_create,0,'
 object_event_add(Flaregun,ev_alarm,5,'
     ammoCount = maxAmmo;
 ');
+globalvar FlaregunSnd;
+FlaregunSnd = sound_add(directory + '/randomizer_sounds/FlaregunSnd.wav', 0, 1);
 object_event_add(Flaregun,ev_other,ev_user1,'
     if(readyToShoot && ammoCount >0 && !owner.cloak) {
         ammoCount-=1;
-            //playsound(x,y,FlaregunSnd); This sound is actually painful im not turnin dat on
+            playsound(x,y,FlaregunSnd);
             var shot;
             if !collision_line(x,y,x+lengthdir_x(15,owner.aimDirection),y+lengthdir_y(15,owner.aimDirection),Obstacle,1,0) and !place_meeting(x+lengthdir_x(15,owner.aimDirection),y+lengthdir_y(15,owner.aimDirection),TeamGate) {
                 shot = instance_create(x+lengthdir_x(13,owner.aimDirection),y+lengthdir_y(13,owner.aimDirection),Flare);
@@ -7729,7 +7735,7 @@ object_event_add(Detonator,ev_alarm,5,'
 object_event_add(Detonator,ev_other,ev_user1,'
     if(readyToShoot && ammoCount >0 && !owner.cloak) {
         ammoCount-=1;
-            //playsound(x,y,FlaregunSnd);
+			playsound(x,y,FlaregunSnd);
             var shot;
             if !collision_line(x,y,x+lengthdir_x(15,owner.aimDirection),y+lengthdir_y(15,owner.aimDirection),Obstacle,1,0) and !place_meeting(x+lengthdir_x(15,owner.aimDirection),y+lengthdir_y(15,owner.aimDirection),TeamGate) {
                 shot = instance_create(x+lengthdir_x(13,owner.aimDirection),y+lengthdir_y(13,owner.aimDirection),DetonationFlare);
