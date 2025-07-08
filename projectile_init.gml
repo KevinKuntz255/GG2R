@@ -1565,7 +1565,7 @@ object_event_add(MadMilk,ev_other,ev_user2,'
 
 	repeat(15*global.gibLevel){
 		var blood;
-		//blood = instance_create(x+random(20)-10,y+random(20)-10,Milk);
+		blood = instance_create(x+random(20)-10,y+random(20)-10,/*Milk*/Blood);
 		blood.direction = random(360);
 		blood.speed=random(5);
 	}

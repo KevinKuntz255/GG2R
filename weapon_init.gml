@@ -3236,9 +3236,9 @@ object_event_add(Eyelander,ev_other,ev_user1,'
 	}
 ');
 globalvar ChargeSnd1, ChargeSnd2, ChargeSnd3;
-ChargeSnd1 = sound_add(directory + '/randomizer_sounds/ChargeSnd1.wav', 0, 1);
-ChargeSnd2 = sound_add(directory + '/randomizer_sounds/ChargeSnd2.wav', 0, 1);
-ChargeSnd3 = sound_add(directory + '/randomizer_sounds/ChargeSnd3.wav', 0, 1);
+ChargeSnd1 = sound_add(directory + '/randomizer_sounds/DetoCharge1Snd.wav', 0, 1);
+ChargeSnd2 = sound_add(directory + '/randomizer_sounds/DetoCharge2Snd.wav', 0, 1);
+ChargeSnd3 = sound_add(directory + '/randomizer_sounds/DetoCharge3Snd.wav', 0, 1);
 object_event_add(Eyelander,ev_other,ev_user2,'
     if (charging == 0 && !owner.cloak && ammoCount >= maxAmmo) {
         charging = 1;
