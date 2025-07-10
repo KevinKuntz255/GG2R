@@ -470,6 +470,7 @@ object_event_add(Character,ev_create,0,'
 	blurs = 0;
 	curMeter = 0;
 	player.activeWeapon=-1;
+	player.playerLoadout=-1;
 ');
 
 object_event_clear(Character,ev_step,ev_step_end);

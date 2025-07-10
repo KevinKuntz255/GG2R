@@ -6393,7 +6393,8 @@ object_event_add(Phlog,ev_other,ev_user1,'
                             text=sprite_index = MissS
                         } else {
                             //other.ownerPlayer.object.phlogDmg+=other.hitDamage*(1+0*0.35)*1; //other.crit
-                            if !object.invincible object.hp -= other.hitDamage*(1+0*0.35)*1; //other.crit
+                            //if !object.invincible// object.hp -= other.hitDamage*(1+0*0.35)*1; //other.crit
+                            object.hp -= other.hitDamage*(1+0*0.35)*1; //other.crit
                             //object.lastDamageCrit=other.crit;
                             object.timeUnscathed = 0;
                             if (object.lastDamageDealer != other.ownerPlayer && object.lastDamageDealer != object.player){
@@ -6407,7 +6408,8 @@ object_event_add(Phlog,ev_other,ev_user1,'
                             blood = instance_create(object.x,object.y,Blood);
                             blood.direction = other.owner.aimDirection-180;
                         }*/
-                        if(!object_is_ancestor(object.object_index, Pyro) && !object.invincible) {
+                        //if(!object_is_ancestor(object.object_index, Pyro) && /*!object.invincible*/ ) {
+                        if(!object_is_ancestor(object.object_index, Pyro)) {
                             //object.frozen = false;
                             if (object.burnDuration < object.maxDuration) {
                                 object.burnDuration += other.durationIncrease; 
