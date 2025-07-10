@@ -18,11 +18,14 @@ object_event_add(Weapon,ev_create,0,'
     charging = 0;
     //spark = 0;
     //alarm[9]=2;
-
+	baseDamage=-1; // stops crashing when youre zooming in
     isMelee = false;
-	
+	isMeter = false; // introducing meters
+	meterName ="";
+	maxMeter=-1;
+	meterCount=-1;
+
 	playsound(x,y,SwitchSnd);
-	with(RadioBlur) instance_destroy();
 ');
 
 
@@ -611,6 +614,7 @@ object_event_add(BonkHand,ev_alarm,6,'
 ');
 object_event_add(BonkHand,ev_alarm,10,'
     owner.radioactive = false;
+	playsound(x,y,BallSnd);
 ');
 object_event_add(BonkHand,ev_step,ev_step_normal,'
     image_index = owner.team+2*real(ammoCount);
@@ -884,6 +888,27 @@ object_event_add(MadmilkHand,ev_other,ev_user1,'
 		playsound(x,y,swingSnd);
 		alarm[5] = reloadBuffer + reloadTime;
         owner.ammo[105] = -1;
+    }
+');
+object_event_add(MadmilkHand,ev_draw,0,'
+    if (distance_to_point(view_xview + view_wview/2, view_yview + view_hview/2) > 800)
+        exit;
+
+    if (!owner.invisible and !owner.taunting and !owner.player.humiliated)
+    {
+        if (!owner.cloak)
+            image_alpha = power(owner.cloakAlpha, 0.5);
+        else
+            image_alpha = power(owner.cloakAlpha, 2);
+        draw_sprite_ext(sprite_index, image_index, round(x+xoffset*image_xscale), round(y+yoffset) + owner.equipmentOffset, image_xscale, image_yscale, image_angle, c_white, image_alpha);
+        if (owner.ubered)
+        {
+            if (owner.team == TEAM_RED)
+                ubercolour = c_red;
+            else if (owner.team == TEAM_BLUE)
+                ubercolour = c_blue;
+            draw_sprite_ext(sprite_index, image_index, round(x+xoffset*image_xscale), round(y+yoffset) + owner.equipmentOffset, image_xscale, image_yscale, image_angle, ubercolour, 0.7*image_alpha);
+        }
     }
 ');
 WEAPON_ATOMIZER = 9;
@@ -1446,6 +1471,7 @@ object_event_add(SoldierShotgun,ev_other,ev_user3,'
     alarm[5] = (reloadBuffer + reloadTime) / global.delta_factor;
     alarm[7] = alarm[0] / 2;
 ');
+// Introduce Metered weapons
 WEAPON_BUFFBANNER = 16;
 BuffBanner = object_add();
 object_set_parent(BuffBanner, Weapon);
@@ -1454,7 +1480,9 @@ object_event_add(BuffBanner,ev_create,0,'
     yoffset=-9;
     refireTime=18;
     event_inherited();
-    maxAmmo = 4;
+    maxAmmo = 4; // this dont matter
+	maxMeter = 4;
+	meterCount = 0;
     ammoCount = 0;
     reloadTime = 500;
     reloadBuffer = 18;
@@ -1462,6 +1490,21 @@ object_event_add(BuffBanner,ev_create,0,'
     readyToStab=false;
     image_speed = 0;
     unscopedDamage = 0;
+	isMelee = true;
+	isMeter = true;
+	
+	normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\BuffBannerS.png", 2, 1, 0, 0, 0);
+    recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\BuffBannerS.png", 2, 1, 0, 0, 0);
+    reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\BuffBannerS.png", 2, 1, 0, 0, 0);
+
+    sprite_index = normalSprite;
+
+    recoilTime = refireTime;
+    recoilAnimLength = sprite_get_number(recoilSprite)/2;
+    recoilImageSpeed = recoilAnimLength/recoilTime;
+
+    reloadAnimLength = sprite_get_number(reloadSprite)/2;
+    reloadImageSpeed = reloadAnimLength/reloadTime;
 ');
 WEAPON_RBISON = 17;
 RBison = object_add();
@@ -3173,7 +3216,7 @@ object_event_add(Eyelander,ev_step,ev_step_normal,'
 	if (charging == 1) {
 		image_speed=0.3;
         owner.jumpStrength = 0;
-        ammoCount -= 2;
+        if (owner.moveStatus != 4) ammoCount -= 2; else if (owner.moveStatus == 4) ammoCount -= 0.8; // lol, I am crazy for this one
         if ammoCount <= 0 {
 			owner.jumpStrength = 8+(0.6/2);
             charging = 0;
@@ -3244,7 +3287,8 @@ object_event_add(Eyelander,ev_other,ev_user2,'
         charging = 1;
 		owner.accel = 0;
 		owner.moveStatus = 0;
-        playsound(x,y,choose(ChargeSnd1, ChargeSnd2,ChargeSnd3));
+		owner.vspeed -= 0.15; // jerry-rigging consistency in charging by makin u slightly jumped
+        //playsound(x,y,choose(ChargeSnd1, ChargeSnd2,ChargeSnd3));
 		if (smashing != 1) readyToStab = true;
     }
 ');
@@ -3775,7 +3819,8 @@ object_event_add(Wrench,ev_create,0,'
     readyToStab = false;
     alarm[2] = 15;
     smashing = false;
-
+	isMelee = true;
+	
     stabdirection=0;
     maxAmmo = 100;
     ammoCount = maxAmmo;

@@ -166,11 +166,8 @@ object_event_add(RadioBlur,ev_step,ev_step_end,'
 		} else {
 			instance_destroy();
 		}
-		if (x <= owner.x + sign(owner.hspeed)) instance_destroy();
 	} else 
 		instance_destroy();
-	if (image_alpha <= 0.1) // dont think this works, Ill ask the fellas abt it l8r
-		instance_destroy(); // wow that is too many RadioBlurs, clean up on aisle blur
 ');
 
 object_set_parent(MeleeMask, StabMask);
@@ -1434,7 +1431,8 @@ object_event_add(MadMilk,ev_create,0,'
         exploded = false;
         bubbled = false;
         reflector = noone;
-        alarm[2]=30*15;
+        alarm[1]=29;
+        alarm[2]=60;
         hfric=0.5;
         rotfric=0.7;
         rotspeed=random(20)-10;
@@ -1494,9 +1492,28 @@ object_event_add(MadMilk,ev_collision,Character,'
 
 	event_user(2);
 ');
+object_event_add(MadMilk,ev_collision,Obstacle,'
+    move_contact_solid(point_direction(x,y,x+hspeed,y+vspeed), speed);
+	if(not place_free(x,y+sign(vspeed))) {
+		vspeed*=-0.4;
+		if(not place_free(x+hspeed,y)){
+			move_contact_solid(point_direction(x,y,x+hspeed,y+vspeed), speed);
+			hspeed*=-0.4;
+		}
+	}
+	if(not place_free(x+sign(hspeed),y)){
+		hspeed*=-0.4;
+		if(not place_free(x,y+vspeed)) {
+			move_contact_solid(point_direction(x,y,x+hspeed,y+vspeed), speed);
+			vspeed*=-0.4;
+		}
+	}
+
+	event_user(2);
+');
 object_event_add(MadMilk,ev_collision,TeamGate,'
     {
-    instance_destroy()
+		instance_destroy()
         // speed = 0;
            // stickied = true;
     }
@@ -1610,10 +1627,10 @@ object_event_add(MadMilk,ev_draw,0,'
             a += 1;
         }   
     }
-    //draw_sprite_ext(sprite_index,image_index,x,y,1,1,0,c_white,image_alpha);
-	if team == TEAM_RED color = c_orange;
-	else color = c_aqua;   
-    draw_sprite_ext(sprite_index,0,x,y,image_xscale,image_yscale,image_angle,color,1);
+    draw_sprite_ext(sprite_index,image_index,x,y,1,1,image_angle,c_white,image_alpha);
+	//if team == TEAM_RED color = c_orange;
+	//else color = c_aqua;   
+    //draw_sprite_ext(sprite_index,0,x,y,image_xscale,image_yscale,image_angle,color,1);
 ');
 
 globalvar NapalmGrenade;
@@ -1671,7 +1688,7 @@ object_event_add(Rocket,ev_other,ev_user5,'
 			}
 		} alt heal code
 		// this code to detect knockback healing doesnt work
-		/*with (Character) {
+		with (Character) {
 			if (distance_to_object(other) <= other.blastRadius and !(team == other.team and id != other.ownerPlayer.object and place_meeting(x, y+1, Obstacle)))
 			{
 				if distance_to_object(other) <= other.blastRadius and other.team != team && !ubered and hp > 0 && true
