@@ -304,7 +304,7 @@ object_event_add(MeleeMask,ev_collision,Sentry,'
         else
             alarm[0] = 1;
     } else if weapon == WEAPON_WRENCH or weapon == WEAPON_EUREKAEFFECT {
-        if other.sapped > 0 {
+        /*if other.sapped > 0 {
             if global.isHost {
                 other.sapped-=2*crit;
                 if other.sapped <= 0 {
@@ -343,9 +343,9 @@ object_event_add(MeleeMask,ev_collision,Sentry,'
                 playsound(x,y,MeleeHitMapSnd);
             } else playsound(x,y,WrenchFailSnd);
         } else playsound(x,y,WrenchFailSnd);
-        instance_destroy();
+        instance_destroy();*/
     } else if weapon == WEAPON_WRECKER && other.sapped > 0 {
-        if global.isHost {
+        /*if global.isHost {
             other.sapped-=2*crit;
             if other.sapped <= 0 {
                 other.sapped = 0;
@@ -353,7 +353,7 @@ object_event_add(MeleeMask,ev_collision,Sentry,'
                 write_ubyte(global.eventBuffer, ds_list_find_index(global.players,other.ownerPlayer));
             }
         }
-        playsound(x,y,MeleeHitMapSnd);
+        playsound(x,y,MeleeHitMapSnd);*/
     }
 ');
 object_event_add(MeleeMask,ev_collision,Generator,'
@@ -1698,3 +1698,17 @@ object_event_add(Rocket,ev_other,ev_user5,'
 			}
 		}*/
 ');
+
+// Use the damage API
+// does not work, idk why
+global.dealDamageFunction += '
+    if (argument1 != noone && instance_exists(argument1)) {
+	
+        //if (argument1.object_index == Player) {
+		//	if (argument1.radioactive) {
+		//		argument1.object.hp += argument2;
+		//		playsound(x,y,PickupSnd);
+		//	}
+		//}
+	}
+';

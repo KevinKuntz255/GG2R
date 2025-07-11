@@ -1030,17 +1030,17 @@ global.name[WEAPON_FAN] = "Force A Nature";
 global.weapons[WEAPON_RUNDOWN] = Rundown;
 global.name[WEAPON_RUNDOWN] = "Shortstop";
 global.weapons[WEAPON_SODAPOPPER] = SodaPopper;
-global.name[WEAPON_SODAPOPPER] = "Sodapopper";
+global.name[WEAPON_SODAPOPPER] = "Sodapopper (unfinished)";
 global.weapons[WEAPON_FLASHLIGHT] = Lasergun;
 global.name[WEAPON_FLASHLIGHT] = "Flashlight";
 global.weapons[WEAPON_PISTOL] = Pistol;
 global.name[WEAPON_PISTOL] = "Pistol";
 global.weapons[WEAPON_BONK] = BonkHand;
-global.name[WEAPON_BONK] = "Bonk! Atomic punch";
+global.name[WEAPON_BONK] = "Bonk! Atomic punch (unfinished)";
 global.weapons[WEAPON_SANDMAN] = Sandman;
-global.name[WEAPON_SANDMAN] = "Sandman";
+global.name[WEAPON_SANDMAN] = "Sandman (unfinished)";
 global.weapons[WEAPON_MADMILK] = MadmilkHand;
-global.name[WEAPON_MADMILK] = "Madmilk";
+global.name[WEAPON_MADMILK] = "Madmilk (unfinished)";
 global.weapons[WEAPON_ATOMIZER] = Atomizer;
 global.name[WEAPON_ATOMIZER] = "Atomizer";
 
@@ -1775,7 +1775,7 @@ global.name[WEAPON_ROCKETLAUNCHER] = "Rocketlauncher";
 global.weapons[WEAPON_DIRECTHIT] = DirectHit;
 global.name[WEAPON_DIRECTHIT] = "Direct Hit"
 global.weapons[WEAPON_COWMANGLER] = CowMangler;
-global.name[WEAPON_COWMANGLER] = "Cow Mangler 5000";
+global.name[WEAPON_COWMANGLER] = "Cow Mangler 5000 (unfinished)";
 global.weapons[WEAPON_BLACKBOX] = BlackBox;
 global.name[WEAPON_BLACKBOX] = "Black Box";
 global.weapons[WEAPON_AIRSTRIKE] = Airstrike;
@@ -1783,13 +1783,13 @@ global.name[WEAPON_AIRSTRIKE] = "Airstrike";
 global.weapons[WEAPON_SOLDIERSHOTGUN] = SoldierShotgun;
 global.name[WEAPON_SOLDIERSHOTGUN] = "Shotgun";
 global.weapons[WEAPON_BUFFBANNER] = BuffBanner;
-global.name[WEAPON_BUFFBANNER] = "Buff Banner";
+global.name[WEAPON_BUFFBANNER] = "Buff Banner (spriteonly)";
 global.weapons[WEAPON_RBISON] = RBison;
 global.name[WEAPON_RBISON] = "Righteous Bison";
 global.weapons[WEAPON_EQUALIZER] = Shovel;
 global.name[WEAPON_EQUALIZER] = "Equalizer";
 global.weapons[WEAPON_RESERVESHOOTER] = Reserveshooter;
-global.name[WEAPON_RESERVESHOOTER] = "Reserve Shooter";
+global.name[WEAPON_RESERVESHOOTER] = "Reserve Shooter (unfinished)";
 
 // Sniper
 globalvar WEAPON_RIFLE, WEAPON_BAZAARBARGAIN, WEAPON_HUNTSMAN, WEAPON_MACHINA, WEAPON_SYDNEYSLEEPER, WEAPON_SMG, WEAPON_JARATE, WEAPON_KUKRI, WEAPON_SHIV, WEAPON_BOOTS;
@@ -3013,23 +3013,23 @@ WEAPON_BOOTS = 29;
 global.weapons[WEAPON_RIFLE] = Rifle;
 global.name[WEAPON_RIFLE] = "Sniper Rifle"
 global.weapons[WEAPON_BAZAARBARGAIN] = BazaarBargain;
-global.name[WEAPON_BAZAARBARGAIN] = "Bazaar Bargain";
+global.name[WEAPON_BAZAARBARGAIN] = "Bazaar Bargain (unfinished)";
 global.weapons[WEAPON_HUNTSMAN] = HuntsMan;
 global.name[WEAPON_HUNTSMAN] = "Huntsman";
 global.weapons[WEAPON_MACHINA] = Machina;
-global.name[WEAPON_MACHINA] = "Machina";
+global.name[WEAPON_MACHINA] = "Machina (unfinished)";
 global.weapons[WEAPON_SYDNEYSLEEPER] = SydneySleeper;
-global.name[WEAPON_SYDNEYSLEEPER] = "Sydney Sleeper";
+global.name[WEAPON_SYDNEYSLEEPER] = "Sydney Sleeper (unfinished)";
 global.weapons[WEAPON_SMG] = Smg;
 global.name[WEAPON_SMG] = "SMG";
 global.weapons[WEAPON_JARATE] = JarateHand;
-global.name[WEAPON_JARATE] = "Jarate";
+global.name[WEAPON_JARATE] = "Jarate (unimplemented)";
 global.weapons[WEAPON_KUKRI] = Kukri;
-global.name[WEAPON_KUKRI] = "Kukri & Darwin's Danger Shield";
+global.name[WEAPON_KUKRI] = "Kukri & Darwin's Danger Shield (unfinished)";
 global.weapons[WEAPON_SHIV] = Shiv;
-global.name[WEAPON_SHIV] = "Tribalman's Shiv & Razorback";
+global.name[WEAPON_SHIV] = "Tribalman's Shiv & Razorback (unfinished)";
 global.weapons[WEAPON_BOOTS] = Shiv;
-global.name[WEAPON_BOOTS] = "Rocket Boots";
+global.name[WEAPON_BOOTS] = "Rocket Boots (unimplemented)";
 
 // Demoman
 globalvar WEAPON_MINEGUN, WEAPON_TIGERUPPERCUT, WEAPON_SCOTTISHRESISTANCE, WEAPON_STICKYJUMPER, WEAPON_STICKYSTICKER, WEAPON_GRENADELAUNCHER, WEAPON_DOUBLETROUBLE, WEAPON_EYELANDER, WEAPON_PAINTRAIN, WEAPON_GRENADE;
@@ -3181,6 +3181,20 @@ object_event_add(Eyelander,ev_create,0,'
 
     reloadAnimLength = sprite_get_number(reloadSprite)/2;
     reloadImageSpeed = reloadAnimLength/reloadTime;
+');
+object_event_add(Eyelander,ev_destroy,0,'
+	with (MeleeMask) {
+        if (ownerPlayer == other.ownerPlayer) {
+            instance_destroy();
+        }
+    }
+	with(RadioBlur) {
+		if (owner == other.owner) {
+            instance_destroy();
+        }
+	}
+	charging = 0;
+	owner.jumpStrength = 8+(0.6/2);
 ');
 object_event_add(Eyelander,ev_alarm,1,'
     { 
@@ -3427,23 +3441,23 @@ object_event_add(GrenadeHand,ev_create,0,'
 global.weapons[WEAPON_MINEGUN] = Minegun;
 global.name[WEAPON_MINEGUN] = "Minegun";
 global.weapons[WEAPON_TIGERUPPERCUT] = TigerUppercut;
-global.name[WEAPON_TIGERUPPERCUT] = "Tiger Uppercut";
+global.name[WEAPON_TIGERUPPERCUT] = "Tiger Uppercut (unimplemented)";
 global.weapons[WEAPON_SCOTTISHRESISTANCE] = ScottishResitance;
-global.name[WEAPON_SCOTTISHRESISTANCE] = "Scottish Resistance";
+global.name[WEAPON_SCOTTISHRESISTANCE] = "Scottish Resistance (unimplemented)";
 global.weapons[WEAPON_STICKYJUMPER] = StickyJumper;
-global.name[WEAPON_STICKYJUMPER] = "Sticky Jumper";
+global.name[WEAPON_STICKYJUMPER] = "Sticky Jumper (unimplemented)";
 global.weapons[WEAPON_STICKYSTICKER] = Stickysticker;
-global.name[WEAPON_STICKYSTICKER] = "Stucky Charm";
+global.name[WEAPON_STICKYSTICKER] = "Stucky Charm (unimplemented)";
 global.weapons[WEAPON_GRENADELAUNCHER] = GrenadeLauncher;
-global.name[WEAPON_GRENADELAUNCHER] = "Grenade Launcher";
+global.name[WEAPON_GRENADELAUNCHER] = "Grenade Launcher (unimplemented)";
 global.weapons[WEAPON_DOUBLETROUBLE] = DoubleTrouble;
-global.name[WEAPON_DOUBLETROUBLE] = "Double Trouble";
+global.name[WEAPON_DOUBLETROUBLE] = "Double Trouble (unimplemented)";
 global.weapons[WEAPON_EYELANDER] = Eyelander;
 global.name[WEAPON_EYELANDER] = "Eyelander";
 global.weapons[WEAPON_PAINTRAIN] = Paintrain;
 global.name[WEAPON_PAINTRAIN] = "Paintrain";
 global.weapons[WEAPON_GRENADE] = GrenadeHand;
-global.name[WEAPON_GRENADE] = "Hand Grenade";
+global.name[WEAPON_GRENADE] = "Hand Grenade (unimplemented)";
 
 // Medic
 globalvar WEAPON_NEEDLEGUN, WEAPON_BLUTSAUGER, WEAPON_TERMINALBREATH, WEAPON_CROSSBOW, WEAPON_OVERDOSE, WEAPON_MEDIGUN, WEAPON_KRITSKRIEG, WEAPON_QUICKFIX, WEAPON_OVERHEALER, WEAPON_POTION;
@@ -3589,6 +3603,80 @@ object_event_add(Ubersaw,ev_create,0,'
     unscopedDamage = 0;
 	// TEMP
 	healTarget = noone;
+	
+	isMelee = true;
+	normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\UbersawS.png", 2, 1, 0, 0, 0);
+    recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\UbersawFS.png", 8, 1, 0, 0, 0);
+    reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\UbersawS.png", 2, 1, 0, 0, 0);
+
+    sprite_index = normalSprite;
+
+    recoilTime = refireTime;
+    recoilAnimLength = sprite_get_number(recoilSprite)/2;
+    recoilImageSpeed = recoilAnimLength/recoilTime;
+
+    reloadAnimLength = sprite_get_number(reloadSprite)/2;
+    reloadImageSpeed = reloadAnimLength/reloadTime;
+');
+object_event_add(Ubersaw,ev_destroy,0,'
+    with (MeleeMask) {
+        if (ownerPlayer == other.ownerPlayer) {
+            instance_destroy();
+        }
+    }
+');
+object_event_add(Ubersaw,ev_alarm,1,'
+    { 
+        shot = instance_create(x,y,MeleeMask);
+        shot.direction=owner.aimDirection;
+        shot.speed=owner.speed;
+        shot.owner=owner;
+        shot.ownerPlayer=ownerPlayer;
+        shot.team=owner.team;
+        shot.hitDamage = 35;
+        shot.weapon=WEAPON_WRENCH;
+        //Removed crit thing here
+        alarm[2] = 10;
+    }
+');
+object_event_add(Ubersaw,ev_alarm,2,'
+    {
+    readyToStab = true;
+    }
+');
+object_event_add(Ubersaw,ev_alarm,5,'
+    ammoCount = 1;
+');
+object_event_add(Ubersaw,ev_step,ev_step_normal,'
+    if smashing {
+        image_speed=0.3;
+        if 1 != 1 { //Removed crit here
+            if image_index >= 11{
+                image_speed=0;
+                image_index=8;
+                stabbing = false;
+            } 
+        } else if image_index >= 4*owner.team+3 {
+            image_speed=0;
+            image_index=4*owner.team;
+            stabbing = false;
+        }    
+    } else {
+        if 1 <= 1  image_index=4*owner.team;
+        else image_index = 8;
+    }
+');
+object_event_add(Ubersaw,ev_other,ev_user1,'
+    if(readyToStab && !owner.cloak){
+        //owner.runPower = 0;
+        //owner.jumpStrength = 0;
+        smashing = 1;
+
+        justShot=true;
+        readyToStab = false;
+        alarm[1] = StabreloadTime / global.delta_factor;
+        playsound(x,y,swingSnd);
+    }
 ');
 WEAPON_MEDIGUN = 45;
 WEAPON_KRITSKRIEG = 46;
@@ -3692,25 +3780,25 @@ object_event_add(Brewinggun,ev_create,0,'
 ');
 
 global.weapons[WEAPON_NEEDLEGUN] = Needlegun;
-global.name[WEAPON_NEEDLEGUN] = "Needlegun";
+global.name[WEAPON_NEEDLEGUN] = "Needlegun (unimplemented)";
 global.weapons[WEAPON_BLUTSAUGER] = Blutsauger;
-global.name[WEAPON_BLUTSAUGER] = "Blutsauger";
+global.name[WEAPON_BLUTSAUGER] = "Blutsauger (unimplemented)";
 global.weapons[WEAPON_TERMINALBREATH] = TerminalBreath;
-global.name[WEAPON_TERMINALBREATH] = "Terminal Breath";
+global.name[WEAPON_TERMINALBREATH] = "Terminal Breath (unimplemented)";
 global.weapons[WEAPON_CROSSBOW] = Crossbow;
-global.name[WEAPON_CROSSBOW] = "Crusader's Crossbow";
+global.name[WEAPON_CROSSBOW] = "Crusader's Crossbow (unimplemented)";
 global.weapons[WEAPON_OVERDOSE] = Ubersaw;
-global.name[WEAPON_OVERDOSE] = "Ubersaw";
+global.name[WEAPON_OVERDOSE] = "Ubersaw (unfinished)";
 global.weapons[WEAPON_MEDIGUN] = Medigun;
 global.name[WEAPON_MEDIGUN] = "Medigun"
 global.weapons[WEAPON_KRITSKRIEG] = Kritzieg;
-global.name[WEAPON_KRITSKRIEG] = "Kritzkrieg"
+global.name[WEAPON_KRITSKRIEG] = "Kritzkrieg (unimplemented)"
 global.weapons[WEAPON_QUICKFIX] = QuickFix;
-global.name[WEAPON_QUICKFIX] = "Quickfix";
+global.name[WEAPON_QUICKFIX] = "Quickfix (unimplemented)";
 global.weapons[WEAPON_OVERHEALER] = Overhealer;
-global.name[WEAPON_OVERHEALER] = "Overhealer";
+global.name[WEAPON_OVERHEALER] = "Overhealer (unimplemented)";
 global.weapons[WEAPON_POTION] = Brewinggun;
-global.name[WEAPON_POTION] = "Holy Water";
+global.name[WEAPON_POTION] = "Holy Water (unimplemented)";
 
 // Engineer
 globalvar WEAPON_SHOTGUN, WEAPON_FRONTIERJUSTICE, WEAPON_SHERIFF, WEAPON_POMSON, WEAPON_WIDOWMAKER, WEAPON_NAILGUN, WEAPON_STUNGUN, WEAPON_WRENCH, WEAPON_WRANGLER, WEAPON_EUREKAEFFECT;
@@ -3829,7 +3917,82 @@ object_event_add(Wrench,ev_create,0,'
     idle=true;
     cooldown = 0;
     unscopedDamage = 0;
+	
+	isMelee = true;
+	normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\WrenchS.png", 2, 1, 0, 0, 0);
+    recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\WrenchFS.png", 8, 1, 0, 0, 0);
+    reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\WrenchS.png", 2, 1, 0, 0, 0);
+
+    sprite_index = normalSprite;
+
+    recoilTime = refireTime;
+    recoilAnimLength = sprite_get_number(recoilSprite)/2;
+    recoilImageSpeed = recoilAnimLength/recoilTime;
+
+    reloadAnimLength = sprite_get_number(reloadSprite)/2;
+    reloadImageSpeed = reloadAnimLength/reloadTime;
 ');
+object_event_add(Wrench,ev_destroy,0,'
+    with (MeleeMask) {
+        if (ownerPlayer == other.ownerPlayer) {
+            instance_destroy();
+        }
+    }
+');
+object_event_add(Wrench,ev_alarm,1,'
+    { 
+        shot = instance_create(x,y,MeleeMask);
+        shot.direction=owner.aimDirection;
+        shot.speed=owner.speed;
+        shot.owner=owner;
+        shot.ownerPlayer=ownerPlayer;
+        shot.team=owner.team;
+        shot.hitDamage = 35;
+        shot.weapon=WEAPON_WRENCH;
+        //Removed crit thing here
+        alarm[2] = 10;
+    }
+');
+object_event_add(Wrench,ev_alarm,2,'
+    {
+    readyToStab = true;
+    }
+');
+object_event_add(Wrench,ev_alarm,5,'
+    ammoCount = 1;
+');
+object_event_add(Wrench,ev_step,ev_step_normal,'
+    if smashing {
+        image_speed=0.3;
+        if 1 != 1 { //Removed crit here
+            if image_index >= 11{
+                image_speed=0;
+                image_index=8;
+                stabbing = false;
+            } 
+        } else if image_index >= 4*owner.team+3 {
+            image_speed=0;
+            image_index=4*owner.team;
+            stabbing = false;
+        }    
+    } else {
+        if 1 <= 1  image_index=4*owner.team;
+        else image_index = 8;
+    }
+');
+object_event_add(Wrench,ev_other,ev_user1,'
+    if(readyToStab && !owner.cloak){
+        //owner.runPower = 0;
+        //owner.jumpStrength = 0;
+        smashing = 1;
+
+        justShot=true;
+        readyToStab = false;
+        alarm[1] = StabreloadTime / global.delta_factor;
+        playsound(x,y,swingSnd);
+    }
+');
+
 WEAPON_WRANGLER = 58;
 Wrangler = object_add();
 object_set_parent(Wrangler, Weapon);
@@ -3871,23 +4034,23 @@ object_event_add(Eeffect,ev_create,0,'
 global.weapons[WEAPON_SHOTGUN] = Shotgun;
 global.name[WEAPON_SHOTGUN] = "Shotgun"
 global.weapons[WEAPON_FRONTIERJUSTICE] = FrontierJustice;
-global.name[WEAPON_FRONTIERJUSTICE] = "Frontier Justice";
+global.name[WEAPON_FRONTIERJUSTICE] = "Frontier Justice (unimplemented)";
 global.weapons[WEAPON_SHERIFF] = Sheriff;
-global.name[WEAPON_SHERIFF] = "The Sheriff";
+global.name[WEAPON_SHERIFF] = "The Sheriff (unimplemented)";
 global.weapons[WEAPON_POMSON] = Pumson;
-global.name[WEAPON_POMSON] = "Pomson 6000";
+global.name[WEAPON_POMSON] = "Pomson 6000 (unimplemented)";
 global.weapons[WEAPON_WIDOWMAKER] = Widowmaker;
-global.name[WEAPON_WIDOWMAKER] = "Widowmaker";
+global.name[WEAPON_WIDOWMAKER] = "Widowmaker (unimplemented)";
 global.weapons[WEAPON_NAILGUN] = Nailgun;
-global.name[WEAPON_NAILGUN] = "Nailgun";
+global.name[WEAPON_NAILGUN] = "Nailgun (unimplemented)";
 global.weapons[WEAPON_STUNGUN] = Stungun;
-global.name[WEAPON_STUNGUN] = "Stungun";
+global.name[WEAPON_STUNGUN] = "Stungun (unimplemented)";
 global.weapons[WEAPON_WRENCH] = Wrench;
-global.name[WEAPON_WRENCH] = "Wrench";
+global.name[WEAPON_WRENCH] = "Wrench (unfinished)";
 global.weapons[WEAPON_WRANGLER] = Wrangler;
-global.name[WEAPON_WRANGLER] = "Wrangler";
+global.name[WEAPON_WRANGLER] = "Wrangler (unimplemented)";
 global.weapons[WEAPON_EUREKAEFFECT] = Eeffect;
-global.name[WEAPON_EUREKAEFFECT] = "Eureka Effect";
+global.name[WEAPON_EUREKAEFFECT] = "Eureka Effect (unimplemented)";
 
 // Heavy
 globalvar WEAPON_MINIGUN, WEAPON_TOMISLAV, WEAPON_NATACHA, WEAPON_BRASSBEAST, WEAPON_IRON, WEAPON_HEAVYSHOTGUN, WEAPON_SANDVICH, WEAPON_FAMILYBUSINESS, WEAPON_CHOCOLATE, WEAPON_KGOB;
@@ -4837,13 +5000,13 @@ object_event_add(KGOB,ev_other,ev_user1,'
 global.weapons[WEAPON_MINIGUN] = Minigun;
 global.name[WEAPON_MINIGUN] = "Minigun";
 global.weapons[WEAPON_TOMISLAV] = Tomislav;
-global.name[WEAPON_TOMISLAV] = "Tomislav";
+global.name[WEAPON_TOMISLAV] = "Tomislav (unfinished)";
 global.weapons[WEAPON_NATACHA] = Natacha;
-global.name[WEAPON_NATACHA] = "Natascha";
+global.name[WEAPON_NATACHA] = "Natascha (unfinished)";
 global.weapons[WEAPON_BRASSBEAST] = BrassBeast;
-global.name[WEAPON_BRASSBEAST] = "Brass Beast";
+global.name[WEAPON_BRASSBEAST] = "Brass Beast (unfinished)";
 global.weapons[WEAPON_IRON] = IronMaiden;
-global.name[WEAPON_IRON] = "Iron Maiden";
+global.name[WEAPON_IRON] = "Iron Maiden (unfinished)";
 global.weapons[WEAPON_HEAVYSHOTGUN] = HeavyShotgun;
 global.name[WEAPON_HEAVYSHOTGUN] = "Shotgun";
 global.weapons[WEAPON_SANDVICH] = SandvichHand;
@@ -4851,7 +5014,7 @@ global.name[WEAPON_SANDVICH] = "Sandvich";
 global.weapons[WEAPON_FAMILYBUSINESS] = FamilyBusiness;
 global.name[WEAPON_FAMILYBUSINESS] = "Family Business";
 global.weapons[WEAPON_CHOCOLATE] = ChocolateHand;
-global.name[WEAPON_CHOCOLATE] = "Dalokohs Bar"
+global.name[WEAPON_CHOCOLATE] = "Dalokohs Bar (unimplemented)"
 global.weapons[WEAPON_KGOB] = KGOB;
 global.name[WEAPON_KGOB] = "Killing Gloves Of Boxing";
 
@@ -5564,7 +5727,7 @@ object_event_add(Knife,ev_other,ev_user1,'
         justShot = true;
 
         readyToStab = false;
-        alarm[1] = StabreloadTime;
+        alarm[1] = StabreloadTime / global.delta_factor;
         playsound(x,y,swingSnd);
     } else if(readyToStab && owner.cloak){
         owner.runPower = 0;
@@ -5710,7 +5873,7 @@ object_event_add(ChainStab,ev_other,ev_user1,'
         justShot = true;
 
         readyToStab = false;
-        alarm[1] = StabreloadTime;
+        alarm[1] = StabreloadTime / global.delta_factor;
         playsound(x,y,swingSnd);
     } else if(readyToStab && owner.cloak){
         owner.runPower = 0;
@@ -5856,7 +6019,7 @@ object_event_add(BigEarner,ev_other,ev_user1,'
         justShot = true;
 
         readyToStab = false;
-        alarm[1] = StabreloadTime;
+        alarm[1] = StabreloadTime / global.delta_factor;
         playsound(x,y,swingSnd);
     } else if(readyToStab && owner.cloak){
         owner.runPower = 0;
@@ -6014,7 +6177,7 @@ object_event_add(Spycicle,ev_other,ev_user1,'
         justShot = true;
 
         readyToStab = false;
-        alarm[1] = StabreloadTime;
+        alarm[1] = StabreloadTime / global.delta_factor;
         playsound(x,y,swingSnd);
     } else if(readyToStab && owner.cloak){
         owner.runPower = 0;
@@ -6160,7 +6323,7 @@ object_event_add(Zapper,ev_other,ev_user1,'
         justShot = true;
 
         readyToStab = false;
-        alarm[1] = StabreloadTime;
+        alarm[1] = StabreloadTime / global.delta_factor;
         playsound(x,y,swingSnd);
     } else if(readyToStab && owner.cloak){
         owner.runPower = 0;
@@ -6191,23 +6354,23 @@ object_event_add(Zapper,ev_other,ev_user1,'
 global.weapons[WEAPON_REVOLVER] = Revolver;
 global.name[WEAPON_REVOLVER] = "Revolver";
 global.weapons[WEAPON_ETRANGER] = Etranger;
-global.name[WEAPON_ETRANGER] = "l'Etranger"
+global.name[WEAPON_ETRANGER] = "l'Etranger (unfinished)"
 global.weapons[WEAPON_DIAMONDBACK] = Diamondback;
-global.name[WEAPON_DIAMONDBACK] = "Diamondback";
+global.name[WEAPON_DIAMONDBACK] = "Diamondback (unfinished)";
 global.weapons[WEAPON_DIPLOMAT] = Diplomat;
-global.name[WEAPON_DIPLOMAT] = "The Ambassador";
+global.name[WEAPON_DIPLOMAT] = "The Ambassador (unfinished)";
 global.weapons[WEAPON_NORDICGOLD] = Goldassistant;
-global.name[WEAPON_NORDICGOLD] = "Nordic Gold";
+global.name[WEAPON_NORDICGOLD] = "Nordic Gold (unfinished)";
 global.weapons[WEAPON_KNIFE] = Knife;
 global.name[WEAPON_KNIFE] = "Knife";
 global.weapons[WEAPON_MEDICHAIN] = ChainStab;
-global.name[WEAPON_MEDICHAIN] = "Medichain"
+global.name[WEAPON_MEDICHAIN] = "Medichain (unfinished)"
 global.weapons[WEAPON_BIGEARNER] = BigEarner;
-global.name[WEAPON_BIGEARNER] = "Big Earner";
+global.name[WEAPON_BIGEARNER] = "Big Earner (unfinished)";
 global.weapons[WEAPON_SPYCICLE] = Spycicle;
-global.name[WEAPON_SPYCICLE] = "Spycicle";
+global.name[WEAPON_SPYCICLE] = "Spycicle (unfinished)";
 global.weapons[WEAPON_ZAPPER] = Zapper;
-global.name[WEAPON_ZAPPER] = "Zapper";
+global.name[WEAPON_ZAPPER] = "Zapper (unfinished)";
 
 // Pyro
 globalvar WEAPON_FLAMETHROWER, WEAPON_PHLOG, WEAPON_TRANSMUTATOR, WEAPON_FROSTBITE, WEAPON_BACKBURNER, WEAPON_PYROSHOTGUN, WEAPON_FLAREGUN, WEAPON_DETONATOR, WEAPON_NAPALM, WEAPON_WRECKER;
@@ -8024,7 +8187,7 @@ global.name[WEAPON_PHLOG] = "Phlogistinator";
 global.weapons[WEAPON_TRANSMUTATOR] = Transmutator;
 global.name[WEAPON_TRANSMUTATOR] = "Transmutator";
 global.weapons[WEAPON_FROSTBITE] = Frostbite;
-global.name[WEAPON_FROSTBITE] = "Frostbite";
+global.name[WEAPON_FROSTBITE] = "Frostbite (unfinished)";
 global.weapons[WEAPON_BACKBURNER] = Backburner;
 global.name[WEAPON_BACKBURNER] = "Backburner";
 global.weapons[WEAPON_PYROSHOTGUN] = PyroShotgun;
@@ -8034,7 +8197,7 @@ global.name[WEAPON_FLAREGUN] = "Flaregun";
 global.weapons[WEAPON_DETONATOR] = Detonator;
 global.name[WEAPON_DETONATOR] = "Detonator";
 global.weapons[WEAPON_NAPALM] = NapalmHand;
-global.name[WEAPON_NAPALM] = "Napalm Grenade";
+global.name[WEAPON_NAPALM] = "Napalm Grenade (unfinished)";
 global.weapons[WEAPON_WRECKER] = Axe;
 global.name[WEAPON_WRECKER] = "Homewrecker";
 

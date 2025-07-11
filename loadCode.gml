@@ -473,6 +473,14 @@ object_event_add(Character,ev_create,0,'
 	player.playerLoadout=-1;
 ');
 
+object_event_add(Character,ev_destroy,0,'
+	with(RadioBlur) {
+		if (owner == other.id) {
+            instance_destroy();
+        }
+	}
+');
+
 object_event_clear(Character,ev_step,ev_step_end);
 object_event_add(Character,ev_step,ev_step_end,'
 	charSetSolids();
@@ -1121,7 +1129,8 @@ object_event_add(PlayerControl,ev_step,ev_step_end,'
 		    if(!instance_exists(NutsNBoltsHud))
 		        instance_create(0,0,NutsNBoltsHud);
 		}
-		if(global.myself.class == CLASS_HEAVY and global.myself.object.weapons[1] == SandvichHand)
+		if(global.myself.class == CLASS_HEAVY)
+			if (global.myself.object.weapons[1] == SandvichHand) // fix q/c
 		{
 		    if(!instance_exists(SandwichHud))
 		        instance_create(0,0,SandwichHud);
@@ -1248,6 +1257,7 @@ object_event_add(AmmoCounter,ev_draw,0,'
 //Changes the number telling randomizer what weapon should be shown
 object_event_add(PlayerControl, ev_mouse, ev_global_middle_press,'
 	if(global.myself.object != -1){
+		if (global.myself.object.radioactive || global.myself.class == CLASS_QUOTE) exit; // fix q/c
 		if(global.myself.activeWeapon == 0){
 			global.myself.activeWeapon = 1;
 		}else{
