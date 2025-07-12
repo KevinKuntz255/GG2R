@@ -14,7 +14,7 @@ object_event_add(Weapon,ev_create,0,'
     //uberCharge=0;
     //t=0;
     //speedboost=0;
-    //lobbed = 0;
+    lobbed = 0;
     charging = 0;
     //spark = 0;
     //alarm[9]=2;
@@ -3149,19 +3149,19 @@ object_event_add(Eyelander,ev_create,0,'
     yoffset=-40;
     refireTime=18;
     event_inherited();
+	maxMines = 14;
+    lobbed = 0;
     StabreloadTime = 5;
     readyToStab = false;
     alarm[2] = 15;
     smashing = false;
-    image_speed=0;
     charging = 0;
     
-    stabbing=false;
-    stabdirection= owner.aimDirection;
+    stabdirection=0;
     maxAmmo = 100;
     ammoCount = maxAmmo;
     reloadTime = 300;
-    reloadBuffer = 18;
+    reloadBuffer = refireTime;
     idle=true;
     smashing=false;
 	isMelee = true;
@@ -3225,7 +3225,9 @@ object_event_add(Eyelander,ev_alarm,2,'
 object_event_add(Eyelander,ev_alarm,5,'
     ammoCount = 100;
 ');
-
+object_event_add(Eyelander,ev_alarm,10,'
+    charging = 0;
+');
 object_event_add(Eyelander,ev_step,ev_step_normal,'
 	if (charging == 1) {
 		image_speed=0.3;
@@ -3250,18 +3252,11 @@ object_event_add(Eyelander,ev_step,ev_step_normal,'
 				owner.hspeed += 1.8;
 			}
 		}
-    } else if readyToShoot {
-		owner.jumpStrength = 8+(0.6/2);
-        if ammoCount < 0 ammoCount = 0;
-        else if ammoCount <= maxAmmo ammoCount +=1;
     } else {
         owner.jumpStrength = 8+(0.6/2);
+        if ammoCount < 0 ammoCount = 0;
+        else if ammoCount <= maxAmmo ammoCount +=1;
     }
-	
-	if (owner.ubered)
-	{
-		
-	}
 	
     if smashing {
         image_speed=0.3;
@@ -3302,8 +3297,9 @@ object_event_add(Eyelander,ev_other,ev_user2,'
 		owner.accel = 0;
 		owner.moveStatus = 0;
 		owner.vspeed -= 0.15; // jerry-rigging consistency in charging by makin u slightly jumped
-        //playsound(x,y,choose(ChargeSnd1, ChargeSnd2,ChargeSnd3));
+        playsound(x,y,choose(ChargeSnd1, ChargeSnd2,ChargeSnd3));
 		if (smashing != 1) readyToStab = true;
+		//alarm[10] = 100;
     }
 ');
 
@@ -3311,46 +3307,43 @@ WEAPON_PAINTRAIN = 38;
 Paintrain = object_add();
 object_set_parent(Paintrain, Weapon);
 object_event_add(Paintrain,ev_create,0,'
-    xoffset=-9;
-    yoffset=-40;
-    refireTime=18;
-    event_inherited();
-    StabreloadTime = 5;
-    readyToStab = false;
-    alarm[2] = 15;
-    smashing = false;
-    image_speed=0;
-    
-    stabbing=false;
-    stabdirection=0;
-    maxAmmo = 100;
-    ammoCount = maxAmmo;
-    reloadTime = 300;
-    reloadBuffer = 18;
-    idle=true;
-    smashing=false;
-    unscopedDamage = 0;
-	
-	//TEMP
-    lobbed=0;
-    unscopedDamage = 0;
-	
-	isMelee = true;
-	normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\PainTrainS.png", 2, 1, 0, 0, 0);
-    recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\PainTrainFS.png", 2, 1, 0, 0, 0);
-    reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\PainTrainS.png", 2, 1, 0, 0, 0);
+	{
+		xoffset=-9;
+		yoffset=-40;
+		refireTime=24;
+		event_inherited();	
+		maxMines = 14;
+		lobbed = 0;
+		unscopedDamage = 0;
+		StabreloadTime = 5;
+		readyToStab = false;
+		alarm[2] = 15;
+		smashing = false;
+		
+		stabdirection=0;
+		maxAmmo = 1;
+		ammoCount = maxAmmo;
+		reloadTime = 300;
+		reloadBuffer = refireTime;
+		idle=true;
+		isMelee = true;
+		
+		normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\PainTrainS.png", 2, 1, 0, 0, 0);
+		recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\PainTrainFS.png", 2, 1, 0, 0, 0);
+		reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\PainTrainS.png", 2, 1, 0, 0, 0);
 
-    sprite_index = normalSprite;
+		sprite_index = normalSprite;
 
-    recoilTime = refireTime;
-    recoilAnimLength = sprite_get_number(recoilSprite)/2;
-    recoilImageSpeed = recoilAnimLength/recoilTime;
+		recoilTime = refireTime;
+		recoilAnimLength = sprite_get_number(recoilSprite)/2;
+		recoilImageSpeed = recoilAnimLength/recoilTime;
 
-    reloadAnimLength = sprite_get_number(reloadSprite)/2;
-    reloadImageSpeed = reloadAnimLength/reloadTime;
-	
-	//owner.runPower = 5;
-	owner.capStrength = 2;
+		reloadAnimLength = sprite_get_number(reloadSprite)/2;
+		reloadImageSpeed = reloadAnimLength/reloadTime;
+		
+		//owner.runPower = 5;
+		owner.capStrength = 2;
+	}
 ');
 object_event_add(Paintrain,ev_destroy,0,'
     with (MeleeMask) {
@@ -3603,6 +3596,8 @@ object_event_add(Ubersaw,ev_create,0,'
     unscopedDamage = 0;
 	// TEMP
 	healTarget = noone;
+	if !variable_local_exists("uberCharge")
+		uberCharge = 0;
 	
 	isMelee = true;
 	normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\UbersawS.png", 2, 1, 0, 0, 0);

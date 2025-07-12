@@ -1129,11 +1129,12 @@ object_event_add(PlayerControl,ev_step,ev_step_end,'
 		    if(!instance_exists(NutsNBoltsHud))
 		        instance_create(0,0,NutsNBoltsHud);
 		}
-		if(global.myself.class == CLASS_HEAVY)
+		if(global.myself.class == CLASS_HEAVY) {
 			if (global.myself.object.weapons[1] == SandvichHand) // fix q/c
-		{
-		    if(!instance_exists(SandwichHud))
-		        instance_create(0,0,SandwichHud);
+			{
+				if(!instance_exists(SandwichHud))
+					instance_create(0,0,SandwichHud);
+			}
 		}
 
 		// Sticky HUD. Because real men let computers count for them.
@@ -1169,7 +1170,7 @@ object_event_add(AmmoCounter,ev_draw,0,'
 		if instance_exists(global.myself.object.currentWeapon) {
 			var weapon;
 			weapon = global.myself.object.currentWeapon;
-			if (weapon.isMelee) exit;
+			if (weapon.isMelee && weapon.object_index != Eyelander) exit;
 			barcolor = make_color_rgb(217,217,183);
 			draw_set_color(barcolor);
 		
