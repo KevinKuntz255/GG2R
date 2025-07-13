@@ -8252,7 +8252,10 @@ global.name[WEAPON_SNIPEANATURE] = "Snipe-A-Nature"
 global.weapons[WEAPON_SAXTONHALE] = SaxtonFist; 
 global.name[WEAPON_SAXTONHALE] = "HAXTON SAAAAAAAAALE";
 
-
+// Special Variables
+globalvar WEAPON_FIREARROW, WEAPON_KUNAIBACKSTAB, WEAPON_SAPPER, WEAPON_MEDICHAINBACKSTAB, WEAPON_FAILSTAB, WEAPON_ARROWHEADSHOT, WEAPON_SPYCICLEBACKSTAB, WEAPON_BACKSTAB;
+globalvar Fire Arrow, Kunai Backstab, Sapper, Medichain Backstab, Failstab, Arrow Headshot, Spycicle Backstab, Backstab;
+WEAPON_FIREARROW = 100;
 
 //read the loadout file
 ini_open("Loadout.gg2");
@@ -8291,20 +8294,7 @@ global.Classlimit[7]=ini_read_real("Class","Spy",-1);
 global.Classlimit[8]=ini_read_real("Class","Pyro",-1);
 global.Classlimit[9]=ini_read_real("Class","Quote",-1);
 
-ini_close(); 
-
-global.chatters = ds_list_create();
-global.redChatBuffer = buffer_create();
-global.blueChatBuffer = buffer_create();
-global.publicChatBuffer = buffer_create();
-global.chatLog = ds_list_create();
-global.chatFadeTimers = ds_list_create();
-global.banlist = ds_list_create();
-global.mutelist = ds_list_create();
-global.unmutelist = ds_list_create();
-global.rconlist = ds_list_create();
-//Commands(); EXCLUDED
-global.isRcon = false;
+ini_close();
 
 global.currentLoadout = global.scoutLoadout;
 if(global.isHost){

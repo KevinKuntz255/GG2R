@@ -344,8 +344,8 @@ object_event_add(MeleeMask,ev_collision,Sentry,'
             } else playsound(x,y,WrenchFailSnd);
         } else playsound(x,y,WrenchFailSnd);
         instance_destroy();*/
-    } else if weapon == WEAPON_WRECKER && other.sapped > 0 {
-        /*if global.isHost {
+    }/* else if weapon == WEAPON_WRECKER && other.sapped > 0 {
+        if global.isHost {
             other.sapped-=2*crit;
             if other.sapped <= 0 {
                 other.sapped = 0;
@@ -353,8 +353,8 @@ object_event_add(MeleeMask,ev_collision,Sentry,'
                 write_ubyte(global.eventBuffer, ds_list_find_index(global.players,other.ownerPlayer));
             }
         }
-        playsound(x,y,MeleeHitMapSnd);*/
-    }
+        playsound(x,y,MeleeHitMapSnd);
+    }*/
 ');
 object_event_add(MeleeMask,ev_collision,Generator,'
     if (other.team != team) {
@@ -1667,10 +1667,12 @@ object_event_add(NapalmGrenade,ev_draw,0,'
 ');
 
 object_event_add(Rocket,ev_collision,Character,'
-    if other.team != team {
-        if owner.weapons[0] >= WEAPON_BLACKBOX && ownerPlayer.object != -1
-			ownerPlayer.object.hp=min(ownerPlayer.object.hp+15,ownerPlayer.object.maxHp);
-    }
+	if ownerPlayer.object != -1 {
+		if other.team != team {
+			if owner.weapons[0] >= WEAPON_BLACKBOX
+				ownerPlayer.object.hp=min(ownerPlayer.object.hp+15,ownerPlayer.object.maxHp);
+		}
+	}
 	// somehow, healing on knockback is detected here, test later!!
 	//if (distance_to_object(other) < blastRadius)
 	//{
