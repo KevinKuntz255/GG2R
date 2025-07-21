@@ -1420,8 +1420,9 @@ object_event_add(Ball,ev_draw,0,'
     draw_sprite_ext(sprite_index,image_index,x,y,1,1,0,c_white,image_alpha);
 ');
 
-globalvar MadMilk;
+globalvar MadMilk, Milk;
 MadMilk = object_add();
+Milk = object_add();
 object_event_add(MadMilk,ev_create,0,'
     {
         explosionDamage = 50;
@@ -1474,23 +1475,10 @@ object_event_add(MadMilk,ev_step,ev_step_normal,'
 	image_angle-=hspeed*2.5;
 ');
 object_event_add(MadMilk,ev_collision,Character,'
-    move_contact_solid(point_direction(x,y,x+hspeed,y+vspeed), speed);
-	if(not place_free(x,y+sign(vspeed))) {
-		vspeed*=-0.4;
-		if(not place_free(x+hspeed,y)){
-			move_contact_solid(point_direction(x,y,x+hspeed,y+vspeed), speed);
-			hspeed*=-0.4;
-		}
-	}
-	if(not place_free(x+sign(hspeed),y)){
-		hspeed*=-0.4;
-		if(not place_free(x,y+vspeed)) {
-			move_contact_solid(point_direction(x,y,x+hspeed,y+vspeed), speed);
-			vspeed*=-0.4;
-		}
-	}
-
-	event_user(2);
+	if team != other.team event_user(2);
+');
+object_event_add(MadMilk,ev_collision,Generator,'
+	if team != other.team event_user(2);
 ');
 object_event_add(MadMilk,ev_collision,Obstacle,'
     move_contact_solid(point_direction(x,y,x+hspeed,y+vspeed), speed);
@@ -1519,19 +1507,7 @@ object_event_add(MadMilk,ev_collision,TeamGate,'
     }
 ');
 object_event_add(MadMilk,ev_collision,Sentry,'
-    if(other.team != team) {
-        var thp;
-        thp = damage*crit*other.bonus;
-        if(other.currentWeapon > -1 and other.humiliated = 0){if(other.currentWeapon.wrangled) thp /= 2}
-        other.hp -= thp    
-        //other.hp -= damage*crit*other.bonus;
-    //new stuff
-        other.lastDamageDealer = ownerPlayer;
-        other.lastDamageSource = weapon;
-        other.lastDamageCrit = crit;
-    //end new stuff
-        instance_destroy();
-    }
+    if other.team != team event_user(2);
 ');
 object_event_add(MadMilk,ev_other,ev_user12,'
 
@@ -1553,7 +1529,7 @@ object_event_add(MadMilk,ev_other,ev_user2,'
 	with (Character) {
 		if (distance_to_object(other) < other.blastRadius and !(team == other.team and id != other.ownerPlayer.object and place_meeting(x, y+1, Obstacle))){
 			if(other.team != team) && !ubered and hp && 0 && !radioactive {
-					//milked=1; // in modern context this variable name is making me laugh
+					milked=1; // in modern context this variable name is making me laugh
 					alarm[8]=250-distance_to_object(other);
 					cloak=false; 
 					if instance_exists(other.ownerPlayer) {
@@ -1567,7 +1543,7 @@ object_event_add(MadMilk,ev_other,ev_user2,'
 			}
 			lastDamageDealer = other.ownerPlayer;
 			lastDamageSource = -1;
-			lastDamageCrit = other.crit;
+			//lastDamageCrit = other.crit;
 			cloakAlpha = min(cloakAlpha + 0.2, 1);
 		} if (distance_to_object(other) < other.blastRadius and team == other.team){
 			if(other.team == team) && !ubered and hp > 0 {
@@ -1582,7 +1558,7 @@ object_event_add(MadMilk,ev_other,ev_user2,'
 
 	repeat(15*global.gibLevel){
 		var blood;
-		blood = instance_create(x+random(20)-10,y+random(20)-10,/*Milk*/Blood);
+		blood = instance_create(x+random(20)-10,y+random(20)-10,Milk);
 		blood.direction = random(360);
 		blood.speed=random(5);
 	}
@@ -1632,32 +1608,174 @@ object_event_add(MadMilk,ev_draw,0,'
 	//else color = c_aqua;   
     //draw_sprite_ext(sprite_index,0,x,y,image_xscale,image_yscale,image_angle,color,1);
 ');
-
+object_event_add(Milk,ev_create,0,'
+	lifetime=250;
+    alarm[0]=lifetime;
+    stick = false;
+    ogib=-1;
+    odir=0;
+    sprite_index=sprite_add(pluginFilePath + "\randomizer_sprites\MilkS.png", 1, 0, 0, 0, 0);
+	image_index=sprite_index;
+    image_speed=0;
+');
+object_event_add(Milk,ev_step,ev_step_normal,'
+	{
+	if(!stick){
+		if(place_free(x,y+1)) {
+		vspeed += 0.4;
+		}
+		if(vspeed>11) {
+		vspeed=11;
+		}
+		if(vspeed<-11) {
+		vspeed=-11;
+		}
+		if(hspeed>11) {
+		hspeed=11;
+		}
+		if(hspeed<-11) {
+		hspeed=-11;
+		}
+	}
+	   image_alpha -= (2/lifetime);
+	}
+');
+object_event_add(Milk,ev_collision,Obstacle,'
+	if(!stick) {
+	move_contact_solid(point_direction(x,y,x+hspeed,y+vspeed),-1)
+		}
+	speed=0;
+	stick = true;
+');
+object_event_add(Milk,ev_alarm,0,'
+    instance_destroy();
+');
 globalvar NapalmGrenade;
 NapalmGrenade = object_add();
 object_event_add(NapalmGrenade,ev_create,0,'
-    {
-        explosionDamage = 50;
-        animationState = 1;
-        stickied = false;
-        blastRadius = 60;
-        exploded = false;
-        bubbled = false;
-        reflector = noone;
-        alarm[1]=29;
-        hfric=0.9;
-        rotfric=0.9;
-        rotspeed=random(20)-10;
-        image_speed=0;
-        crit = 1;
-        used=0;
-        damage=15;
-        bounced=0;
-        sprite_index = sprite_add(pluginFilePath + "\randomizer_sprites\NapalmS.png", 1, 1, 0, 3, 3);
+	{
+		explosionDamage = 30;
+		animationState = 1;
+		alarm[1] = 29;
+		stickied = false;
+		blastRadius = 60;
+		exploded = false;
+		bubbled = false;
+		reflector = noone;
+		alarm[2]=60; //2 seconds to detonate
+		hfric=0.9;
+		rotfric=0.9;
+		rotspeed=random(20)-10;
+		image_speed=0;
+		crit = 1;
+		used=0;
+		sprite_index = sprite_add(pluginFilePath + "\randomizer_sprites\NapalmS.png", 1, 1, 0, 3, 3);
         mask_index = sprite_index;
-        team = -1;
-        intel = 0;
-        vis_angle = 0;
+    }
+');
+object_event_add(NapalmGrenade,ev_alarm,0,'
+    reflector = noone;
+');
+object_event_add(NapalmGrenade,ev_alarm,2,'
+    if global.isHost {
+		//sendNapalm(ds_list_find_index(global.players,ownerPlayer),x,y);
+		//doNapalm(ownerPlayer,x,y);
+		// implement later
+	} else alarm[3] = 60 //the server has 2 seconds to send the detonation event. if it didnt happen after that just destroy the grenade
+');
+object_event_add(NapalmGrenade,ev_alarm,3,'
+	instance_destroy();
+');
+object_event_add(NapalmGrenade,ev_step,ev_step_normal,'
+	if(abs(vspeed)<0.2) {
+		vspeed=0;
+	}
+	if(abs(rotspeed) < 0.2) {
+		rotspeed=0
+	}
+	image_angle += rotspeed;
+	if(place_free(x,y+1)) {
+		vspeed += 0.7
+	}
+	if(vspeed>11) {
+		vspeed=11;
+	}
+	image_angle-=hspeed*2.5
+');
+object_event_add(NapalmGrenade,ev_collision,Obstacle,'
+	hspeed*=hfric;
+	rotspeed*=rotfric;
+	collided=true;
+
+	move_contact_solid(point_direction(x,y,x+hspeed,y+vspeed), speed);
+	if(not place_free(x,y+sign(vspeed))) {
+		vspeed*=-0.8;
+		if(not place_free(x+hspeed,y)){
+			move_contact_solid(point_direction(x,y,x+hspeed,y+vspeed), speed);
+			hspeed*=-0.8;
+		}
+	}
+	if(not place_free(x+sign(hspeed),y)){
+		hspeed*=-0.8;
+		if(not place_free(x,y+vspeed)) {
+			move_contact_solid(point_direction(x,y,x+hspeed,y+vspeed), speed);
+			vspeed*=-0.8;
+		}
+	}
+
+	/*if used == 0 {
+		alarm[2]=30;
+		used = 1;
+	}*/
+');
+object_event_add(NapalmGrenade,ev_collision,Character,'
+	if(team != other.team) {
+		if used == 0 {
+			alarm[2]=10;
+			used = 1;
+		}
+	}
+');
+object_event_add(NapalmGrenade,ev_collision,TeamGate,'
+    {
+	//instance_destroy()
+		speed *= -1;
+		   // stickied = true;
+	}
+');
+object_event_add(NapalmGrenade,ev_collision,Sentry,'
+    if(team != other.team) {
+		if used == 0 {
+			alarm[2]=1;
+			used = 1;
+		}
+	}
+');
+object_event_add(NapalmGrenade,ev_collision,BulletWall,'
+    {
+        var imp;
+        move_contact_solid(direction, speed);
+        imp = instance_create(x,y,Impact);
+        imp.image_angle=direction;
+        instance_destroy();
+    }
+');
+object_event_add(NapalmGrenade,ev_collision,ControlPointSetupGate,'
+    if global.setupTimer >0 {
+        var imp;
+        move_contact_solid(direction, speed);
+        imp = instance_create(x,y,Impact);
+        imp.image_angle=direction;
+        instance_destroy();
+    }
+');
+object_event_add(NapalmGrenade,ev_collision,Generator,'
+    if(other.team != team) {
+		if used == 0 {
+			alarm[2]=1;
+			used = 1;
+		}
+		instance_destroy();
     }
 ');
 object_event_add(NapalmGrenade,ev_draw,0,'
@@ -1665,7 +1783,202 @@ object_event_add(NapalmGrenade,ev_draw,0,'
 	else color = c_aqua;   
     draw_sprite_ext(sprite_index,0,x,y,image_xscale,image_yscale,image_angle,color,1);
 ');
+globalvar JarOPiss, Piss;
+JarOPiss = object_add();
+Piss = object_add();
+object_event_add(JarOPiss,ev_create,0,'
+	{
+    animationState = 1;
+    alarm[1] = 29;
+    stickied = false;
+    blastRadius = 60;
+    exploded = false;
+    bubbled = false;
+    reflector = noone;
+    alarm[2]=60;
+    hfric=0.5;
+    rotfric=0.7;
+    rotspeed=random(20)-10;
+	sprite_index = sprite_add(pluginFilePath + "\randomizer_sprites\JarateS.png", 1, 1, 0, 3, 3);
+	mask_index = sprite_index;
+    image_speed=0;
+    //crit=1;
+	}
+');
+object_event_add(JarOPiss,ev_alarm,0,'
+    reflector = noone;
+');
+object_event_add(JarOPiss,ev_alarm,2,'
+    instance_destroy();
+    if owner != -1 && instance_exists(owner) owner.ammo = 1;
+');
+object_event_add(JarOPiss,ev_step,ev_step_normal,'
+    image_index=2;
 
+	if(abs(vspeed)<0.2) {
+		vspeed=0;
+	}
+	if(abs(rotspeed) < 0.2) {
+		rotspeed=0;
+	}
+	image_angle += rotspeed;
+	if(place_free(x,y+1)) {
+		vspeed += 0.7;
+	}
+	if(vspeed>11) {
+		vspeed=11;
+	}
+	image_angle-=hspeed*2.5;
+');
+object_event_add(JarOPiss,ev_collision,BulletWall,'
+    {
+        var imp;
+        move_contact_solid(direction, speed);
+        imp = instance_create(x,y,Impact);
+        imp.image_angle=direction;
+        instance_destroy();
+    }
+');
+object_event_add(JarOPiss,ev_collision,ControlPointSetupGate,'
+    if global.setupTimer >0 {
+        var imp;
+        move_contact_solid(direction, speed);
+        imp = instance_create(x,y,Impact);
+        imp.image_angle=direction;
+        instance_destroy();
+    }
+');
+object_event_add(JarOPiss,ev_collision,Character,'
+	if team != other.team event_user(2);
+');
+object_event_add(JarOPiss,ev_collision,Generator,'
+	if team != other.team event_user(2);
+');
+object_event_add(JarOPiss,ev_collision,Obstacle,'
+    move_contact_solid(point_direction(x,y,x+hspeed,y+vspeed), speed);
+	if(not place_free(x,y+sign(vspeed))) {
+		vspeed*=-0.4;
+		if(not place_free(x+hspeed,y)){
+			move_contact_solid(point_direction(x,y,x+hspeed,y+vspeed), speed);
+			hspeed*=-0.4;
+		}
+	}
+	if(not place_free(x+sign(hspeed),y)){
+		hspeed*=-0.4;
+		if(not place_free(x,y+vspeed)) {
+			move_contact_solid(point_direction(x,y,x+hspeed,y+vspeed), speed);
+			vspeed*=-0.4;
+		}
+	}
+
+	event_user(2);
+');
+object_event_add(JarOPiss,ev_collision,TeamGate,'
+    {
+		instance_destroy()
+        // speed = 0;
+           // stickied = true;
+    }
+');
+object_event_add(JarOPiss,ev_collision,Sentry,'
+    if other.team != team event_user(2);
+');
+object_event_add(JarOPiss,ev_other,ev_user12,'
+
+');
+object_event_add(JarOPiss,ev_other,ev_user13,'
+
+');
+object_event_add(JarOPiss,ev_other,ev_user2,'
+	if(exploded == true) {
+		exit;
+	} else {
+		exploded = true;
+	}
+	//instance_create(x,y,Explosion);
+	playsound(x,y,JarateSnd);
+
+	with (Character) {
+		if (distance_to_object(other) < other.blastRadius and !(team == other.team and id != other.ownerPlayer.object and place_meeting(x, y+1, Obstacle))){
+			if(other.team != team) && !ubered and hp && 0 && !radioactive {
+					pissed=1; // in modern context this variable name is making me laugh
+					alarm[8]=250-distance_to_object(other);
+					cloak=false; 
+					if instance_exists(other.ownerPlayer) {
+						other.ownerPlayer.object.hp = min(other.ownerPlayer.object.maxHp, other.ownerPlayer.object.hp+20);
+					}       
+			}
+			if radioactive {
+				var text;
+				text=instance_create(x,y,Text);
+				text.sprite_index=MissS;
+			}
+			lastDamageDealer = other.ownerPlayer;
+			lastDamageSource = -1;
+			//lastDamageCrit = other.crit;
+			cloakAlpha = min(cloakAlpha + 0.2, 1);
+		} if (distance_to_object(other) < other.blastRadius and team == other.team){
+			if(other.team == team) && !ubered and hp > 0 {
+				burnDuration = 0;
+					
+			}
+		}
+	}
+
+
+
+
+	repeat(15*global.gibLevel){
+		var blood;
+		blood = instance_create(x+random(20)-10,y+random(20)-10,Piss);
+		blood.direction = random(360);
+		blood.speed=random(5);
+	}
+
+	instance_destroy();
+');
+object_event_add(Piss,ev_create,0,'
+	lifetime=250;
+    alarm[0]=lifetime;
+    stick = false;
+    ogib=-1;
+    odir=0;
+    sprite_index=sprite_add(pluginFilePath + "\randomizer_sprites\PissS.png", 1, 0, 0, 0, 0);
+	image_index=sprite_index;
+    image_speed=0;
+');
+object_event_add(Piss,ev_step,ev_step_normal,'
+	{
+	if(!stick){
+		if(place_free(x,y+1)) {
+		vspeed += 0.4;
+		}
+		if(vspeed>11) {
+		vspeed=11;
+		}
+		if(vspeed<-11) {
+		vspeed=-11;
+		}
+		if(hspeed>11) {
+		hspeed=11;
+		}
+		if(hspeed<-11) {
+		hspeed=-11;
+		}
+	}
+	   image_alpha -= (2/lifetime);
+	}
+');
+object_event_add(Piss,ev_collision,Obstacle,'
+	if(!stick) {
+	move_contact_solid(point_direction(x,y,x+hspeed,y+vspeed),-1)
+		}
+	speed=0;
+	stick = true;
+');
+object_event_add(Piss,ev_alarm,0,'
+    instance_destroy();
+');
 object_event_add(Rocket,ev_collision,Character,'
 	if ownerPlayer.object != -1 {
 		if other.team != team {

@@ -467,10 +467,13 @@ object_event_add(InGameMenuController,ev_create,0,'
 object_event_add(Character,ev_create,0,'
 	accel = 0;
 	radioactive = false;
+	milked = 0;
+	pissed = 0;
 	blurs = 0;
 	curMeter = 0;
 	player.activeWeapon=-1;
 	player.playerLoadout=-1;
+	bleeding = 0;
 ');
 
 object_event_add(Character,ev_destroy,0,'
@@ -479,6 +482,12 @@ object_event_add(Character,ev_destroy,0,'
             instance_destroy();
         }
 	}
+');
+
+object_event_add(Character,ev_alarm,8,'
+	milked = 0;
+	bleeding = 0;
+	pissed = 0;
 ');
 
 object_event_clear(Character,ev_step,ev_step_end);
@@ -1261,6 +1270,7 @@ object_event_add(PlayerControl, ev_mouse, ev_global_middle_press,'
 		if (global.myself.object.radioactive || global.myself.class == CLASS_QUOTE) exit; // fix q/c
 		if(global.myself.activeWeapon == 0){
 			global.myself.activeWeapon = 1;
+			if (global.myself.object.zoomed) global.myself.object.zoomed = false;
 		}else{
 			global.myself.activeWeapon = 0;
 		}

@@ -27,5 +27,5 @@ if(global.myself.class == CLASS_ENGINEER)
 //} else if global.myself.object.taunting==false && global.myself.object.omnomnomnom==false && global.myself.class==CLASS_HEAVY {
 //    write_ubyte(global.serverSocket, OMNOMNOMNOM);
 } else if global.myself.class == CLASS_SNIPER {
-    write_ubyte(global.serverSocket, TOGGLE_ZOOM);
+    if (global.myself.activeWeapon == 0) write_ubyte(global.serverSocket, TOGGLE_ZOOM);
 }
