@@ -447,6 +447,47 @@ object_event_add(LoadoutMenu, ev_keypress, vk_escape,'
 	    instance_create(0,0,InGameMenuController);*/
 ');
 
+ini_open("gg2.ini");
+global.switchWeapon = ini_read_real("RM","switch_weapon",ord('Q'));
+ini_close();
+// Make a new menu for plugin options.
+if !variable_global_exists("pluginOptions") {
+    global.pluginOptions = object_add();
+    object_set_parent(global.pluginOptions, OptionsController);
+    object_set_depth(global.pluginOptions, -130000);
+    object_event_add(global.pluginOptions, ev_create, 0, '
+        menu_create(40, 140, 300, 200, 30);
+
+        if room != Options {
+            menu_setdimmed();
+        }
+
+        menu_addback("Back", "
+            instance_destroy();
+            if(room == Options)
+                instance_create(0,0,MainMenuController);
+            else
+                instance_create(0,0,InGameMenuController);
+        ");
+    ');
+
+    object_event_add(InGameMenuController, ev_create, 0, '
+        menu_addlink("Randomizer Options", "
+            instance_destroy();
+            instance_create(0,0,global.pluginOptions);
+        ");
+    ');
+}
+
+object_event_add(global.pluginOptions, ev_create, 0, '
+    menu_addedit_key("Switch Weapon:", "global.switchWeapon","");
+');
+
+object_event_add(global.pluginOptions, ev_destroy, 0, '
+    ini_open("gg2.ini");
+    ini_write_real("RM", "switch_weapon", global.switchWeapon);
+    ini_close();
+');
 
 //Adds loadout to ingame menu
 object_event_add(InGameMenuController,ev_create,0,'
@@ -471,7 +512,7 @@ object_event_add(Character,ev_create,0,'
 	pissed = 0;
 	blurs = 0;
 	curMeter = 0;
-	player.activeWeapon=-1;
+	player.activeWeapon=0;
 	player.playerLoadout=-1;
 	bleeding = 0;
 ');
@@ -793,6 +834,25 @@ object_event_add(Heavy,ev_create,0,'
 	// Override defaults
 	numFlames = 5;
 ');
+object_event_clear(Heavy,ev_step,ev_step_normal);
+object_event_add(Heavy,ev_step,ev_step_normal,'
+	minigun = keyState & $10 && global.myself.activeWeapon == 0;
+	weapon = global.myself.object.currentWeapon.object_index;
+	if(minigun) {
+		if (weapon == Tomislav) {
+			runPower = 0.55;
+		} else if (weapon == BrassBeast) {
+			runPower = 0;
+			jumpStrength = 0;
+		} else {
+			runPower = 0.3;
+		}
+    } else {
+        runPower = 0.8;
+		jumpStrength = baseJumpStrength;
+    }
+	event_inherited();
+');
 object_event_clear(Demoman,ev_create,0);
 object_event_add(Demoman,ev_create,0,'
 	baseRunPower = 1;
@@ -1064,6 +1124,33 @@ object_event_add(PlayerControl,ev_step,ev_step_begin,'
 //Handles swapping out loadout weapons and the active weapon shown
 object_event_clear(PlayerControl,ev_step,ev_step_end);
 object_event_add(PlayerControl,ev_step,ev_step_end,'
+	//Changes the number telling randomizer what weapon should be shown
+	if (keyboard_check_pressed(global.switchWeapon)) {
+		if(global.myself.object != -1){
+			if (global.myself.object.radioactive || global.myself.class == CLASS_QUOTE) exit; // fix q/c
+			if(global.myself.activeWeapon == 0){
+				global.myself.activeWeapon = 1;
+				if (global.myself.object.zoomed) {
+					write_ubyte(global.serverSocket, TOGGLE_ZOOM);
+				}
+			}else{
+				global.myself.activeWeapon = 0;
+			}
+
+			var coolSendBuffer;
+			coolSendBuffer = buffer_create();
+
+			//Sends the active weapon to the server
+			write_ubyte(coolSendBuffer, randomizer.activeWeapon);
+			write_ubyte(coolSendBuffer, global.myself.activeWeapon);
+			if(global.isHost){
+				PluginPacketSendTo(randomizer.packetID, coolSendBuffer, global.myself);
+			}else{
+				PluginPacketSend(randomizer.packetID, coolSendBuffer);
+			}
+			buffer_clear(coolSendBuffer);
+		}
+	}
 	globalvar AmmoCounterID;
     with(AmmoCounter) AmmoCounterID = id;
     with(Player){
@@ -1261,32 +1348,6 @@ object_event_add(AmmoCounter,ev_draw,0,'
 				draw_healthbar(xoffset+689,yoffset+ysize/1.26+90,xoffset+723,yoffset+ysize/1.26+98,global.myself.object.currentWeapon.ammoCount/global.myself.object.currentWeapon.maxAmmo*100,c_black,barcolor,barcolor,0,true,false);
 			}
 		}
-	}
-');
-
-//Changes the number telling randomizer what weapon should be shown
-object_event_add(PlayerControl, ev_mouse, ev_global_middle_press,'
-	if(global.myself.object != -1){
-		if (global.myself.object.radioactive || global.myself.class == CLASS_QUOTE) exit; // fix q/c
-		if(global.myself.activeWeapon == 0){
-			global.myself.activeWeapon = 1;
-			if (global.myself.object.zoomed) global.myself.object.zoomed = false;
-		}else{
-			global.myself.activeWeapon = 0;
-		}
-
-	    var coolSendBuffer;
-		coolSendBuffer = buffer_create();
-
-		//Sends the active weapon to the server
-        write_ubyte(coolSendBuffer, randomizer.activeWeapon);
-        write_ubyte(coolSendBuffer, global.myself.activeWeapon);
-        if(global.isHost){
-            PluginPacketSendTo(randomizer.packetID, coolSendBuffer, global.myself);
-        }else{
-            PluginPacketSend(randomizer.packetID, coolSendBuffer);
-        }
-        buffer_clear(coolSendBuffer);
 	}
 ');
 

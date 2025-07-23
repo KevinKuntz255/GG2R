@@ -1,4 +1,8 @@
 //Some needed things for weapons
+globalvar MeleeHitMapSnd, MeleeHitSnd, JarateSnd;
+MeleeHitMapSnd = sound_add(directory + '/randomizer_sounds/MeleeHitMapSnd.wav', 0, 1);
+MeleeHitSnd = sound_add(directory + '/randomizer_sounds/MeleeHitSnd.wav', 0, 1);
+JarateSnd = sound_add(directory + '/randomizer_sounds/JarateSnd.wav', 0, 1);
 // create RadioBlur here so that It's in the first file callled in plugin.gml
 globalvar MeleeMask, RadioBlur;
 MeleeMask = object_add();
@@ -188,9 +192,6 @@ object_event_add(MeleeMask,ev_destroy,0,'
     event_inherited();
     owner.currentWeapon.smashing = false;
 ');
-globalvar MeleeHitMapSnd, MeleeHitSnd;
-MeleeHitMapSnd = sound_add(directory + '/randomizer_sounds/MeleeHitMapSnd.wav', 0, 1);
-MeleeHitSnd = sound_add(directory + '/randomizer_sounds/MeleeHitSnd.wav', 0, 1);
 object_event_add(MeleeMask,ev_collision,Obstacle,'
     if hit == 0 {
         playsound(x,y,MeleeHitMapSnd);
@@ -1515,8 +1516,6 @@ object_event_add(MadMilk,ev_other,ev_user12,'
 object_event_add(MadMilk,ev_other,ev_user13,'
 
 ');
-globalvar JarateSnd;
-JarateSnd = sound_add(directory + '/randomizer_sounds/JarateSnd.wav', 0, 1);
 object_event_add(MadMilk,ev_other,ev_user2,'
 	if(exploded == true) {
 		exit;
@@ -1979,44 +1978,74 @@ object_event_add(Piss,ev_collision,Obstacle,'
 object_event_add(Piss,ev_alarm,0,'
     instance_destroy();
 ');
-object_event_add(Rocket,ev_collision,Character,'
-	if ownerPlayer.object != -1 {
-		if other.team != team {
-			if owner.weapons[0] >= WEAPON_BLACKBOX
-				ownerPlayer.object.hp=min(ownerPlayer.object.hp+15,ownerPlayer.object.maxHp);
-		}
-	}
-	// somehow, healing on knockback is detected here, test later!!
-	//if (distance_to_object(other) < blastRadius)
-	//{
-			//playsound(x,y,PickupSnd);
-	//}
+globalvar NatachaShot;
+NatachaShot = object_add();
+object_set_sprite(NatachaShot, ShotS);
+object_set_parent(NatachaShot, Shot);
+object_event_add(NatachaShot,ev_create,0,'
+    {
+        hitDamage = 6;
+		lifetime = 40;
+		alarm[0] = lifetime;
+		originx=x;
+		originy=y;
+			
+        // Controls whether this bullet penetrates bubbles or not
+        // Also controls whether this bullet destroys friendly bubbles
+        perseverant = choose(0, 0, 1); // 1/3 chance
+    }
 ');
-object_event_add(Rocket,ev_other,ev_user5,'
-		/*if(characterHit != -1) {
-			if(characterHit.team != team)
-			{
-				if (owner.weapons[0] >= WEAPON_BLACKBOX) {
-					//playsound(x,y,PickupSnd);
-					owner.hp += 15;
-				}
-			}
-		} alt heal code
-		// this code to detect knockback healing doesnt work
-		with (Character) {
-			if (distance_to_object(other) <= other.blastRadius and !(team == other.team and id != other.ownerPlayer.object and place_meeting(x, y+1, Obstacle)))
-			{
-				if distance_to_object(other) <= other.blastRadius and other.team != team && !ubered and hp > 0 && true
-				{
-					playsound(x,y,PickupSnd);
-				}
-			}
-		}*/
+object_event_add(NatachaShot,ev_alarm,0,'
+    instance_destroy();
+');
+object_event_add(NatachaShot,ev_collision,Character,'
+    gunSetSolids();
+    if (!place_free(x, y)) 
+    {
+        instance_destroy();
+        gunUnsetSolids();
+        exit;
+    }
+    gunUnsetSolids();
+
+    if(other.id != ownerPlayer.object and other.team != team  && other.hp > 0 && other.ubered == 0)
+    {
+        damageCharacter(ownerPlayer, other.id, hitDamage);
+        if (other.lastDamageDealer != ownerPlayer and other.lastDamageDealer != other.player)
+        {
+            other.secondToLastDamageDealer = other.lastDamageDealer;
+            other.alarm[4] = other.alarm[3]
+        }
+        other.alarm[3] = ASSIST_TIME / global.delta_factor;
+        other.lastDamageDealer = ownerPlayer;
+        other.lastDamageSource = weapon;
+        
+        var blood;
+        if(global.gibLevel > 0)
+        {
+            blood = instance_create(x,y,Blood);
+            blood.direction = direction-180;
+        }
+        dealFlicker(other.id);
+        with(other)
+        {
+            motion_add(other.direction, other.speed*0.1);
+			speed*=0.95;
+        }
+        instance_destroy();
+    }
 ');
 
 // Use the damage API
 // does not work, idk why
 global.dealDamageFunction += '
+	if (argument0 != noone && instance_exists(argument0)) {
+		if (argument0.object_index == Player) {
+			if (argument0.object != -1 && instance_exists(argument0.object)) {
+				if (argument0.object.currentWeapon.object_index == BlackBox && argument1.team != argument0.team) argument0.object.hp += argument2*0.25;
+			}
+		}
+	}
     if (argument1 != noone && instance_exists(argument1)) {
 	
         //if (argument1.object_index == Player) {
