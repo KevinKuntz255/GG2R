@@ -4,14 +4,17 @@ MeleeHitMapSnd = sound_add(directory + '/randomizer_sounds/MeleeHitMapSnd.wav', 
 MeleeHitSnd = sound_add(directory + '/randomizer_sounds/MeleeHitSnd.wav', 0, 1);
 JarateSnd = sound_add(directory + '/randomizer_sounds/JarateSnd.wav', 0, 1);
 // create RadioBlur here so that It's in the first file callled in plugin.gml
-globalvar MeleeMask, RadioBlur;
-MeleeMask = object_add();
+globalvar MeleeMask, RadioBlur, Text, MissS, CritS;
 RadioBlur=object_add();
+Text = object_add();
+MissS = sprite_add(pluginFilePath + "\randomizer_sprites\MissS.png", 1, 0, 0, 0, 0);
+CritS = sprite_add(pluginFilePath + "\randomizer_sprites\CritS.png", 1, 0, 0, 0, 0);
 object_set_depth(RadioBlur, 130000);
 object_event_add(RadioBlur,ev_create,0,'
 	owner=-1;
 	charging=-1;
-	radioactive =-1;
+	radioactive=-1;
+	image_alpha=0.1;
 ');
 object_event_add(RadioBlur,ev_draw,0,'
 	if !variable_local_exists("old_pos") {
@@ -154,32 +157,41 @@ object_event_add(RadioBlur,ev_draw,0,'
 		overlayList = owner.stillOverlays;
 	}
 
-    while a < 12-1 {
-		draw_sprite_ext(sprite,floor(owner.animationImage),old_pos[a,0],old_pos[a,1],owner.image_xscale,1,0,c_white,0.1/((a+2)/2));
+    while a <= 12-1 {
+		draw_sprite_ext(sprite,floor(owner.animationImage),old_pos[a,0],old_pos[a,1],owner.image_xscale,1,0,c_white,image_alpha/((a+2)/2));
 		a += 1;
-	}   
+	}
 ');
-
 object_event_add(RadioBlur,ev_step,ev_step_end,'
-	if instance_exists(owner) {
+	if owner {
 		charging = owner.currentWeapon.charging;
 		radioactive = owner.radioactive;
 		if radioactive or charging /*or owner.stomping or owner.raged*/ {
-		x=owner.x;
-		y=owner.y;
+			x=owner.x;
+			y=owner.y;
 		} else {
-			instance_destroy();
+			image_alpha -= 0.05;
+			if image_alpha <= 0.01 instance_destroy();
 		}
-	} else 
-		instance_destroy();
+	} else {
+		image_alpha -= 0.05;
+		if image_alpha <= 0.01 instance_destroy();
+	}
 ');
-
+object_event_add(Text,ev_create,0,'
+	vspeed-=0.5;
+');
+object_event_add(Text,ev_step,ev_step_normal,'
+	image_alpha -= 0.05;
+	if image_alpha <= 0.1 instance_destroy();
+');
+MeleeMask = object_add();
 object_set_parent(MeleeMask, StabMask);
 object_event_add(MeleeMask,ev_create,0,'
     {
         hitDamage = 8;
         alarm[0]=6;
-        crit=1;
+        crit=0;
         hit = 0;
         flameLife = 15;
         burnIncrease = 1;
@@ -203,16 +215,17 @@ object_event_add(MeleeMask,ev_collision,Character,'
     {
         if(!collision_line(x,y-12,other.x,other.y,Obstacle,true,true)) and (!collision_line(x,y-12,other.x,other.y,TeamGate,true,true) and (!collision_line(x,y-12,other.x,other.y,BulletWall,true,true)))
         {
-            //if other.radioactive { //Is bonk radioactive?
-            //    var text;
-            //    text=instance_create(x,y,Text);
-            //    text=sprite_index = MissS
-            //    instance_destroy();
-            //    exit;
-            //}
             playsound(x,y,MeleeHitSnd);
             if weapon == WEAPON_WRECKER && other.burnDuration > 0 hitDamage*= 1;
-            if true other.hp -= hitDamage*(1+0*0.35)*1;
+			hitDamage *= (1+0*0.35)*1;
+			damageCharacter(ownerPlayer.object, other.id, hitDamage);
+			
+			if (crit == 1) {
+				var text;
+				text=instance_create(x+20,y,Text);
+				text.sprite_index = CritS;
+			}
+			//other.hp -= hitDamage*(1+0*0.35)*1;
             //if weapon == WEAPON_WRENCH && other.hp <= 0 && instance_exists(owner) owner.nutsNBolts = min(100,owner.nutsNBolts+25);
 
             with(other) {motion_add(other.owner.aimDirection,3);}
@@ -654,7 +667,7 @@ object_event_add(SapMask,ev_create,0,'
     {
         hitDamage = 8;
         alarm[0]=6;
-        //playsound(x,y,KnifeSnd)
+        playsound(x,y,KnifeSnd)
     }
 ');
 object_event_add(SapMask,ev_collision,Character,'');
@@ -1168,8 +1181,14 @@ object_event_add(FANShot,ev_collision,Character,'
         dealFlicker(other.id);
         with(other)
         {
-            motion_add(other.direction, other.speed*0.1);
-        }
+			motion_add(other.direction, other.speed*0.1);
+			if (!onground) { // make em fly if theyre off ground
+				//motion_add(other.direction, other.speed*0.2);
+				other.moveStatus = 3;
+			} else {
+				
+			}
+		}
         instance_destroy();
     }
 ');
@@ -1318,13 +1337,6 @@ object_event_add(Ball,ev_step,ev_step_normal,'
 ');
 object_event_add(Ball,ev_collision,Character,'
     if(/*other.id != ownerPlayer.object and*/other.team != team  && other.hp > 0 && other.ubered == 0 && used==0 && speed >= 0.2) && bounced <2 {
-        //if other.radioactive {
-        //    var text;
-        //    text  = instance_create(x,y,Text);
-        //    text.sprite_index = MissS;
-        //    instance_destroy();
-        //    exit;
-        //}
         if (other.lastDamageDealer != ownerPlayer && other.lastDamageDealer != other.player){
             other.secondToLastDamageDealer = other.lastDamageDealer;
             other.alarm[4] = other.alarm[3]
@@ -1333,10 +1345,16 @@ object_event_add(Ball,ev_collision,Character,'
         other.lastDamageDealer = ownerPlayer;
         other.lastDamageSource = weapon;
         other.lastDamageCrit = 1;
-         
-        if true { 
-            if bounced < 1 other.hp -= damage*(1+0*0.35); else other.hp -= damage*(1+0*0.35)*.50;
-        }
+		
+		if bounced < 1
+			damage *= (1+0*0.35);
+		else
+			damage *= (1+0*0.35)*.50;
+		
+		damageCharacter(ownerPlayer, other.id, damage);
+		
+		//other.hp -= damage*(1+0*0.35); else other.hp -= damage*(1+0*0.35)*.50;
+		
         with(other) {
             motion_add(other.direction, other.speed*0.03);
             cloakAlpha = min(cloakAlpha + 0.1, 1);    
@@ -1482,22 +1500,6 @@ object_event_add(MadMilk,ev_collision,Generator,'
 	if team != other.team event_user(2);
 ');
 object_event_add(MadMilk,ev_collision,Obstacle,'
-    move_contact_solid(point_direction(x,y,x+hspeed,y+vspeed), speed);
-	if(not place_free(x,y+sign(vspeed))) {
-		vspeed*=-0.4;
-		if(not place_free(x+hspeed,y)){
-			move_contact_solid(point_direction(x,y,x+hspeed,y+vspeed), speed);
-			hspeed*=-0.4;
-		}
-	}
-	if(not place_free(x+sign(hspeed),y)){
-		hspeed*=-0.4;
-		if(not place_free(x,y+vspeed)) {
-			move_contact_solid(point_direction(x,y,x+hspeed,y+vspeed), speed);
-			vspeed*=-0.4;
-		}
-	}
-
 	event_user(2);
 ');
 object_event_add(MadMilk,ev_collision,TeamGate,'
@@ -1694,38 +1696,55 @@ object_event_add(NapalmGrenade,ev_step,ev_step_normal,'
 	}
 	image_angle += rotspeed;
 	if(place_free(x,y+1)) {
-		vspeed += 0.7
-	}
-	if(vspeed>11) {
-		vspeed=11;
-	}
+		vspeed += 0.7 * global.delta_factor;
+    } else
+    {
+        vspeed = min(vspeed, 0);
+        hspeed = hspeed * delta_mult(0.9);
+    }
+    if (vspeed > 11)
+        vspeed = 11;
 	image_angle-=hspeed*2.5
-');
-object_event_add(NapalmGrenade,ev_collision,Obstacle,'
-	hspeed*=hfric;
-	rotspeed*=rotfric;
-	collided=true;
+	
+	if(!place_free(x+hspeed, y+vspeed)){
+        hspeed*=hfric;
+        rotspeed*=rotfric;
+        collided=true;
 
-	move_contact_solid(point_direction(x,y,x+hspeed,y+vspeed), speed);
-	if(not place_free(x,y+sign(vspeed))) {
-		vspeed*=-0.8;
-		if(not place_free(x+hspeed,y)){
-			move_contact_solid(point_direction(x,y,x+hspeed,y+vspeed), speed);
-			hspeed*=-0.8;
-		}
-	}
-	if(not place_free(x+sign(hspeed),y)){
-		hspeed*=-0.8;
-		if(not place_free(x,y+vspeed)) {
-			move_contact_solid(point_direction(x,y,x+hspeed,y+vspeed), speed);
-			vspeed*=-0.8;
-		}
-	}
+        wallSetSolid();
 
-	/*if used == 0 {
-		alarm[2]=30;
-		used = 1;
-	}*/
+        really_move_contact_solid(point_direction(x,y,x+hspeed,y+vspeed), speed);
+
+        if(!place_free(x,y+sign(vspeed)))
+        {
+            vspeed *= -0.4;
+            if(!place_free(x+hspeed,y))
+            {
+                really_move_contact_solid(point_direction(x,y,x+hspeed,y+vspeed), speed);
+                hspeed *= -0.4;
+            }
+        }
+        if(!place_free(x+sign(hspeed),y))
+        {
+            hspeed *= -0.4;
+            if(!place_free(x,y+vspeed))
+            {
+                really_move_contact_solid(point_direction(x,y,x+hspeed,y+vspeed), speed);
+                vspeed *= -0.4;
+            }
+        }
+    }
+	
+	if (speed > 0)
+        if (point_distance(x,y,view_xview[0],view_yview[0]) > 2000)
+            instance_destroy();
+			
+	x += hspeed * global.delta_factor;
+    y += vspeed * global.delta_factor;
+    x -= hspeed;
+    y -= vspeed;
+	
+	wallUnsetSolid();
 ');
 object_event_add(NapalmGrenade,ev_collision,Character,'
 	if(team != other.team) {
@@ -1854,22 +1873,6 @@ object_event_add(JarOPiss,ev_collision,Generator,'
 	if team != other.team event_user(2);
 ');
 object_event_add(JarOPiss,ev_collision,Obstacle,'
-    move_contact_solid(point_direction(x,y,x+hspeed,y+vspeed), speed);
-	if(not place_free(x,y+sign(vspeed))) {
-		vspeed*=-0.4;
-		if(not place_free(x+hspeed,y)){
-			move_contact_solid(point_direction(x,y,x+hspeed,y+vspeed), speed);
-			hspeed*=-0.4;
-		}
-	}
-	if(not place_free(x+sign(hspeed),y)){
-		hspeed*=-0.4;
-		if(not place_free(x,y+vspeed)) {
-			move_contact_solid(point_direction(x,y,x+hspeed,y+vspeed), speed);
-			vspeed*=-0.4;
-		}
-	}
-
 	event_user(2);
 ');
 object_event_add(JarOPiss,ev_collision,TeamGate,'
@@ -2035,7 +2038,6 @@ object_event_add(NatachaShot,ev_collision,Character,'
         instance_destroy();
     }
 ');
-
 // Use the damage API
 // does not work, idk why
 global.dealDamageFunction += '
@@ -2046,13 +2048,13 @@ global.dealDamageFunction += '
 			}
 		}
 	}
-    if (argument1 != noone && instance_exists(argument1)) {
-	
-        //if (argument1.object_index == Player) {
-		//	if (argument1.radioactive) {
-		//		argument1.object.hp += argument2;
-		//		playsound(x,y,PickupSnd);
-		//	}
-		//}
-	}
+	if (object_is_ancestor(argument1.object_index, Character)) {
+        if (argument1.radioactive) {
+            argument1.hp += argument2;
+			playsound(x,y,PickupSnd);
+			var text;
+			text=instance_create(x,y,Text);
+			text.sprite_index=MissS;
+        }
+    }
 ';

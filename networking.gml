@@ -95,8 +95,14 @@ object_event_add(PlayerControl, ev_step, ev_step_end, '
                 for(i = 0; i < ds_list_size(global.players); i += 1) {
                     player = ds_list_find_value(global.players, i);
                     write_ushort(randomizer.sendBuffer, i);
-                    write_ushort(randomizer.sendBuffer, player.playerLoadout);
-                }
+                    with(player) {
+						if(variable_local_exists("playerLoadout")) {
+							write_ushort(randomizer.sendBuffer, player.playerLoadout);
+						} else {
+							write_ushort(randomizer.sendBuffer, 0);
+						}
+					}
+				}
                 PluginPacketSendTo(randomizer.packetID, randomizer.sendBuffer, sender);
                 buffer_clear(randomizer.sendBuffer);
                 break;  

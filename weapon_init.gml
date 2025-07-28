@@ -5,7 +5,7 @@
 //Updating this for modern gg2 was a LOT LOT of work
 
 // Sounds
-globalvar SwitchSnd, FlashlightSnd, swingSnd, BallSnd, DirecthitSnd, ManglerChargesnd, LaserShotSnd, BowSnd, ChargeSnd1, ChargeSnd2, ChargeSnd3, FlaregunSnd;
+globalvar SwitchSnd, FlashlightSnd, swingSnd, BallSnd, DirecthitSnd, ManglerChargesnd, LaserShotSnd, BowSnd, ChargeSnd1, ChargeSnd2, ChargeSnd3, FlaregunSnd, BuffbannerSnd, CritSnd;
 SwitchSnd = sound_add(directory + '/randomizer_sounds/switchSnd.wav', 0, 1);
 FlashlightSnd = sound_add(directory + '/randomizer_sounds/FlashlightSnd.wav', 0, 1);
 swingSnd = sound_add(directory + '/randomizer_sounds/swingSnd.wav', 0, 1);
@@ -18,6 +18,8 @@ ChargeSnd1 = sound_add(directory + '/randomizer_sounds/DetoCharge1Snd.wav', 0, 1
 ChargeSnd2 = sound_add(directory + '/randomizer_sounds/DetoCharge2Snd.wav', 0, 1);
 ChargeSnd3 = sound_add(directory + '/randomizer_sounds/DetoCharge3Snd.wav', 0, 1);
 FlaregunSnd = sound_add(directory + '/randomizer_sounds/FlaregunSnd.wav', 0, 1);
+BuffbannerSnd = sound_add(directory + '/randomizer_sounds/BuffbannerSnd.wav', 0, 1);
+CritSnd = sound_add(directory + '/randomizer_sounds/CritSnd.wav', 0, 1);
 object_event_add(Weapon,ev_create,0,'
 	//wrangled = false;
 	readyToStab=false;
@@ -34,19 +36,20 @@ object_event_add(Weapon,ev_create,0,'
 	
     isMelee = false;
 	
-	isMeter = false; // introducing meters
-	meterName ="";
+	hasMeter = false; // introducing meters
+	meterName = "";
 	maxMeter=-1;
 	meterCount=-1;
 	
 	// Implement fixed reload times by parented variables
 	with(owner) {
 		with (player)
+			// reminder: activeWeapon is modified before Weapon ev_create is called
 			if (!variable_local_exists("activeWeapon")) exit;
-			if variable_local_exists("PrimaryRefireTime") && player.activeWeapon == 0 {
+			if variable_local_exists("PrimaryRefireTime") && player.activeWeapon == 1 {
 				other.alarm[0] = PrimaryRefireTime;
 			}
-			if variable_local_exists("SecondaryRefireTime") && player.activeWeapon == 1 {
+			if variable_local_exists("SecondaryRefireTime") && player.activeWeapon == 0 {
 				other.alarm[0] = SecondaryRefireTime;
 			}
 			if variable_local_exists("reloadFlare") {
@@ -69,7 +72,7 @@ object_event_add(Weapon,ev_create,0,'
 ');
 object_event_add(Weapon,ev_destroy,0,'
 	if (alarm[0] > 1.25) {
-		if (owner.player.activeWeapon == 0)
+		if (owner.player.activeWeapon == 1)
 			owner.PrimaryRefireTime = alarm[0];
 		else
 			owner.SecondaryRefireTime = alarm[0];
@@ -458,12 +461,14 @@ object_event_add(Lasergun,ev_other,ev_user3,'
         with(Player) {
             if(id != other.ownerPlayer and team != other.owner.team and object != -1) {
                 if(collision_line(other.x,other.y,other.a[i],other.b[i],object,true,false)>=0) && object.ubered == 0 {
-                    if true == false { //I put this over here for now object.radioactive  WHAT DOES THIS MEAN
+                    if true == false { //I put this over here for now object.radioactive
                         var text;
                         text=instance_create(x,y,Text);
                         text=sprite_index = MissS
                     } else {
-                        if true == true object.hp -= other.hitDamage*(1+0*0.35)*1*1; //Yeah I removed crap here
+						hitDamage *= (1+0*0.35)*1;
+						damageCharacter(ownerPlayer.object, other.id, hitDamage);
+                        //if true == true object.hp -= other.hitDamage*(1+0*0.35)*1; //Yeah MCBoss removed crits here
                         //object.lastDamageCrit=other.crit;
                         object.timeUnscathed = 0;
                         if (object.lastDamageDealer != other.ownerPlayer && object.lastDamageDealer != object.player){
@@ -665,7 +670,7 @@ object_event_add(BonkHand,ev_alarm,6,'
 ');
 object_event_add(BonkHand,ev_alarm,10,'
     owner.radioactive = false;
-	playsound(x,y,BallSnd);
+	playsound(x,y,BowSnd);
 ');
 object_event_add(BonkHand,ev_step,ev_step_normal,'
     image_index = owner.team+2*real(ammoCount);
@@ -1534,7 +1539,7 @@ object_event_add(BuffBanner,ev_create,0,'
     image_speed = 0;
     unscopedDamage = 0;
 	isMelee = true;
-	isMeter = true;
+	hasMeter = true;
 	
 	normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\BuffBannerS.png", 2, 1, 0, 0, 0);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\BuffBannerS.png", 2, 1, 0, 0, 0);
@@ -1549,6 +1554,32 @@ object_event_add(BuffBanner,ev_create,0,'
     reloadAnimLength = sprite_get_number(reloadSprite)/2;
     reloadImageSpeed = reloadAnimLength/reloadTime;
 ');
+object_event_add(BuffBanner,ev_other,ev_user3,'
+	if (!owner.cloak && meterCount >= maxMeter)
+	{
+		meterCount = 0;
+		playsound(x,y,BuffbannerSnd);
+		owner.taunting=true;
+        owner.tauntindex=0;
+        owner.image_speed=owner.tauntspeed;
+	}
+');
+object_event_add(BuffBanner,ev_step,ev_step_normal,'
+    image_index = owner.team+2*real(ammoCount);
+
+    if !variable_local_exists("ammoCheck") {
+        ammoCheck = 1;
+        alarm[5] = owner.ammo[105];
+    }
+	if (owner.taunting) {
+		if (owner.tauntindex >= sprite_get_number(owner.tauntsprite)-1 && !owner.buffbanner) {
+			owner.buffbanner = true;
+			playsound(x,y,BallSnd);
+			
+		}
+	}
+');
+
 WEAPON_RBISON = 17;
 RBison = object_add();
 object_set_parent(RBison, Weapon);
@@ -3256,6 +3287,20 @@ object_event_add(GrenadeLauncher,ev_create,0,'
     ammoCount = maxAmmo;
     idle=true;
     unscopedDamage = 0;
+	
+	normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\GrenadeLauncherS.png", 1, 1, 0, 10, 6);
+    recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\GrenadeLauncherFS.png", 1, 1, 0, 10, 6);
+    //reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\GrenadeLauncherFRS.png", 24, 1, 0, 16, 14);
+    reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\GrenadeLauncherS.png", 24, 1, 0, 16, 14);
+
+    sprite_index = normalSprite;
+
+    recoilTime = refireTime;
+    recoilAnimLength = sprite_get_number(recoilSprite)/2;
+    recoilImageSpeed = recoilAnimLength/recoilTime;
+
+    reloadAnimLength = sprite_get_number(reloadSprite)/2;
+    reloadImageSpeed = reloadAnimLength/reloadTime;
 ');
 WEAPON_DOUBLETROUBLE = 36;
 DoubleTrouble = object_add();
@@ -3281,9 +3326,10 @@ object_event_add(Eyelander,ev_create,0,'
     xoffset=-15;
     yoffset=-40;
     refireTime=18;
-    event_inherited();
-	maxMines = 14;
+	event_inherited();
+	maxMines = 8;
     lobbed = 0;
+	unscopedDamage = 0;
     StabreloadTime = 5;
     //readyToStab = false;
     alarm[2] = 15;
@@ -3294,13 +3340,10 @@ object_event_add(Eyelander,ev_create,0,'
     maxAmmo = 100;
     ammoCount = maxAmmo;
     reloadTime = 300;
-    reloadBuffer = refireTime;
+    reloadBuffer = 26;
     idle=true;
     smashing=false;
 	isMelee = true;
-    //TEMP
-    lobbed=0;
-    unscopedDamage = 0;
 	
 	normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\EyelanderS.png", 2, 1, 0, 2, 0);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\EyelanderFS.png", 8, 1, 0, 2, 0);
@@ -3321,11 +3364,6 @@ object_event_add(Eyelander,ev_destroy,0,'
             instance_destroy();
         }
     }
-	with(RadioBlur) {
-		if (owner == other.owner) {
-            instance_destroy();
-        }
-	}
 	charging = 0;
 	owner.jumpStrength = 8+(0.6/2);
 ');
@@ -3338,9 +3376,10 @@ object_event_add(Eyelander,ev_alarm,1,'
         shot.ownerPlayer=ownerPlayer;
         shot.team=owner.team;
         if (charging == 1) {
-			if (ammoCount <= 40) {
+			if (ammoCount <= 50 || owner.accel >= 1.3 && ammoCount <= 55) {
 				shot.hitDamage = 50; 
-				playsound(x,y,UberEndSnd);
+				playsound(x,y,CritSnd);
+				shot.crit=1;
 			}
 			charging = 0;
 			ammoCount = 0;
@@ -3372,8 +3411,6 @@ object_event_add(Eyelander,ev_step,ev_step_normal,'
 			owner.jumpStrength = 8+(0.6/2);
             charging = 0;
         }
-		huggingWall = (owner.hspeed != 0 && !place_free(owner.x + sign(owner.hspeed), owner.y)) // we hit a wall on the left or right
-		//if (!huggingWall) // at spazzs request if u really dont want to start gliding up
 		if (owner.moveStatus != 4) {
 			if (owner.image_xscale == -1) {
 				owner.hspeed -= 3;
@@ -3390,7 +3427,7 @@ object_event_add(Eyelander,ev_step,ev_step_normal,'
     } else {
         owner.jumpStrength = 8+(0.6/2);
         if ammoCount < 0 ammoCount = 0;
-        else if ammoCount <= maxAmmo ammoCount +=1;
+        else if ammoCount < maxAmmo ammoCount +=1;
     }
 	
     if smashing {
@@ -3455,7 +3492,7 @@ object_event_add(Paintrain,ev_create,0,'
 		maxAmmo = 1;
 		ammoCount = maxAmmo;
 		reloadTime = 300;
-		reloadBuffer = refireTime;
+		reloadBuffer = 24;
 		idle=true;
 		isMelee = true;
 		
@@ -6695,9 +6732,9 @@ object_event_add(Phlog,ev_other,ev_user1,'
                             object.lastDamageDealer = other.ownerPlayer;
                             object.cloakAlpha = min(object.cloakAlpha + 0.3, 1);
                         /*if(global.gibLevel > 0){
-                            blood = instance_create(object.x,object.y,Blood);
-                            blood.direction = other.owner.aimDirection-180;
-                        }*/
+								blood = instance_create(object.x,object.y,Blood);
+								blood.direction = other.owner.aimDirection-180;
+							}*/
                         //if(!object_is_ancestor(object.object_index, Pyro) && /*!object.invincible*/ ) {
                         if(!object_is_ancestor(object.object_index, Pyro)) {
                             //object.frozen = false;
@@ -8022,7 +8059,9 @@ object_event_add(Detonator,ev_other,ev_user1,'
 ');
 object_event_add(Detonator,ev_other,ev_user2,'
     with(DetonationFlare) {
-        event_user(5);
+		if ownerPlayer == other.ownerPlayer {
+			event_user(5);
+		}
     }
 ');
 

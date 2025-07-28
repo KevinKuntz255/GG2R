@@ -10,7 +10,6 @@ object_event_add(Client,ev_step,ev_step_normal,'
 	script_execute(move_all_gore);
 ');
 
-
 //Loadout Stuff
 globalvar loadout, Back, LoadoutSwitcher, LoadoutMenu;
 loadout = room_add();
@@ -18,6 +17,7 @@ room_set_width(loadout, 600);
 room_set_height(loadout, 600);
 
 Back=object_add();
+Page=object_add();
 LoadoutSwitcher=object_add();
 LoadoutMenu=object_add();
 
@@ -56,8 +56,44 @@ object_event_add(Back,ev_draw,0,'
 	draw_sprite(BackS,image_index,xoffset+32,yoffset+544);
 ');
 
+object_event_add(Page,ev_create,0,'
+	PageS = sprite_add(pluginFilePath + "\randomizer_sprites\PageS.png", 2, 0, 0, 0, 0);
+	depth = -140000;
+	image_speed=0;
+	//alarm[0] = 1;
+	xoffset = view_xview[0];
+	yoffset = view_yview[0];
+');
+object_event_add(Page,ev_step,ev_step_normal,'
+	if mouse_x >xoffset+32 && mouse_x < xoffset+96 && mouse_y > yoffset+544 && mouse_y < yoffset + 576 image_index = 1;
+	else image_index = 0;
+
+	/*
+	Temporary Workaround
+	if(variable_global_exists("myself")){
+		if(global.myself.object != -1){
+			global.myself.object.keyState = 0;
+			global.myself.object.lastKeyState = 0;
+		}
+	}
+	*/
+');
+object_event_add(Page,ev_mouse,ev_global_left_press,'
+	if image_index == 1 {
+	    if room = loadout room_goto_fix(Menu);
+	    else with(LoadoutMenu) {instance_destroy();};
+	}
+');
+object_event_add(Page,ev_draw,0,'
+	xoffset = view_xview[0];
+	yoffset = view_yview[0];
+
+	draw_sprite(PageS,image_index,xoffset+32,yoffset+544);
+');
+
 object_event_add(LoadoutSwitcher,ev_create,0,'
 	SelectionS = sprite_add(pluginFilePath + "\randomizer_sprites\SelectionS.png", 180, 0, 0, 0, 0);
+	SelectionS2 = sprite_add(pluginFilePath + "\randomizer_sprites\SelectionS2.png", 2, 0, 0, 0, 0); // Expand later.
 	sprite_index = sprite_add(pluginFilePath + "\randomizer_sprites\ScrollerS.png", 5, 0, 0, 0, 0);
 	depth = -140000;
 	image_speed=0;
@@ -72,7 +108,8 @@ object_event_add(LoadoutSwitcher,ev_create,0,'
 	ysize = view_hview[0];
 
 	selection = 0;
-
+	page=0;
+	
 	description[0,0] = "";
 	description[0,1] = "";
 	description[0,2] = "";
@@ -150,8 +187,13 @@ object_event_add(LoadoutSwitcher,ev_draw,0,'
 	draw_sprite_ext(sprite_index,loaded-value,x+xoffset,y+yoffset,image_xscale,image_yscale,0,c_white,image_alpha);
 
 	for(i=0;i<5;i+=1) {
-	    if selection == i draw_sprite_ext(SelectionS,value+i+90,x+xoffset+8,y+yoffset+56*i+8,image_xscale,image_yscale,0,c_white,image_alpha);
-	    else draw_sprite_ext(SelectionS,value+i,x+xoffset+8,y+yoffset+56*i+8,image_xscale,image_yscale,0,c_white,image_alpha);
+	    if (page==0) {
+			if selection == i draw_sprite_ext(SelectionS,value+i+90,x+xoffset+8,y+yoffset+56*i+8,image_xscale,image_yscale,0,c_white,image_alpha);
+				else draw_sprite_ext(SelectionS,value+i,x+xoffset+8,y+yoffset+56*i+8,image_xscale,image_yscale,0,c_white,image_alpha);
+		} else {
+			if selection == i draw_sprite_ext(SelectionS2,value+i+90,x+xoffset+8,y+yoffset+56*i+8,image_xscale,image_yscale,0,c_white,image_alpha);
+				else draw_sprite_ext(SelectionS2,value+i,x+xoffset+8,y+yoffset+56*i+8,image_xscale,image_yscale,0,c_white,image_alpha);
+		}
 	}
 ');
 
@@ -480,7 +522,7 @@ if !variable_global_exists("pluginOptions") {
 }
 
 object_event_add(global.pluginOptions, ev_create, 0, '
-    menu_addedit_key("Switch Weapon:", "global.switchWeapon","");
+    menu_addedit_keyormouse("Switch Weapon:", "global.switchWeapon","");
 ');
 
 object_event_add(global.pluginOptions, ev_destroy, 0, '
@@ -508,6 +550,7 @@ object_event_add(InGameMenuController,ev_create,0,'
 object_event_add(Character,ev_create,0,'
 	accel = 0;
 	radioactive = false;
+	buffbanner = false;
 	milked = 0;
 	pissed = 0;
 	blurs = 0;
@@ -515,6 +558,7 @@ object_event_add(Character,ev_create,0,'
 	player.activeWeapon=0;
 	player.playerLoadout=-1;
 	bleeding = 0;
+	flight = 0;
 ');
 
 object_event_add(Character,ev_destroy,0,'
@@ -531,6 +575,39 @@ object_event_add(Character,ev_alarm,8,'
 	pissed = 0;
 ');
 
+object_event_add(Character,ev_step,ev_step_normal,'
+	/*if (currentWeapon.charging == 1 and currentWeapon.object_index == Eyelander)
+	{
+		if (moveStatus != 4) {
+			if (image_xscale = -1) {
+				hspeed -= 3;
+			} else if (image_xscale = 1) {
+				hspeed += 3;
+			}
+		} else {
+			if (image_xscale == -1) {
+				hspeed -= 1.8;
+			} else if (image_xscale == 1) {
+				hspeed += 1.8;
+			}
+		}
+	}*/// the trimping becomes permadisabled when used on ev_step_begin
+	
+	blur = radioactive or (currentWeapon.charging == 1 and currentWeapon.object_index == Eyelander);
+	if (blur) {
+		while (blurs <= 15) {
+			blur=instance_create(x,y,RadioBlur);
+			blur.owner=id;
+			blurs+=1;
+		}
+	} else {
+		blurs = 0;
+	}
+');
+globalvar DetoTrimpSnd, DetoFlyStartSnd, DetoFlySnd;
+DetoTrimpSnd = sound_add(directory + '/randomizer_sounds/DetoTrimpSnd.wav', 0, 1);
+DetoFlyStartSnd = sound_add(directory + '/randomizer_sounds/DetoFlyStartSnd.wav', 0, 1);
+DetoFlySnd = sound_add(directory + '/randomizer_sounds/DetoFlySnd.wav', 0, 1);
 object_event_clear(Character,ev_step,ev_step_end);
 object_event_add(Character,ev_step,ev_step_end,'
 	charSetSolids();
@@ -549,37 +626,40 @@ object_event_add(Character,ev_step,ev_step_end,'
 	xprevious = x;
 	yprevious = y;
 	
-	blur = radioactive or (currentWeapon.charging == 1 and currentWeapon.object_index == Eyelander);
-	if (blur) {
-		while (blurs < 15) {
-			blur=instance_create(x,y,RadioBlur);
-			blur.owner=id;
-			blurs+=1;
-		}
-	} else {
-		with(RadioBlur)
-			instance_destroy();
-		blurs = 0;
-	}
-	
 	if(currentWeapon.charging == 1 and currentWeapon.object_index == Eyelander) {
 		// the hspeed mod is a light buff to detect more slopes
-		if(hspeed != 0 && !place_free(x + sign(hspeed*0.5), y)) { // we hit a wall on the left or right
+		if (moveStatus == 4 && !flight)
+		{
+			if(alarm[9] <= 0)
+				loopsoundstart(x,y,DetoFlySnd);
+			else
+				loopsoundmaintain(x,y,DetoFlySnd);
+			alarm[9] = 2 / global.delta_factor;
+		}	
+		if(!place_free(x + sign(hspeed*0.5), y)) { // we hit a wall on the left or right
 			if(place_free(x + sign(hspeed), y - 6)) // if we could just walk up the step
 			{
-				playsound(x,y,PickupSnd);
+				playsound(x,y,DetoTrimpSnd);
 				if (keyState & $80) vspeed -= 7.3 * accel; // hold W to fly
 				//hspeed -= 5;
 				accel += 0.5;
-				if (accel > 1.3) moveStatus = 4;
 			} else {
 				accel = 0;
 			}
 		}
-		if (keyState & $80)
-			if (accel > 1.3 and !onground) moveStatus = 4; // bork it so youre always flyin
+		if (keyState & $80) {
+			if (accel > 1.3 && !onground) {
+				moveStatus = 4; // bork it so youre always flyin
+				if (flight) {
+					playsound(x,y,DetoFlyStartSnd);
+					flight = false;
+				}
+			} else {
+				flight = true;
+			}
+		}
 	} //detected upwards slope, Fly!
-	
+		
 	charUnsetSolids();
 
 	if(global.isHost && hp<=0) {
@@ -708,7 +788,11 @@ object_event_add(Character,ev_step,ev_step_end,'
 	if(deathmatch_invulnerable <= 0)
 	    deathmatch_invulnerable = 0;
 ');
-
+object_event_add(Character,ev_alarm,9,'
+	{
+    loopsoundstop(DetoFlySnd);
+    }
+');
 object_event_add(Weapon,ev_create,0,'
 	spark = 0;
     alarm[9]=2;
@@ -772,9 +856,9 @@ object_event_add(Weapon,ev_draw,0,'
 		        //draw_sprite_ext(sprite_index, imageOffset, round(x+xoffset*image_xscale), round(y+yoffset) + owner.equipmentOffset, image_xscale, image_yscale, image_angle, ubercolour, 0.7*image_alpha);
 		        draw_sprite_ext(sprite_index,4+imageOffset/2,round(x+xoffset*image_xscale),round(y+yoffset),image_xscale,image_yscale,image_angle,ubercolour,0.7);
                 if (!isMelee) 
-					draw_sprite_ext(Spark2S,spark,round(x+xoffset*image_xscale),round(y+yoffset),image_xscale,image_yscale,image_angle,ubercolour,0.3);
+					draw_sprite_ext(Spark2S,spark,round(x+xoffset*image_xscale),round(y+yoffset) + owner.equipmentOffset ,image_xscale,image_yscale,image_angle,ubercolour,0.3);
 				else
-					draw_sprite_ext(Spark2S,spark,round(x+xoffset*image_xscale),round(y+yoffset+40),image_xscale,image_yscale,image_angle,ubercolour,0.3);
+					draw_sprite_ext(Spark2S,spark,round(x+xoffset*image_xscale),round(y+yoffset+40) + owner.equipmentOffset ,image_xscale,image_yscale,image_angle,ubercolour,0.3);
 			}
 	    }
 	    if (owner.ubered)
@@ -836,7 +920,7 @@ object_event_add(Heavy,ev_create,0,'
 ');
 object_event_clear(Heavy,ev_step,ev_step_normal);
 object_event_add(Heavy,ev_step,ev_step_normal,'
-	minigun = keyState & $10 && global.myself.activeWeapon == 0;
+	minigun = keyState & $10 && player.activeWeapon == 0;
 	weapon = global.myself.object.currentWeapon.object_index;
 	if(minigun) {
 		if (weapon == Tomislav) {
@@ -1127,7 +1211,7 @@ object_event_add(PlayerControl,ev_step,ev_step_end,'
 	//Changes the number telling randomizer what weapon should be shown
 	if (keyboard_check_pressed(global.switchWeapon)) {
 		if(global.myself.object != -1){
-			if (global.myself.object.radioactive || global.myself.class == CLASS_QUOTE) exit; // fix q/c
+			if (global.myself.object.radioactive || global.myself.class == CLASS_QUOTE || global.myself.object.taunting) exit; // fix q/c
 			if(global.myself.activeWeapon == 0){
 				global.myself.activeWeapon = 1;
 				if (global.myself.object.zoomed) {
