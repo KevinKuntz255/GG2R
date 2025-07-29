@@ -1,14 +1,16 @@
 //Some needed things for weapons
-globalvar MeleeHitMapSnd, MeleeHitSnd, JarateSnd;
+globalvar MeleeHitMapSnd, MeleeHitSnd, JarateSnd, CritHitSnd;
 MeleeHitMapSnd = sound_add(directory + '/randomizer_sounds/MeleeHitMapSnd.wav', 0, 1);
 MeleeHitSnd = sound_add(directory + '/randomizer_sounds/MeleeHitSnd.wav', 0, 1);
 JarateSnd = sound_add(directory + '/randomizer_sounds/JarateSnd.wav', 0, 1);
+CritHitSnd = sound_add(directory + '/randomizer_sounds/CritHitSnd.wav', 0, 1);
 // create RadioBlur here so that It's in the first file callled in plugin.gml
-globalvar MeleeMask, RadioBlur, Text, MissS, CritS;
+globalvar MeleeMask, RadioBlur, Text, MissS, CritS, MiniCritS;
 RadioBlur=object_add();
 Text = object_add();
 MissS = sprite_add(pluginFilePath + "\randomizer_sprites\MissS.png", 1, 0, 0, 0, 0);
 CritS = sprite_add(pluginFilePath + "\randomizer_sprites\CritS.png", 1, 0, 0, 0, 0);
+MiniCritS = sprite_add(pluginFilePath + "\randomizer_sprites\MiniCritS.png", 1, 0, 0, 0, 0);
 object_set_depth(RadioBlur, 130000);
 object_event_add(RadioBlur,ev_create,0,'
 	owner=-1;
@@ -215,16 +217,28 @@ object_event_add(MeleeMask,ev_collision,Character,'
     {
         if(!collision_line(x,y-12,other.x,other.y,Obstacle,true,true)) and (!collision_line(x,y-12,other.x,other.y,TeamGate,true,true) and (!collision_line(x,y-12,other.x,other.y,BulletWall,true,true)))
         {
-            playsound(x,y,MeleeHitSnd);
             if weapon == WEAPON_WRECKER && other.burnDuration > 0 hitDamage*= 1;
 			hitDamage *= (1+0*0.35)*1;
 			damageCharacter(ownerPlayer.object, other.id, hitDamage);
 			
 			if (crit == 1) {
 				var text;
-				text=instance_create(x+20,y,Text);
+				if (ownerPlayer.object.image_xscale == -1)
+					text=instance_create(x-20,y-10,Text);
+				else
+					text=instance_create(x+20,y-10,Text);
 				text.sprite_index = CritS;
+				playsound(x,y,CritHitSnd);
+			} else if (crit == 2) {
+				var text;
+				if (ownerPlayer.object.image_xscale == -1)
+					text=instance_create(x-20,y-10,Text);
+				else
+					text=instance_create(x+20,y-10,Text);
+				text.sprite_index = MiniCritS;
 			}
+			
+			playsound(x,y,MeleeHitSnd);
 			//other.hp -= hitDamage*(1+0*0.35)*1;
             //if weapon == WEAPON_WRENCH && other.hp <= 0 && instance_exists(owner) owner.nutsNBolts = min(100,owner.nutsNBolts+25);
 
@@ -250,6 +264,8 @@ object_event_add(MeleeMask,ev_collision,Character,'
                 if global.isHost{
                     //doEventBallstun(other.player,0); simply no
                     //sendEventBallStun(other.player,0);
+					// righ, have this instead
+					speed*= 0.55;
                 }
             } else if weapon == WEAPON_FISTS or weapon == WEAPON_SAXTONHALE {
                 if other.hp <= 0 with(other) {motion_add(other.owner.aimDirection,25);};
@@ -286,7 +302,7 @@ object_event_add(MeleeMask,ev_collision,Character,'
             other.lastDamageSource = weapon;
 
             var blood;
-            if(global.gibLevel > 0)
+            if(global.gibLevel > 0 && !other.radioactive)
             {
                 repeat(10)
                 {
@@ -469,9 +485,14 @@ object_event_add(DetonationFlare,ev_other,ev_user5,'
                         afterburnSource = WEAPON_DETONATOR;
                         alarm[0] = decayDelay;
                     }
-                    if true hp -= other.explosionDamage*sqr((1-(distance_to_object(other)/other.blastRadius)))*(1+0*0.35)*1*bonus;
-                    if player == other.ownerPlayer hp-= 10*sqr((1-(distance_to_object(other)/other.blastRadius)))*(1+0*0.35)*1;
-                    timeUnscathed = 0;
+					if (player != other.ownerPlayer) damageCharacter(ownerPlayer.object, other.id, other.explosionDamage*sqr((1-(distance_to_object(other)/other.blastRadius)))*(1+0*0.35)*1*bonus);
+					else if (player == other.ownerPlayer)
+						damageCharacter(ownerPlayer.object, other.id, 10*sqr((1-(distance_to_object(other)/other.blastRadius)))*(1+0*0.35)*1);
+                    
+					//if true hp -= other.explosionDamage*sqr((1-(distance_to_object(other)/other.blastRadius)))*(1+0*0.35)*1*bonus;
+                    //if player == other.ownerPlayer hp-= 10*sqr((1-(distance_to_object(other)/other.blastRadius)))*(1+0*0.35)*1;
+                    
+					timeUnscathed = 0;
                     if (id == other.ownerPlayer.object and lastDamageDealer != -1 and lastDamageDealer != other.ownerPlayer and other.reflector == noone)
                     {
                         lastDamageSource = DAMAGE_SOURCE_FINISHED_OFF_GIB;
@@ -494,7 +515,7 @@ object_event_add(DetonationFlare,ev_other,ev_user5,'
                             lastDamageSource = WEAPON_REFLECTED_FLARE;
                         }
                     }
-                    if(global.gibLevel > 0)
+                    if(global.gibLevel > 0 && !other.radioactive)
                     {
                         repeat(3)
                         {
@@ -839,7 +860,7 @@ object_event_add(Arrow,ev_collision,Character,'
             other.lastDamageSource = weapon;
             //other.lastDamageCrit = crit;
             var blood;
-            if(global.gibLevel > 0){
+            if(global.gibLevel > 0 && !other.radioactive){
                 blood = instance_create(x,y,Blood);
                 blood.direction = direction-180;
                 }
@@ -1038,7 +1059,8 @@ object_event_add(LaserShot,ev_collision,Character,'
                     }
                 }
             }
-            if true other.hp -= hitDamage*(1+0*0.35)*1;
+			hitDamage *= (1+0*0.35)*1;
+            damageCharacter(ownerPlayer, other.id, hitDamage);
             other.timeUnscathed = 0;
             if (other.lastDamageDealer != ownerPlayer && other.lastDamageDealer != other.player){
                 other.secondToLastDamageDealer = other.lastDamageDealer;
@@ -1048,7 +1070,7 @@ object_event_add(LaserShot,ev_collision,Character,'
             other.lastDamageDealer = ownerPlayer;
             other.lastDamageSource = weapon;
             var blood;
-            if(global.gibLevel > 0){
+            if(global.gibLevel > 0 && !other.radioactive){
                 blood = instance_create(x,y,Blood);
                 blood.direction = direction-180;
                 }
@@ -1173,7 +1195,7 @@ object_event_add(FANShot,ev_collision,Character,'
         other.lastDamageSource = weapon;
         
         var blood;
-        if(global.gibLevel > 0)
+        if(global.gibLevel > 0 && !object.radioactive)
         {
             blood = instance_create(x,y,Blood);
             blood.direction = direction-180;
@@ -1529,13 +1551,10 @@ object_event_add(MadMilk,ev_other,ev_user2,'
 
 	with (Character) {
 		if (distance_to_object(other) < other.blastRadius and !(team == other.team and id != other.ownerPlayer.object and place_meeting(x, y+1, Obstacle))){
-			if(other.team != team) && !ubered and hp && 0 && !radioactive {
+			if(other.team != team) && !ubered and hp > 0 && !radioactive {
 					milked=1; // in modern context this variable name is making me laugh
 					alarm[8]=250-distance_to_object(other);
-					cloak=false; 
-					if instance_exists(other.ownerPlayer) {
-						other.ownerPlayer.object.hp = min(other.ownerPlayer.object.maxHp, other.ownerPlayer.object.hp+20);
-					}       
+					cloak=false;     
 			}
 			if radioactive {
 				var text;
@@ -1697,8 +1716,7 @@ object_event_add(NapalmGrenade,ev_step,ev_step_normal,'
 	image_angle += rotspeed;
 	if(place_free(x,y+1)) {
 		vspeed += 0.7 * global.delta_factor;
-    } else
-    {
+    } else {
         vspeed = min(vspeed, 0);
         hspeed = hspeed * delta_mult(0.9);
     }
@@ -1902,7 +1920,7 @@ object_event_add(JarOPiss,ev_other,ev_user2,'
 
 	with (Character) {
 		if (distance_to_object(other) < other.blastRadius and !(team == other.team and id != other.ownerPlayer.object and place_meeting(x, y+1, Obstacle))){
-			if(other.team != team) && !ubered and hp && 0 && !radioactive {
+			if(other.team != team) && !ubered and hp > 0 && !radioactive {
 					pissed=1; // in modern context this variable name is making me laugh
 					alarm[8]=250-distance_to_object(other);
 					cloak=false; 
@@ -1981,6 +1999,7 @@ object_event_add(Piss,ev_collision,Obstacle,'
 object_event_add(Piss,ev_alarm,0,'
     instance_destroy();
 ');
+
 globalvar NatachaShot;
 NatachaShot = object_add();
 object_set_sprite(NatachaShot, ShotS);
@@ -2024,7 +2043,7 @@ object_event_add(NatachaShot,ev_collision,Character,'
         other.lastDamageSource = weapon;
         
         var blood;
-        if(global.gibLevel > 0)
+        if(global.gibLevel > 0 && !other.radioactive)
         {
             blood = instance_create(x,y,Blood);
             blood.direction = direction-180;
@@ -2038,23 +2057,227 @@ object_event_add(NatachaShot,ev_collision,Character,'
         instance_destroy();
     }
 ');
-// Use the damage API
-// does not work, idk why
-global.dealDamageFunction += '
-	if (argument0 != noone && instance_exists(argument0)) {
-		if (argument0.object_index == Player) {
-			if (argument0.object != -1 && instance_exists(argument0.object)) {
-				if (argument0.object.currentWeapon.object_index == BlackBox && argument1.team != argument0.team) argument0.object.hp += argument2*0.25;
-			}
-		}
+
+// copied from qcwep as made by ZaSpai
+globalvar QCShot, MGShot, MGShotS, MGShotMaskS;
+QCShot = object_add();
+object_event_add(QCShot,ev_create,0,'
+    hitDamage = 7;
+    lifetime = 35;
+    alarm[0] = lifetime / global.delta_factor;
+    originx = x;
+    originy = y;
+    gravity = 0; //defines arcing
+	//team = TEAM_SPECTATOR;
+    
+    // Controls whether this bullet penetrates bubbles or not
+    // Also controls whether this bullet destroys friendly bubbles
+    // Straight shooters have 2 in 3 chance, arcers have 1 in 3
+    perseverant = choose(0, 0, 0); // 0/3 chance
+    
+    image_speed = 0;
+');
+
+object_event_add(QCShot,ev_alarm,0,'
+	instance_destroy();
+');
+
+object_event_add(QCShot,ev_step,ev_step_begin,'
+	gunSetSolids();
+	if(!variable_local_exists("firststep"))
+        firststep = true;
+    
+    vspeed += gravity * global.delta_factor;
+    
+    image_angle = direction;
+    
+    if(!firststep and global.delta_factor != 1)
+    {
+        x += hspeed * global.delta_factor;
+        y += vspeed * global.delta_factor;
+    }
+    
+    if (!place_free(x, y))
+    {
+        imp = instance_create(x,y,Impact);
+        imp.image_angle=direction;
+        instance_destroy();
+    }
+    
+    if(!firststep and global.delta_factor != 1)
+    {
+        x -= hspeed;
+        y -= vspeed;
+    }
+    else
+        firststep = false;
+	
+	gunUnsetSolids();
+');
+
+object_event_add(QCShot,ev_collision,Obstacle,'
+	var imp;
+    gunSetSolids();
+    really_move_contact_solid(direction, speed);
+    gunUnsetSolids();
+    imp = instance_create(x,y,Impact);
+    imp.image_angle=direction;
+    instance_destroy();
+');
+
+object_event_add(QCShot,ev_collision,Character,'
+    if(other.id != ownerPlayer.object and other.team != team  && other.hp > 0 && other.ubered == 0)
+    {
+        damageCharacter(ownerPlayer, other.id, hitDamage);
+        if (other.lastDamageDealer != ownerPlayer and other.lastDamageDealer != other.player)
+        {
+            other.secondToLastDamageDealer = other.lastDamageDealer;
+            other.alarm[4] = other.alarm[3]
+        }
+        other.alarm[3] = ASSIST_TIME;
+        other.lastDamageDealer = ownerPlayer;
+        other.lastDamageSource = weapon;
+        
+        var blood;
+        if(global.gibLevel > 0 && !other.radioactive)
+        {
+            blood = instance_create(x,y,Blood);
+            blood.direction = direction-180;
+        }
+        dealFlicker(other.id);
+        with(other)
+        {
+            motion_add(other.direction, other.speed*0.03);
+        }
+        instance_destroy();
+    }
+');
+
+object_event_add(QCShot,ev_collision,TeamGate,'
+	if (!global.mapchanging) {
+		var imp;
+		move_contact_solid(direction, speed);
+		imp = instance_create(x,y,Impact);
+		imp.image_angle=direction;
+		instance_destroy();
 	}
+');
+
+object_event_add(QCShot,ev_collision,Sentry,'
+	if(other.team != team)
+	{
+		damageSentry(ownerPlayer, other.id, hitDamage);
+		other.lastDamageDealer = ownerPlayer;
+		other.lastDamageSource = weapon;
+		instance_destroy();
+	}
+');
+
+object_event_add(QCShot,ev_collision,Bubble,'
+if(team != other.team and !perseverant)
+    instance_destroy();
+');
+
+object_event_add(QCShot,ev_collision,BulletWall,'
+	var imp;
+    move_contact_solid(direction, speed);
+    imp = instance_create(x,y,Impact);
+    imp.image_angle=direction;
+    instance_destroy();
+');
+	
+object_event_add(QCShot,ev_collision,Generator,'
+	if(other.team != team) {
+		damageGenerator(ownerPlayer, other.id, hitDamage);
+		instance_destroy();
+	}
+');
+
+object_event_add(QCShot,ev_draw,0,'
+	draw_sprite_ext(sprite_index,team,x,y,image_xscale,image_yscale,direction,c_white,image_alpha);
+');
+
+MGShot = object_add();
+MGShotS = sprite_add(directory + '\randomizer_sprites\MGShotS.png', 2, 0, 0, 11, 4);
+MGShotMaskS = sprite_add(directory + '\randomizer_sprites\MGShotMaskS.png', 1, 0, 0, 11, 4);
+object_set_parent(MGShot,QCShot);
+object_set_sprite(MGShot,MGShotS);
+object_set_mask(MGShot,MGShotMaskS);
+object_event_add(MGShot,ev_create,0,'
+	event_inherited();
+    gravity = 0.10;
+    perseverant = choose(0, 0, 1); // 1/3 chance
+');
+
+object_event_clear(Bubble,ev_destroy,0);
+object_event_add(Bubble,ev_destroy,0,"
+	if(instance_exists(gun) && instance_exists(owner))
+		gun.bubbleCount -= 1;
+	instance_create(x,y,Pop);
+");
+
+// for radioactivity
+object_event_clear(Shot,ev_collision,Character);
+object_event_add(Shot,ev_collision,Character,'
+	gunSetSolids();
+    if (!place_free(x, y)) 
+    {
+        instance_destroy();
+        gunUnsetSolids();
+        exit;
+    }
+    gunUnsetSolids();
+
+    if(other.id != ownerPlayer.object and other.team != team  && other.hp > 0 && other.ubered == 0)
+    {
+        damageCharacter(ownerPlayer, other.id, hitDamage);
+        if (other.lastDamageDealer != ownerPlayer and other.lastDamageDealer != other.player)
+        {
+            other.secondToLastDamageDealer = other.lastDamageDealer;
+            other.alarm[4] = other.alarm[3]
+        }
+        other.alarm[3] = ASSIST_TIME / global.delta_factor;
+        other.lastDamageDealer = ownerPlayer;
+        other.lastDamageSource = weapon;
+        
+        var blood;
+        if(global.gibLevel > 0 && !other.radioactive)
+        {
+            blood = instance_create(x,y,Blood);
+            blood.direction = direction-180;
+        }
+        dealFlicker(other.id);
+        with(other)
+        {
+            motion_add(other.direction, other.speed*0.03);
+        }
+        instance_destroy();
+    }
+');
+// Use the damage API
+global.dealDamageFunction += '
 	if (object_is_ancestor(argument1.object_index, Character)) {
-        if (argument1.radioactive) {
+        if (argument1.radioactive) { // bonk detection
             argument1.hp += argument2;
-			playsound(x,y,PickupSnd);
 			var text;
 			text=instance_create(x,y,Text);
 			text.sprite_index=MissS;
+			exit;
         }
+		if (argument1.pissed && argument1.team != argument0.team || argument0.object.currentWeapon.hype) {
+			argument2 += 1*0.35; // add this dmg for healing factors
+			argument1.hp -= 1*0.35;
+			var text;
+			text=instance_create(x,y,Text);
+			text.sprite_index=MiniCritS;
+		}
+		if (argument0 != noone && instance_exists(argument0)) {
+			if (argument0.object_index == Player) {
+				if (argument0.object != -1 && instance_exists(argument0.object)) {
+					if (argument0.object.currentWeapon.object_index == BlackBox && argument1.team != argument0.team) argument0.object.hp += argument2*0.3; // BlackBox heal code
+					if (argument1.milked) argument0.object.hp += argument2*0.35; // milk heal code
+				}
+			}
+		}
     }
 ';

@@ -549,16 +549,89 @@ object_event_add(InGameMenuController,ev_create,0,'
 
 object_event_add(Character,ev_create,0,'
 	accel = 0;
-	radioactive = false;
-	buffbanner = false;
-	milked = 0;
-	pissed = 0;
 	blurs = 0;
-	curMeter = 0;
 	player.activeWeapon=0;
 	player.playerLoadout=-1;
-	bleeding = 0;
 	flight = 0;
+	
+	loaded1 = 0;
+	loaded2 = 0;
+	
+	overheal = 0;
+    isSaxtonHale = false;
+    raged=false;
+    canSwitch = true;
+	
+	//stuff from alt weapons
+    pissed=0;
+    milked = 0;
+    bleeding = 0;
+    buffing=false;
+    buffbanner=false;
+    critting=0;
+    critzed = 0;
+    invisibeam = false;
+    megaHealed=false;
+    stunned=0;
+    radioactive=false;
+    bonus=1;
+    charge=false;
+    speedboost=0;
+    cooldown=0;
+    revengeCrits = 0;
+    sapCrits = 0;
+    active = false;
+    regenRate = 2;
+    invincible = false;
+    stabspeed = 0;
+    highJump = 0;
+    fireproof = 0;
+    currentKills = 0;
+    drCharge=0;
+    frozen = 0;
+    phlogDmg = 0;
+    phlogCrit = 0;
+    glowindex = 0;
+	
+	//passive effects
+    hasDangershield = false;
+    hasOverdose = false;
+    stomping = false;
+    hasOverdose = false;
+    hasRazorback = false;
+    hasBootlegger = false;
+    hasBoots = false;
+    bootfuel = 150;
+    floating = false;
+    
+    //for picking up sentries
+    sentryhp=0;
+    sentryupgraded=0;
+    sentrylevel=0;
+    carrySentry=0;
+    
+	meter0=-1;
+	meter1=-1;
+	
+	// could try using the above later?
+    //Things lorgan also prefers saved
+    ammo[100] = false;  //uberReady
+    ammo[101] = 0;      //lobbed (scottish resistance)
+    ammo[102] = -1;     //Bonk timer
+    ammo[103] = 0;      //lobbed (minegun)
+    ammo[104] = -1;     //Jarate timer
+    ammo[105] = -1;     //Sandvich timer
+    ammo[106] = 0;      //bazaar bargain bonus
+    ammo[107] = -1;     //Ball timer
+    ammo[108] = 0;      //Lobbed (tiger uppercut)   
+    ammo[109] = 0;      //hyve amount
+    ammo[110] = 0;      //lobbed (stickyjumper)
+    ammo[111] = -1;     //chocolate timer
+    ammo[112] = 15*30;  //spycicle timer
+    ammo[113] = -1;     //Milk timer
+    ammo[114] = -1;     //napalm grenade timer
+    ammo[115] = 0;      //lobbed (sticky sticker)
+    // damn that is alot of work
 ');
 
 object_event_add(Character,ev_destroy,0,'
@@ -567,6 +640,7 @@ object_event_add(Character,ev_destroy,0,'
             instance_destroy();
         }
 	}
+	loopsoundstop(DetoFlySnd);
 ');
 
 object_event_add(Character,ev_alarm,8,'
@@ -591,7 +665,7 @@ object_event_add(Character,ev_step,ev_step_normal,'
 				hspeed += 1.8;
 			}
 		}
-	}*/// the trimping becomes permadisabled when used on ev_step_begin
+	}*/// the trimping becomes permadisabled when used on ev_step_normal
 	
 	blur = radioactive or (currentWeapon.charging == 1 and currentWeapon.object_index == Eyelander);
 	if (blur) {
@@ -616,7 +690,7 @@ object_event_add(Character,ev_step,ev_step_end,'
 	// Climbing down stairs
 	// if we are not falling this frame, and we are not on a dropdown platform
 	if(vspeed == 0 and ((keyState & $02) or !place_meeting(x, y+1, DropdownPlatform) or place_meeting(x, y, DropdownPlatform)))
-	{ 
+	{
 	    if(place_free(x,y+6))
 	        if(!place_free(x,y+7))
 	            y += 6;
@@ -627,25 +701,47 @@ object_event_add(Character,ev_step,ev_step_end,'
 	yprevious = y;
 	
 	if(currentWeapon.charging == 1 and currentWeapon.object_index == Eyelander) {
-		// the hspeed mod is a light buff to detect more slopes
-		if (moveStatus == 4 && !flight)
-		{
-			if(alarm[9] <= 0)
-				loopsoundstart(x,y,DetoFlySnd);
-			else
-				loopsoundmaintain(x,y,DetoFlySnd);
-			alarm[9] = 2 / global.delta_factor;
-		}	
+		// the hspeed mod is a light buff to detect more slopes	
 		if(!place_free(x + sign(hspeed*0.5), y)) { // we hit a wall on the left or right
-			if(place_free(x + sign(hspeed), y - 6)) // if we could just walk up the step
+			if(place_free(x + sign(hspeed*0.5), y - 6)) // if we could just walk up the step
 			{
 				playsound(x,y,DetoTrimpSnd);
-				if (keyState & $80) vspeed -= 7.3 * accel; // hold W to fly
+				if (keyState & $80) {
+					vspeed -= 7.3 * accel; // hold W to fly
+				}
+				//effect_create_below(ef_smoke,x-hspeed*1.2,y-vspeed*1.2+40,0,c_gray);
+				if !variable_local_exists("jumpFlameParticleType")
+				{
+					jumpFlameParticleType = part_type_create();
+					part_type_sprite(jumpFlameParticleType,FlameS,true,false,true);
+					part_type_alpha2(jumpFlameParticleType,1,0.3);
+					part_type_life(jumpFlameParticleType,2/global.delta_factor,5/global.delta_factor);
+					part_type_scale(jumpFlameParticleType,0.7,-0.65);
+				}
+				
+				if !variable_global_exists("jumpFlameParticleSystem")
+				{
+					global.jumpFlameParticleSystem = part_system_create();
+					part_system_depth(global.jumpFlameParticleSystem, 10);
+				}
+				
+				if(global.particles == PARTICLES_NORMAL or global.particles == PARTICLES_ALTERNATIVE)
+				{
+					part_particles_create(global.jumpFlameParticleSystem,x,y+19,jumpFlameParticleType,1);
+				}
 				//hspeed -= 5;
 				accel += 0.5;
 			} else {
 				accel = 0;
 			}
+		}
+		if (moveStatus == 4 && !flight)
+		{
+			if(alarm[11] <= 0)
+				loopsoundstart(x,y,DetoFlySnd);
+			else
+				loopsoundmaintain(x,y,DetoFlySnd);
+			alarm[11] = 2 / global.delta_factor;
 		}
 		if (keyState & $80) {
 			if (accel > 1.3 && !onground) {
@@ -659,7 +755,12 @@ object_event_add(Character,ev_step,ev_step_end,'
 			}
 		}
 	} //detected upwards slope, Fly!
-		
+	
+	if(currentWeapon.object_index == SodaPopper && (hspeed != 0 || vspeed != 0)) {
+		if (!instance_exists("currentWeapon.hype")) break;
+		if (!currentWeapon.hype)
+			currentWeapon.meterCount += 1/16 * speed;
+	}
 	charUnsetSolids();
 
 	if(global.isHost && hp<=0) {
@@ -717,7 +818,12 @@ object_event_add(Character,ev_step,ev_step_end,'
 	if(y>map_height()){
 	    y = map_height();
 	}
-
+	
+	// or pissed or milked or bleeding thats 3 variables in one place
+	// ykno that could be simplified into a single one
+	// like soaked and a soakType
+	if !invisibeam
+		if /*!(weapon_index > WEAPON_REVOLVER && weapon_index <= WEAPON_ZAPPER or weapon_index == WEAPON_PREDATOR) or*/ pissed or milked or bleeding cloak = false;
 	    
 	// Cloak
 	if (cloak and cloakAlpha > 0 and !cloakFlicker)
@@ -752,6 +858,27 @@ object_event_add(Character,ev_step,ev_step_end,'
 	        hp += 1.6 * global.delta_factor;
 	    if (omnomnomnomindex >= omnomnomnomend)
 	        omnomnomnom=false;
+	}
+	
+	//dripping piss
+	if pissed {
+		repeat(random(floor(2))) instance_create(x+random(32)-16,y+random(32)-16,Piss);
+	}
+	//dripping milk
+	if milked {
+		repeat(random(floor(2))) instance_create(x+random(32)-16,y+random(32)-16,Milk);
+	}
+	//bleeding
+	if bleeding {
+		hp-=0.15;
+		repeat(random(floor(2))) instance_create(x+random(32)-16,y+random(32)-16,BloodDrop);
+		lastDamageSource = WEAPON_SHIV;
+	}
+	//unpissing/unmilking if ubered
+	if ubered or megaHealed or critting {
+		pissed=0;
+		milked=0;
+		bleeding=0;
 	}
 
 	//for things polling whether the character is on a medcabinet
@@ -788,10 +915,16 @@ object_event_add(Character,ev_step,ev_step_end,'
 	if(deathmatch_invulnerable <= 0)
 	    deathmatch_invulnerable = 0;
 ');
-object_event_add(Character,ev_alarm,9,'
+object_event_add(Character,ev_alarm,11,'
 	{
     loopsoundstop(DetoFlySnd);
     }
+');
+object_event_add(Character,ev_alarm,10,'
+	buffbanner = false;
+	stunned = false;
+	radioactive = false;
+	playsound(x,y,BowSnd);
 ');
 object_event_add(Weapon,ev_create,0,'
 	spark = 0;
@@ -848,17 +981,19 @@ object_event_add(Weapon,ev_draw,0,'
 	    draw_sprite_ext(sprite_index, imageOffset, round(x+xoffset*image_xscale), round(y+yoffset) + owner.equipmentOffset, image_xscale, image_yscale, image_angle, c_white, image_alpha);
 	    if (variable_local_exists("charging"))
 	    {
-	    	if(charging == 1){
-		        if (owner.team == TEAM_RED)
-		            ubercolour = c_orange;
-		        else if (owner.team == TEAM_BLUE)
-		            ubercolour = c_aqua;
-		        //draw_sprite_ext(sprite_index, imageOffset, round(x+xoffset*image_xscale), round(y+yoffset) + owner.equipmentOffset, image_xscale, image_yscale, image_angle, ubercolour, 0.7*image_alpha);
-		        draw_sprite_ext(sprite_index,4+imageOffset/2,round(x+xoffset*image_xscale),round(y+yoffset),image_xscale,image_yscale,image_angle,ubercolour,0.7);
-                if (!isMelee) 
-					draw_sprite_ext(Spark2S,spark,round(x+xoffset*image_xscale),round(y+yoffset) + owner.equipmentOffset ,image_xscale,image_yscale,image_angle,ubercolour,0.3);
-				else
-					draw_sprite_ext(Spark2S,spark,round(x+xoffset*image_xscale),round(y+yoffset+40) + owner.equipmentOffset ,image_xscale,image_yscale,image_angle,ubercolour,0.3);
+			if(charging == 1 || hype){
+				if (owner.team == TEAM_RED)
+					ubercolour = c_orange;
+				else if (owner.team == TEAM_BLUE)
+					ubercolour = c_aqua;
+				//draw_sprite_ext(sprite_index, imageOffset, round(x+xoffset*image_xscale), round(y+yoffset) + owner.equipmentOffset, image_xscale, image_yscale, image_angle, ubercolour, 0.7*image_alpha);
+				draw_sprite_ext(sprite_index,4+imageOffset/2,round(x+xoffset*image_xscale),round(y+yoffset),image_xscale,image_yscale,image_angle,ubercolour,0.7);
+				if (charging == 1) {
+					if (!isMelee) 
+						draw_sprite_ext(Spark2S,spark,round(x+xoffset*image_xscale),round(y+yoffset) + owner.equipmentOffset ,image_xscale,image_yscale,image_angle,ubercolour,0.3);
+					else
+						draw_sprite_ext(Spark2S,spark,round(x+xoffset*image_xscale),round(y+yoffset+40) + owner.equipmentOffset ,image_xscale,image_yscale,image_angle,ubercolour,0.3);
+				}
 			}
 	    }
 	    if (owner.ubered)
@@ -1094,6 +1229,29 @@ object_event_add(Medic,ev_create,0,'
 	// Override defaults
 	numFlames = 4;
 ');
+object_event_clear(Quote,ev_create,0);
+object_event_add(Quote,ev_create,0,'
+	maxHp = 140;
+	baseRunPower = 1.07;
+	weapons[0] = Blade;
+	weapons[1] = Machinegun;
+
+	if (global.paramPlayer.team == TEAM_RED)
+	{
+		sprite_index = QuerlyRedS;
+		haxxyStatue = QuoteHaxxyStatueS;
+	}
+	else if (global.paramPlayer.team == TEAM_BLUE)
+	{
+		sprite_index = QuerlyBlueS;
+		haxxyStatue = CurlyHaxxyStatueS;
+	}
+
+	event_inherited();
+
+	// Override defaults
+	numFlames = 3;
+');
 
 //This event sucks
 object_event_clear(PlayerControl,ev_step,ev_step_begin);
@@ -1205,13 +1363,59 @@ object_event_add(PlayerControl,ev_step,ev_step_begin,'
 	}
 ');
 
+
+globalvar SpecialHud;
+SpecialHud = object_add();
+object_event_add(SpecialHud,ev_step,ev_step_begin,'
+	if global.myself.object == -1 instance_destroy();
+');
+object_event_add(SpecialHud,ev_draw,0,'
+	if global.myself.object = -1 exit;
+	
+	xoffset = view_xview[0];
+    yoffset = view_yview[0];
+    ysize = view_hview[0];
+    if global.myself.team == TEAM_BLUE uberoffset=1;
+    else uberoffset=0;
+    
+    draw_set_valign(fa_center);
+    draw_set_halign(fa_center);
+    draw_set_alpha(1);
+    message1 = -1;
+    message2 = -1;
+    title1 = "";
+    title2 = "";
+	
+	var weapon;
+	weapon = global.myself.object.currentWeapon;
+	
+	if global.myself.class == CLASS_DEMOMAN
+		yoffset += 50;
+	if weapon.hasMeter {
+		message1 = (weapon.meterCount / weapon.maxMeter) * 100;
+		//message1 = weapon.meterCount;
+		title1 = weapon.meterName;
+	}
+	if message1 != -1 {
+        draw_healthbar(xoffset+665, yoffset+500, xoffset+785, yoffset+532,message1,c_black,c_white,c_white,0,true,true);
+        draw_sprite_ext(UberHudS,uberoffset,xoffset+720,yoffset+515,2,2,0,c_white,1);
+        draw_text_color(xoffset+730,yoffset+510,title1,c_white,c_white,c_white,c_white,1);
+        if message2 != -1 {
+            draw_healthbar(xoffset+665-140, yoffset+500, xoffset+785-140, yoffset+532,message2,c_black,c_white,c_white,0,true,true);
+           draw_sprite_ext(UberHudS,uberoffset,xoffset+720-140,yoffset+515,2,2,0,c_white,1);
+            draw_text_color(xoffset+730-140,yoffset+510,title2,c_white,c_white,c_white,c_white,1);
+        }
+    }
+');
+
 //Handles swapping out loadout weapons and the active weapon shown
 object_event_clear(PlayerControl,ev_step,ev_step_end);
 object_event_add(PlayerControl,ev_step,ev_step_end,'
 	//Changes the number telling randomizer what weapon should be shown
 	if (keyboard_check_pressed(global.switchWeapon)) {
 		if(global.myself.object != -1){
-			if (global.myself.object.radioactive || global.myself.class == CLASS_QUOTE || global.myself.object.taunting) exit; // fix q/c
+			canSwitch = !global.myself.object.taunting /*or */;
+			if (!canSwitch) exit;
 			if(global.myself.activeWeapon == 0){
 				global.myself.activeWeapon = 1;
 				if (global.myself.object.zoomed) {
@@ -1331,9 +1535,12 @@ object_event_add(PlayerControl,ev_step,ev_step_end,'
 		        
 		// Health HUD
 		if  !instance_exists(HealthHud) instance_create(0,0,HealthHud);
-
+	
 		// Healed HUD
 		if !instance_exists(HealedHud) && global.showHealer = 1 instance_create(0,0,HealedHud);
+		
+		//this hud does most of the special displays (cooldown & charge timers)
+		if !instance_exists(SpecialHud) instance_create(0,0,SpecialHud);
 	}
 ');
 
@@ -1350,7 +1557,7 @@ object_event_add(AmmoCounter,ev_draw,0,'
 		if instance_exists(global.myself.object.currentWeapon) {
 			var weapon;
 			weapon = global.myself.object.currentWeapon;
-			if (weapon.isMelee && weapon.object_index != Eyelander) exit;
+			if (weapon.isMelee) exit;
 			barcolor = make_color_rgb(217,217,183);
 			draw_set_color(barcolor);
 		

@@ -5,7 +5,7 @@
 //Updating this for modern gg2 was a LOT LOT of work
 
 // Sounds
-globalvar SwitchSnd, FlashlightSnd, swingSnd, BallSnd, DirecthitSnd, ManglerChargesnd, LaserShotSnd, BowSnd, ChargeSnd1, ChargeSnd2, ChargeSnd3, FlaregunSnd, BuffbannerSnd, CritSnd;
+globalvar SwitchSnd, FlashlightSnd, swingSnd, BallSnd, DirecthitSnd, ManglerChargesnd, LaserShotSnd, BowSnd, ChargeSnd1, ChargeSnd2, ChargeSnd3, FlaregunSnd, BuffbannerSnd, CritSnd, ShotSnd;
 SwitchSnd = sound_add(directory + '/randomizer_sounds/switchSnd.wav', 0, 1);
 FlashlightSnd = sound_add(directory + '/randomizer_sounds/FlashlightSnd.wav', 0, 1);
 swingSnd = sound_add(directory + '/randomizer_sounds/swingSnd.wav', 0, 1);
@@ -20,13 +20,15 @@ ChargeSnd3 = sound_add(directory + '/randomizer_sounds/DetoCharge3Snd.wav', 0, 1
 FlaregunSnd = sound_add(directory + '/randomizer_sounds/FlaregunSnd.wav', 0, 1);
 BuffbannerSnd = sound_add(directory + '/randomizer_sounds/BuffbannerSnd.wav', 0, 1);
 CritSnd = sound_add(directory + '/randomizer_sounds/CritSnd.wav', 0, 1);
+ShotSnd = sound_add(directory + '/randomizer_sounds/ShotSnd.wav', 0, 1);
 object_event_add(Weapon,ev_create,0,'
 	//wrangled = false;
 	readyToStab=false;
     //crit=1;
     //ubering = false;
     //uberCharge=0;
-    //t=0;
+    t=0;
+	hype=false;
     //speedboost=0;
     lobbed = 0;
     charging = 0;
@@ -42,14 +44,13 @@ object_event_add(Weapon,ev_create,0,'
 	meterCount=-1;
 	
 	// Implement fixed reload times by parented variables
-	with(owner) {
+	with(owner) { // reminder: activeWeapon is modified before Weapon ev_create is called
 		with (player)
-			// reminder: activeWeapon is modified before Weapon ev_create is called
 			if (!variable_local_exists("activeWeapon")) exit;
-			if variable_local_exists("PrimaryRefireTime") && player.activeWeapon == 1 {
+			if variable_local_exists("PrimaryRefireTime") && player.activeWeapon == 0 {
 				other.alarm[0] = PrimaryRefireTime;
 			}
-			if variable_local_exists("SecondaryRefireTime") && player.activeWeapon == 0 {
+			if variable_local_exists("SecondaryRefireTime") && player.activeWeapon == 1 {
 				other.alarm[0] = SecondaryRefireTime;
 			}
 			if variable_local_exists("reloadFlare") {
@@ -268,14 +269,20 @@ object_set_parent(SodaPopper, Weapon);
 object_event_add(SodaPopper,ev_create,0,'
     xoffset=-5;
     yoffset=-4;
-    refireTime=20;
+    refireTime=12;
     event_inherited();
     maxAmmo = 2;
     ammoCount = maxAmmo;
-    reloadTime = 80;
+    reloadTime = 20;
     reloadBuffer = 20;
     idle=true;
-    
+
+	hasMeter = true;
+	meterName = "HYPE";
+	maxMeter=210;
+	meterCount=0;
+	hype = false;
+	
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\SodaPopperS.png", 2, 1, 0, 8, -2);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\SodaPopperFS.png", 4, 1, 0, 8, -2);
     reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\SodaPopperFRS.png", 16, 1, 0, 12, 6);
@@ -310,6 +317,15 @@ object_event_add(SodaPopper,ev_alarm,5,'
         image_speed = reloadImageSpeed * global.delta_factor;
     }
 ');
+object_event_add(SodaPopper,ev_step,ev_step_normal, '
+	if meterCount >= maxMeter {
+		hype = true;
+	}
+	if (hype)
+		meterCount -= 1;
+	if (meterCount <= 0)
+		hype = false;
+');
 object_event_add(SodaPopper,ev_other,ev_user1,'
     if(readyToShoot and ammoCount >0 and global.isHost)
     {
@@ -331,6 +347,9 @@ object_event_add(SodaPopper,ev_other,ev_user3,'
         shot.speed = random(4)+11;
         shot.direction += random(15)-7;
         shot.hitDamage = 8;
+		if (hype) {
+			
+		}
         // Move shot forward to avoid immediate collision with a wall behind the character
         shot.x += lengthdir_x(15, shot.direction);
         shot.y += lengthdir_y(15, shot.direction);
@@ -461,29 +480,23 @@ object_event_add(Lasergun,ev_other,ev_user3,'
         with(Player) {
             if(id != other.ownerPlayer and team != other.owner.team and object != -1) {
                 if(collision_line(other.x,other.y,other.a[i],other.b[i],object,true,false)>=0) && object.ubered == 0 {
-                    if true == false { //I put this over here for now object.radioactive
-                        var text;
-                        text=instance_create(x,y,Text);
-                        text=sprite_index = MissS
-                    } else {
-						hitDamage *= (1+0*0.35)*1;
-						damageCharacter(ownerPlayer.object, other.id, hitDamage);
-                        //if true == true object.hp -= other.hitDamage*(1+0*0.35)*1; //Yeah MCBoss removed crits here
-                        //object.lastDamageCrit=other.crit;
-                        object.timeUnscathed = 0;
-                        if (object.lastDamageDealer != other.ownerPlayer && object.lastDamageDealer != object.player){
-                            object.secondToLastDamageDealer = object.lastDamageDealer;
-                            object.alarm[4] = object.alarm[3]
-                        }
-                        object.alarm[3] = ASSIST_TIME;
-                        object.lastDamageDealer = other.ownerPlayer;
-                        object.cloakAlpha = min(object.cloakAlpha + 0.3, 1);
-                    if(global.gibLevel > 0){
-                        blood = instance_create(object.x,object.y,Blood);
-                        blood.direction = other.owner.aimDirection-180;
-                    }
+					hitDamage *= (1+0*0.35)*1; // re-add crits? maybe!
+					damageCharacter(ownerPlayer.object, other.id, hitDamage);
+					//if true == true object.hp -= other.hitDamage*(1+0*0.35)*1; //Yeah MCBoss removed crits here
+					//object.lastDamageCrit=other.crit;
+					object.timeUnscathed = 0;
+					if (object.lastDamageDealer != other.ownerPlayer && object.lastDamageDealer != object.player){
+						object.secondToLastDamageDealer = object.lastDamageDealer;
+						object.alarm[4] = object.alarm[3]
+					}
+					object.alarm[3] = ASSIST_TIME;
+					object.lastDamageDealer = other.ownerPlayer;
+					object.cloakAlpha = min(object.cloakAlpha + 0.3, 1);
+					if(global.gibLevel > 0 && !object.radioactive){
+						blood = instance_create(object.x,object.y,Blood);
+						blood.direction = other.owner.aimDirection-180;
+					}
                     object.lastDamageSource = WEAPON_FLASHLIGHT;
-                    }
                 }
             }
         }
@@ -491,7 +504,7 @@ object_event_add(Lasergun,ev_other,ev_user3,'
         with(Sentry) {
             if(team != other.owner.team) {
                 if(collision_line(other.x,other.y,other.a[i],other.b[i],id,false,false)>=0) {
-                    hp -= other.hitDamage*1; //Removed crap everywhere for crits
+					hp -= other.hitDamage*1; //Removed crap everywhere for crits
                     //lastDamageCrit=CRIT_FACTOR;
                     lastDamageDealer = other.ownerPlayer;
                     lastDamageSource = WEAPON_FLASHLIGHT;
@@ -704,7 +717,7 @@ object_event_add(BonkHand,ev_other,ev_user1,'
 		ammoCount = max(0, ammoCount-1);
 		playsound(x,y,PickupSnd);
 		alarm[5] = reloadBuffer + reloadTime;
-		alarm[10] = 150;
+		owner.alarm[10] = 150;
     }
 ');
 object_event_add(BonkHand,ev_draw,0,'
@@ -927,7 +940,7 @@ object_event_add(MadmilkHand,ev_other,ev_user0,'
     else alarm[5] = reloadBuffer + owner.ammo[105];
 ');
 object_event_add(MadmilkHand,ev_other,ev_user1,'
-    if(ammoCount >= 1) {
+    if(ammoCount >= 1 && readyToShoot) {
         ammoCount -= max(0, ammoCount-1); 
         shot = instance_create(x,y + yoffset + 1,MadMilk);
         shot.direction=owner.aimDirection+ random(7)-4;
@@ -941,6 +954,8 @@ object_event_add(MadmilkHand,ev_other,ev_user1,'
 		playsound(x,y,swingSnd);
 		alarm[5] = reloadBuffer + reloadTime;
         owner.ammo[105] = -1;
+		readyToShoot = false;
+		alarm[0] = refireTime;
     }
 ');
 object_event_add(MadmilkHand,ev_draw,0,'
@@ -1083,19 +1098,19 @@ global.name[WEAPON_FAN] = "Force A Nature";
 global.weapons[WEAPON_RUNDOWN] = Rundown;
 global.name[WEAPON_RUNDOWN] = "Shortstop";
 global.weapons[WEAPON_SODAPOPPER] = SodaPopper;
-global.name[WEAPON_SODAPOPPER] = "Sodapopper (unfinished)";
+global.name[WEAPON_SODAPOPPER] = "Soda Popper";
 global.weapons[WEAPON_FLASHLIGHT] = Lasergun;
 global.name[WEAPON_FLASHLIGHT] = "Flashlight";
 global.weapons[WEAPON_PISTOL] = Pistol;
 global.name[WEAPON_PISTOL] = "Pistol";
 global.weapons[WEAPON_BONK] = BonkHand;
-global.name[WEAPON_BONK] = "Bonk! Atomic punch (unfinished)";
+global.name[WEAPON_BONK] = "Bonk! Atomic punch";
 global.weapons[WEAPON_SANDMAN] = Sandman;
-global.name[WEAPON_SANDMAN] = "Sandman (unfinished)";
+global.name[WEAPON_SANDMAN] = "Sandman (Unfinished)";
 global.weapons[WEAPON_MADMILK] = MadmilkHand;
-global.name[WEAPON_MADMILK] = "Madmilk (unfinished)";
+global.name[WEAPON_MADMILK] = "Madmilk";
 global.weapons[WEAPON_ATOMIZER] = Atomizer;
-global.name[WEAPON_ATOMIZER] = "Atomizer";
+global.name[WEAPON_ATOMIZER] = "Atomizer (Unfinished)";
 
 // Soldier
 globalvar WEAPON_ROCKETLAUNCHER, WEAPON_DIRECTHIT, WEAPON_COWMANGLER, WEAPON_BLACKBOX, WEAPON_AIRSTRIKE, WEAPON_SOLDIERSHOTGUN, WEAPON_BUFFBANNER, WEAPON_RBISON, WEAPON_EQUALIZER, WEAPON_RESERVESHOOTER;
@@ -1539,7 +1554,6 @@ object_event_add(BuffBanner,ev_create,0,'
     image_speed = 0;
     unscopedDamage = 0;
 	isMelee = true;
-	hasMeter = true;
 	
 	normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\BuffBannerS.png", 2, 1, 0, 0, 0);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\BuffBannerS.png", 2, 1, 0, 0, 0);
@@ -2087,7 +2101,7 @@ object_event_add(BazaarBargain,ev_other,ev_user3,'
                 alarm[3] = ASSIST_TIME / global.delta_factor;
                 lastDamageDealer = other.ownerPlayer;
                 dealFlicker(id);
-                if(global.gibLevel > 0)
+                if(global.gibLevel > 0 && !object.radioactive)
                 {
                     blood = instance_create(x, y, Blood);
                     blood.direction = other.owner.aimDirection - 180;
@@ -2477,7 +2491,7 @@ object_event_add(Machina,ev_other,ev_user3,'
                 alarm[3] = ASSIST_TIME / global.delta_factor;
                 lastDamageDealer = other.ownerPlayer;
                 dealFlicker(id);
-                if(global.gibLevel > 0)
+                if(global.gibLevel > 0 && !object.radioactive)
                 {
                     blood = instance_create(x, y, Blood);
                     blood.direction = other.owner.aimDirection - 180;
@@ -2756,7 +2770,7 @@ object_event_add(SydneySleeper,ev_other,ev_user3,'
                 alarm[3] = ASSIST_TIME / global.delta_factor;
                 lastDamageDealer = other.ownerPlayer;
                 dealFlicker(id);
-                if(global.gibLevel > 0)
+                if(global.gibLevel > 0 && !object.radioactive)
                 {
                     blood = instance_create(x, y, Blood);
                     blood.direction = other.owner.aimDirection - 180;
@@ -2944,7 +2958,7 @@ object_event_add(JarateHand,ev_other,ev_user0,'
     else alarm[5] = reloadBuffer + owner.ammo[105];
 ');
 object_event_add(JarateHand,ev_other,ev_user1,'
-    if(ammoCount >= 1) {
+    if(ammoCount >= 1 && readyToShoot) {
         ammoCount -= max(0, ammoCount-1); 
         shot = instance_create(x,y + yoffset + 1,JarOPiss);
         shot.direction=owner.aimDirection+ random(7)-4;
@@ -2958,6 +2972,8 @@ object_event_add(JarateHand,ev_other,ev_user1,'
 		playsound(x,y,swingSnd);
 		alarm[5] = reloadBuffer + reloadTime;
         owner.ammo[105] = -1;
+		readyToShoot = false;
+		alarm[0] = refireTime;
     }
 ');
 object_event_add(JarateHand,ev_draw,0,'
@@ -3345,6 +3361,12 @@ object_event_add(Eyelander,ev_create,0,'
     smashing=false;
 	isMelee = true;
 	
+	hasMeter = true;
+	meterName = "CHARGE";
+	meterCount = 100;
+	maxMeter = 100;
+	
+
 	normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\EyelanderS.png", 2, 1, 0, 2, 0);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\EyelanderFS.png", 8, 1, 0, 2, 0);
     reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\EyelanderS.png", 2, 1, 0, 2, 0);
@@ -3376,13 +3398,17 @@ object_event_add(Eyelander,ev_alarm,1,'
         shot.ownerPlayer=ownerPlayer;
         shot.team=owner.team;
         if (charging == 1) {
-			if (ammoCount <= 50 || owner.accel >= 1.3 && ammoCount <= 55) {
+			if (meterCount <= 50 || owner.moveStatus == 4 && meterCount <= 60) { // give grace since youre flying
 				shot.hitDamage = 50; 
 				playsound(x,y,CritSnd);
 				shot.crit=1;
+			} else if (meterCount <= 70 || owner.moveStatus == 4 && meterCount <= 80) {
+				shot.hitDamage = 40; 
+				playsound(x,y,CritSnd);
+				shot.crit=2;
 			}
 			charging = 0;
-			ammoCount = 0;
+			meterCount = 0;
 		} else {
 			shot.hitDamage = 35;
 		}
@@ -3397,17 +3423,17 @@ object_event_add(Eyelander,ev_alarm,2,'
     }
 ');
 object_event_add(Eyelander,ev_alarm,5,'
-    ammoCount = 100;
+    //ammoCount = 100;
+    meterCount = 100;
 ');
 object_event_add(Eyelander,ev_alarm,10,'
     charging = 0;
 ');
 object_event_add(Eyelander,ev_step,ev_step_normal,'
 	if (charging == 1) {
-		image_speed=0.3;
         owner.jumpStrength = 0;
-        if (owner.moveStatus != 4) ammoCount -= 2; else if (owner.moveStatus == 4) ammoCount -= 0.8; // lol, I am crazy for this one
-        if ammoCount <= 0 {
+        if (owner.moveStatus != 4) meterCount -= 2; else if (owner.moveStatus == 4) meterCount -= 0.8; // lol, I am crazy for this one
+        if meterCount <= 0 {
 			owner.jumpStrength = 8+(0.6/2);
             charging = 0;
         }
@@ -3426,8 +3452,8 @@ object_event_add(Eyelander,ev_step,ev_step_normal,'
 		}
     } else {
         owner.jumpStrength = 8+(0.6/2);
-        if ammoCount < 0 ammoCount = 0;
-        else if ammoCount < maxAmmo ammoCount +=1;
+        if meterCount < 0 meterCount = 0;
+        else if meterCount < maxMeter meterCount +=1;
     }
 	
     if smashing {
@@ -3460,7 +3486,7 @@ object_event_add(Eyelander,ev_other,ev_user1,'
 	}
 ');
 object_event_add(Eyelander,ev_other,ev_user2,'
-    if (charging == 0 && !owner.cloak && ammoCount >= maxAmmo) {
+    if (charging == 0 && !owner.cloak && meterCount >= maxMeter) {
         charging = 1;
 		owner.accel = 0;
 		owner.moveStatus = 0;
@@ -6714,23 +6740,20 @@ object_event_add(Phlog,ev_other,ev_user1,'
             with(Player) {
                 if(id != other.ownerPlayer and team != other.owner.team and object != -1) {
                     if(collision_line(other.x,other.y,other.x2,other.y2,object,true,false)>=0) && object.ubered == 0 {
-                        if false { //object.radioactive
-                            var text;
-                            text=instance_create(x,y,Text);
-                            text=sprite_index = MissS
-                        } else {
-                            //other.ownerPlayer.object.phlogDmg+=other.hitDamage*(1+0*0.35)*1; //other.crit
-                            //if !object.invincible// object.hp -= other.hitDamage*(1+0*0.35)*1; //other.crit
-                            object.hp -= other.hitDamage*(1+0*0.35)*1; //other.crit
-                            //object.lastDamageCrit=other.crit;
-                            object.timeUnscathed = 0;
-                            if (object.lastDamageDealer != other.ownerPlayer && object.lastDamageDealer != object.player){
-                                object.secondToLastDamageDealer = object.lastDamageDealer;
-                                object.alarm[4] = object.alarm[3]
-                            }
-                            object.alarm[3] = ASSIST_TIME;
-                            object.lastDamageDealer = other.ownerPlayer;
-                            object.cloakAlpha = min(object.cloakAlpha + 0.3, 1);
+						//other.ownerPlayer.object.phlogDmg+=other.hitDamage*(1+0*0.35)*1; //other.crit
+						//if !object.invincible// object.hp -= other.hitDamage*(1+0*0.35)*1; //other.crit
+						hitDamage *= (1+0*0.35)*1
+						damageCharacter(ownerPlayer.object, other.id, hitDamage);
+						//object.hp -= other.hitDamage*(1+0*0.35)*1; //other.crit
+						//object.lastDamageCrit=other.crit;
+						object.timeUnscathed = 0;
+						if (object.lastDamageDealer != other.ownerPlayer && object.lastDamageDealer != object.player){
+							object.secondToLastDamageDealer = object.lastDamageDealer;
+							object.alarm[4] = object.alarm[3]
+						}
+						object.alarm[3] = ASSIST_TIME;
+						object.lastDamageDealer = other.ownerPlayer;
+						object.cloakAlpha = min(object.cloakAlpha + 0.3, 1);
                         /*if(global.gibLevel > 0){
 								blood = instance_create(object.x,object.y,Blood);
 								blood.direction = other.owner.aimDirection-180;
@@ -6753,7 +6776,6 @@ object_event_add(Phlog,ev_other,ev_user1,'
                         object.lastDamageSource = WEAPON_PHLOG;
                         }
                         exit;
-                    }
                 }
             }
             
@@ -7384,7 +7406,7 @@ object_event_add(Frostbite,ev_other,ev_user2,'
 						motion_add(other.owner.aimDirection, other.characterBlastStrength*(1+(cos(degtorad(angle))/2)));
                         vspeed -= 2;
                         moveStatus = 1;
-						hp -= (15*(1-dist/other.blastDistance))+15;
+						damageCharacter(ownerPlayer.object, other.id, (15*(1-dist/other.blastDistance))+15);
                         if (lastDamageDealer != other.ownerPlayer and lastDamageDealer != player)
                         {
                             secondToLastDamageDealer = lastDamageDealer;
@@ -8007,7 +8029,6 @@ object_event_add(Detonator,ev_create,0,'
     reloadBuffer = 20;
     idle=true;
     readyToFlare = false;
-    readyToShoot = true;
 
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\DetonatorS.png", 2, 1, 0, 8, -1);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\DetonatorFS.png", 4, 1, 0, 8, -1);
@@ -8294,17 +8315,134 @@ WEAPON_MACHINEGUN = 91;
 Machinegun = object_add();
 object_set_parent(Machinegun, Weapon);
 object_event_add(Machinegun,ev_create,0,'
-    xoffset = 0;
-    yoffset = -3;
+    xoffset = 4;
+    yoffset = -1;
     refireTime = 2;
+	bubbleCount = 0;
     event_inherited();
     sndlooping = false;
-    maxAmmo = 200;
+	maxAmmo = 100;
     ammoCount = maxAmmo;
     reloadBuffer = 15;
     isRefilling = false;
     unscopedDamage = 0;
+	
+	//C type blades (slightly smaller, slightly faster, standard life)
+	bladeRefireTime = 8;
+	bladeDelay = 0;
+    bladesOut = 0;
+    bladeLife = 15;
+    maxBlades = 1;
+    bladeDamage = 12;
+
+	normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\MachinegunS.png", 2, 1, 0, 0, 0);
+    recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\MachinegunFS.png", 4, 1, 0, 0, 0);
+    reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\MachinegunS.png", 2, 1, 0, 0, 0);
+
+    sprite_index = normalSprite;
+
+    recoilTime = 3;
+    recoilAnimLength = sprite_get_number(recoilSprite)/2;
+    recoilImageSpeed = recoilAnimLength/recoilTime;
+
+    reloadAnimLength = sprite_get_number(reloadSprite)/2;
+    reloadImageSpeed = reloadAnimLength/2;
 ');
+
+object_event_add(Machinegun,ev_alarm,5,'
+	isRefilling = true;
+');
+
+object_event_add(Machinegun,ev_step,ev_step_begin,'
+	if (ammoCount < 0)
+		ammoCount = 0;
+	else if (ammoCount <= maxAmmo and isRefilling)
+		ammoCount += 1.5 * global.delta_factor;
+	if (ammoCount > maxAmmo)
+		ammoCount = maxAmmo;
+	if(!readyToShoot and alarm[5] < 25 and !isRefilling)
+		alarm[5] += 1;
+	bladeDelay = min(max(0, bladeDelay - 1), bladeRefireTime / global.delta_factor);
+');
+
+object_event_add(Machinegun,ev_other,ev_user1,'
+	if(readyToShoot and ammoCount >= 1)
+		{
+			playsound(x,y,ShotSnd);
+			var shot;
+			randomize();
+			// repeat(2) {
+				shot = instance_create(x+lengthdir_x(12+(random(6)-3),owner.aimDirection),y+lengthdir_y(random(10)-5,owner.aimDirection),MGShot);
+				shot.hitDamage=6;
+				shot.direction=owner.aimDirection;
+				shot.speed=17;
+				shot.owner=owner;
+				shot.ownerPlayer=ownerPlayer;
+				shot.team=owner.team;
+				shot.weapon=DAMAGE_SOURCE_BUBBLE;
+				shot.hspeed += owner.hspeed;
+				shot.alarm[0] = 30 / global.delta_factor;
+			// }
+			justShot=true;
+			readyToShoot=false;
+			isRefilling = false;
+			ammoCount -= 1;
+			
+			if (instance_exists(owner) && owner.onground == false) {
+				with (owner)
+					motion_add(aimDirection+180 mod 360, 1.0);
+			}			
+			
+			alarm[0] = refireTime / global.delta_factor;
+			alarm[5] = reloadBuffer / global.delta_factor;
+		
+		}
+');
+
+object_event_add(Machinegun,ev_other,ev_user2,'
+	if(readyToShoot && bladesOut < maxBlades && bladeDelay <= 0)
+		{
+			isRefilling = 0;
+			playsound(x,y,BladeSnd);
+			var shot;
+			randomize();
+			shot = createShot(x+lengthdir_x(5, owner.aimDirection), y+lengthdir_y(5, owner.aimDirection), BladeB, DAMAGE_SOURCE_BLADE, owner.aimDirection, 12);
+			shot.image_angle = 0;
+			shot.alarm[0] = bladeLife / global.delta_factor;
+			alarm[0] = refireTime / global.delta_factor;
+			bladesOut += 1;
+			shot.weapon = DAMAGE_SOURCE_BLADE;
+			with(shot)
+				hspeed += owner.hspeed;
+			justShot = true;
+			readyToShoot = false;
+		}
+');
+
+object_event_add(Machinegun,ev_draw,0,'
+	if(owner.taunting or owner.omnomnomnom or owner.player.humiliated)
+		exit;
+	var imageOffset, xdrawpos, ydrawpos;
+	imageOffset = owner.team;
+	xdrawpos = round(x+xoffset*image_xscale);
+	ydrawpos = round(y+yoffset);
+	if (alarm[6] <= 0){
+		//set the sprite to idle
+		imageOffset = owner.team;
+	}else{
+		//We are shooting, loop the shoot animation
+		imageOffset = floor(image_index mod recoilAnimLength) + recoilAnimLength*owner.team
+	}
+	draw_sprite_ext(sprite_index,imageOffset,round(x+xoffset*image_xscale),round(y+yoffset),image_xscale,image_yscale,image_angle,c_white,image_alpha);
+	if (owner.ubered) {
+		if owner.team == TEAM_RED
+			ubercolour = c_red;
+		else if owner.team == TEAM_BLUE
+			ubercolour = c_blue;
+		draw_sprite_ext(sprite_index,imageOffset,round(x+xoffset*image_xscale),round(y+yoffset),image_xscale,image_yscale,image_angle,ubercolour,0.7*image_alpha);
+	}
+');
+
 
 global.weapons[WEAPON_BLADE] = Blade;
 global.name[WEAPON_BLADE] = "Blade";
