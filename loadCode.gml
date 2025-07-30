@@ -551,7 +551,7 @@ object_event_add(Character,ev_create,0,'
 	accel = 0;
 	blurs = 0;
 	player.activeWeapon=0;
-	player.playerLoadout=-1;
+	//player.playerLoadout=0;
 	flight = 0;
 	
 	loaded1 = 0;
@@ -613,7 +613,7 @@ object_event_add(Character,ev_create,0,'
 	meter0=-1;
 	meter1=-1;
 	
-	// could try using the above later?
+	// could test using the above instead later?
     //Things lorgan also prefers saved
     ammo[100] = false;  //uberReady
     ammo[101] = 0;      //lobbed (scottish resistance)
@@ -1186,9 +1186,10 @@ object_event_add(Sniper,ev_create,0,'
 object_event_clear(Soldier,ev_create,0);
 object_event_add(Soldier,ev_create,0,'
 	maxHp = 160;
-	baseRunPower = 0.9;
+	baseRunPower = .9;
 	weapons[0] = global.weapons[real(string_copy(string(global.soldierLoadout), 2, 2))];
 	weapons[1] = global.weapons[real(string_copy(string(global.soldierLoadout), 4, 2))];
+	
 	haxxyStatue = SoldierHaxxyStatueS;
 
 	if (global.paramPlayer.team == TEAM_RED)
@@ -1202,7 +1203,6 @@ object_event_add(Soldier,ev_create,0,'
 
 	event_inherited();
 
-	// Override defaults
 	numFlames = 4;
 ');
 object_event_clear(Medic,ev_create,0);
