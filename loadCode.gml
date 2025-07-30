@@ -552,6 +552,7 @@ object_event_add(Character,ev_create,0,'
 	blurs = 0;
 	player.activeWeapon=0;
 	player.playerLoadout=-1;
+	expectedWeaponBytes = 0;
 	flight = 0;
 	
 	loaded1 = 0;
@@ -1751,5 +1752,131 @@ object_event_add(ClassSelectController,ev_other,ev_user1,'
 	        socket_send(global.serverSocket);
 	    }
 	    done=true;
+	}
+');
+
+
+// Skips received bytes if too many or too little are received for a certain weapon
+object_event_clear(Character,ev_other,ev_user12);
+object_event_add(Character,ev_other,ev_user12,'
+	{
+	    var temp;
+	    write_ubyte(global.serializeBuffer, keyState);
+	    write_ushort(global.serializeBuffer, netAimDirection);
+	    write_ubyte(global.serializeBuffer, aimDistance/2);
+
+	    if(global.updateType == QUICK_UPDATE or global.updateType == FULL_UPDATE) {
+	        write_ushort(global.serializeBuffer, x*5);
+	        write_ushort(global.serializeBuffer, y*5);
+	        write_byte(global.serializeBuffer, hspeed*8.5);
+	        write_byte(global.serializeBuffer, vspeed*8.5);
+	        write_ubyte(global.serializeBuffer, ceil(hp));
+	        write_ubyte(global.serializeBuffer, currentWeapon.ammoCount);
+	        
+	        temp = 0;
+	        if(cloak) temp |= $01;
+	        //allocate the next three bits of the byte for movestatus sync
+	        temp |= (moveStatus & $07) << 1;
+	        write_ubyte(global.serializeBuffer, temp);               
+	    }
+	   
+
+	if(global.updateType == FULL_UPDATE){
+	    write_ubyte(global.serializeBuffer, animationOffset);
+	    
+	    //class specific syncs
+	    switch(player.class)
+	    {
+	    case CLASS_SPY:
+	        write_ubyte(global.serializeBuffer, cloakAlpha*255);
+	        break;
+	    case CLASS_MEDIC:
+	        write_ubyte(global.serializeBuffer, currentWeapon.uberCharge*255/2000);
+	        break;
+	    case CLASS_ENGINEER:
+	        write_ubyte(global.serializeBuffer, nutsNBolts);
+	        break;
+	    case CLASS_SNIPER:
+	        write_ubyte(global.serializeBuffer, currentWeapon.t);
+	        break;
+	    default:
+	        write_ubyte(global.serializeBuffer, 0);
+	    }
+	    write_short(global.serializeBuffer, alarm[1]*global.delta_factor);
+	    write_ubyte(global.serializeBuffer, intel);
+	    write_short(global.serializeBuffer, intelRecharge);
+	    
+	    write_ubyte(global.serializeBuffer, expectedWeaponBytes);
+	    with(currentWeapon) {
+	        event_user(12);
+	    }
+	    }
+	}
+');
+object_event_clear(Character,ev_other,ev_user13);
+object_event_add(Character,ev_other,ev_user13,'
+	{
+	    receiveCompleteMessage(global.serverSocket,4,global.deserializeBuffer);
+	    keyState = read_ubyte(global.deserializeBuffer);
+	    aimDirection = read_ushort(global.deserializeBuffer)*360/65536;
+	    aimDistance = read_ubyte(global.deserializeBuffer)*2;
+	    
+	    var temp, newIntel;
+	    if(global.updateType == QUICK_UPDATE) or (global.updateType == FULL_UPDATE) {
+	        receiveCompleteMessage(global.serverSocket,9,global.deserializeBuffer);
+	        x = read_ushort(global.deserializeBuffer)/5;
+	        y = read_ushort(global.deserializeBuffer)/5;
+	        hspeed = read_byte(global.deserializeBuffer)/8.5;
+	        vspeed = read_byte(global.deserializeBuffer)/8.5;
+	        xprevious = x;
+	        yprevious = y;
+	        
+	        hp = read_ubyte(global.deserializeBuffer);
+	        currentWeapon.ammoCount = read_ubyte(global.deserializeBuffer);
+	        
+	        temp = read_ubyte(global.deserializeBuffer);
+	        cloak = (temp & $01 != 0);
+	        moveStatus = (temp >> 1) & $07;
+	    }
+	    
+	if(global.updateType == FULL_UPDATE){
+	        receiveCompleteMessage(global.serverSocket,8,global.deserializeBuffer);
+	        animationOffset = read_ubyte(global.deserializeBuffer);
+	        //class specific syncs
+	        switch(player.class)
+	        {
+	        case CLASS_SPY:
+	            cloakAlpha = read_ubyte(global.deserializeBuffer)/255;
+	            break;
+	        case CLASS_MEDIC:
+	            currentWeapon.uberCharge = read_ubyte(global.deserializeBuffer)*2000/255;
+	            break;
+	        case CLASS_ENGINEER:
+	            nutsNBolts = read_ubyte(global.deserializeBuffer);
+	            break;
+	        case CLASS_SNIPER:
+	            currentWeapon.t = read_ubyte(global.deserializeBuffer);
+	            if(currentWeapon.t) zoomed = true; // Quick hack
+	            break;
+	        default:
+	            read_ubyte(global.deserializeBuffer)
+	        }
+	        alarm[1] = read_short(global.deserializeBuffer)/global.delta_factor; 
+	        if (alarm[1] != 0)
+	            canGrabIntel = false;
+	        intel = read_ubyte(global.deserializeBuffer);
+	        intelRecharge = read_short(global.deserializeBuffer);
+
+	        actualWeaponBytes = read_ubyte(global.deserializeBuffer);
+	        if(actualWeaponBytes == expectedWeaponBytes){
+		        with(currentWeapon) {
+		            event_user(13);
+		        }
+		    }else{
+		    	receiveCompleteMessage(global.serverSocket,actualWeaponBytes,global.deserializeBuffer);
+		    	buffer_clear(global.deserializeBuffer);
+		    }
+	    }
+	    event_user(1);
 	}
 ');
