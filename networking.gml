@@ -25,6 +25,7 @@ object_event_add(PlayerControl, ev_create, 0, '
         if(!global.isHost and id == global.myself and joined == false){
             //Have to put this here
             global.myself.activeWeapon = 0;
+            global.myself.playerLoadout = global.currentLoadout;
 
             //Send Loadout
             write_ubyte(randomizer.sendBuffer, randomizer.loadoutReceive);

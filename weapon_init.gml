@@ -22,6 +22,7 @@ BuffbannerSnd = sound_add(directory + '/randomizer_sounds/BuffbannerSnd.wav', 0,
 CritSnd = sound_add(directory + '/randomizer_sounds/CritSnd.wav', 0, 1);
 ShotSnd = sound_add(directory + '/randomizer_sounds/ShotSnd.wav', 0, 1);
 object_event_add(Weapon,ev_create,0,'
+    owner.expectedWeaponBytes = 2;
 	//wrangled = false;
 	readyToStab=false;
     //crit=1;
@@ -4844,6 +4845,7 @@ object_event_add(SandvichHand,ev_create,0,'
     yoffset=3;
     refireTime=18;
     event_inherited();
+    owner.expectedWeaponBytes = 3;
     StabreloadTime = 5;
     //readyToStab = false;
     alarm[2] = 15;
