@@ -1,14 +1,23 @@
+var fd, readScript;
+readScript = "";
+fd = file_text_open_read(pluginFilePath + "\move_all_bullets_but_better.gml");
+while(not file_text_eof(fd)) {
+	readScript += file_text_read_string(fd) + "
+	";
+	file_text_readln(fd);
+}
+file_text_close(fd);
+
 //Swapping out scripts for modified versions
 object_event_clear(GameServer,ev_step,ev_step_normal);
-object_event_add(GameServer,ev_step,ev_step_normal,'
-	execute_file(pluginFilePath + "\move_all_bullets_but_better.gml");
+object_event_add(GameServer,ev_step,ev_step_normal, readScript + '
 	script_execute(move_all_gore);
 ');
 object_event_clear(Client,ev_step,ev_step_normal);
-object_event_add(Client,ev_step,ev_step_normal,'
-	execute_file(pluginFilePath + "\move_all_bullets_but_better.gml");
+object_event_add(Client,ev_step,ev_step_normal, readScript + '
 	script_execute(move_all_gore);
 ');
+
 
 //Loadout Stuff
 globalvar loadout, Back, LoadoutSwitcher, LoadoutMenu;
@@ -427,8 +436,7 @@ object_event_add(LoadoutMenu,ev_other,ev_user1,'
 ');
 
 
-// Read the step script from file
-var fd, readScript;
+// Read the script from the file
 readScript = "";
 fd = file_text_open_read(pluginFilePath + "\loadout_menu_ev_user2.gml");
 while(not file_text_eof(fd)) {
@@ -1254,6 +1262,15 @@ object_event_add(Quote,ev_create,0,'
 	numFlames = 3;
 ');
 
+
+readScript = "";
+fd = file_text_open_read(pluginFilePath + "\input_special_but_better.gml");
+while(not file_text_eof(fd)) {
+	readScript += file_text_read_string(fd) + "
+	";
+	file_text_readln(fd);
+}
+file_text_close(fd);
 //This event sucks
 object_event_clear(PlayerControl,ev_step,ev_step_begin);
 object_event_add(PlayerControl,ev_step,ev_step_begin,'
@@ -1326,7 +1343,7 @@ object_event_add(PlayerControl,ev_step,ev_step_begin,'
 	                if(global.special == MOUSE_LEFT) keybyte |= $08;
 	            }
 	            if(mouse_check_button_pressed(mb_left) and global.special == MOUSE_LEFT)
-	                execute_file(pluginFilePath + "\input_special_but_better.gml");
+	                ' + readScript + '
 
 	            if(mouse_check_button(mb_right))
 	            {
@@ -1334,7 +1351,7 @@ object_event_add(PlayerControl,ev_step,ev_step_begin,'
 	                if(global.special == MOUSE_RIGHT) keybyte |= $08;
 	            }
 	            if(mouse_check_button_pressed(mb_right) and global.special == MOUSE_RIGHT)
-	                execute_file(pluginFilePath + "\input_special_but_better.gml");
+	                ' + readScript + '
 	            
 	        }
 	    }
