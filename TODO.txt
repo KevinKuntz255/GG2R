@@ -1,3 +1,4 @@
+
 High amount of Refactoring (3 days worth) due to all the new variables in weapon_init and projectile_init
 send_ubyte/deserialization buffers in Character events to keep meter/ammo consistent
 Meters syncing throughout weapon switch
@@ -8,7 +9,24 @@ Fix SEVERE loadout menu degradation that occurs when used continuously
 Refactor, Cleanup or Organize:
 Merge Crit-based variables Into one type instead of using multiple variables (as seen on SodaPopper's hyve call)
 add global.delta_factor checks on ALL ALARMS/meters
+High Prio:
+remove 'charging' and 'hype', instead, use ability detection with abilityType, abilityVisual and abilityCharged
+add weaponType and weaponGrade
+High amount of Refactoring (3 days worth) due to all the new variables in weapon_init and projectile_init, build for weaponType/weaponGrade (In progress)
 
+
+TESTING REQUIRED:
+Soak an enemy with both milk, piss, and make em bleed
+
+All:
+send_ubyte/deserialization buffers in Character events to keep meter/ammo consistent
+add global.delta_factor checks on ALL ALARMS/meters
+Merge Crit-based variables Into one type instead of using multiple variables (as seen on SodaPopper's hyve call)
+Refactor, Cleanup or Organize:
+
+
+Add Taunts
+replace loaded1 or loaded2 calls with weapons[0] and weapons[1] calls
 
 Implement:
 Weapons:
@@ -17,14 +35,14 @@ Atomizer (95%) Add Tauntkill
 Rundown (optional, weapon works akin to Baby Face's Blaster)
 Pyro:
 Phlog (90%) Add Afterburn
-Napalm Grenade (50%)
+Napalm Grenade (70%)
 Soldier:
 Buff Banner (90%)
 Cow Mangler (50%)
 Reserve Shooter (90%)
 Heavy:
 Iron Maiden
-Dalokhos Bar
+Dalokhos Bar (Implement overheal)
 Detonator:
 Entire Kit
 Medic:
@@ -33,6 +51,9 @@ Engineer:
 - Entire Kit
 Spy:
 - Entire Kit
+
+Q/C:
+- Add a kit?
 
 Option-Based Features:
 - Ban List
