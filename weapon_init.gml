@@ -128,9 +128,10 @@ object_event_add(Weapon,ev_create,0,'
     shots = 1;
     specialShot = -1;
     shotDamage = -1;
-    shotSpeed = -1;
-    shotDir = -1;
-    shotDir=15;
+    shotSpeed[0] = -1;
+    shotSpeed[1] = -1;
+    shotDir[0] = -1;
+    shotDir[1] = -1;
 
 	// Implement fixed reload times by parented variables
 	with(owner) { // reminder: activeWeapon is modified before Weapon ev_create is called
@@ -492,8 +493,8 @@ object_event_add(Weapon,ev_other,ev_user3, '
                 if(golden)
                     shot.sprite_index = ShotGoldS;
                 shot.hspeed += owner.hspeed;
-                if (shotSpeed != -1) shot.speed += shotSpeed; else shot.speed += random(4)-2;
-                if (shotDir != -1) shot.direction += shotDir; else shot.direction += random(15)-7.5;
+                if (shotSpeed[0] != -1) shot.speed += random(shotSpeed[0])-shotSpeed[1]; else shot.speed += random(4)-2;
+                if (shotDir[0] != -1) shot.direction += random(shotDir[0])-shotDir[1]; else shot.direction += random(15)-7.5;
                 // Move shot forward to avoid immediate collision with a wall behind the character
                 shot.x += lengthdir_x(15, shot.direction);
                 shot.y += lengthdir_y(15, shot.direction);
@@ -508,7 +509,7 @@ object_event_add(Weapon,ev_other,ev_user3, '
             ammoCount = max(0, ammoCount-1);
             playsound(x,y,ShotgunSnd);
             var shot;
-            repeat(5) {
+            repeat(shots) {
                 if (specialShot != -1) shot = createShot(x, y, specialShot, damSource, owner.aimDirection, 13); else shot = createShot(x, y, Shot, damSource, owner.aimDirection, 13);
                 if (shotDamage != -1) shot.hitDamage = shotDamage;
                 if(golden)
@@ -567,8 +568,10 @@ object_event_add(ForceANature,ev_create,0,'
     reloadImageSpeed = reloadAnimLength/reloadTime;
 ');
 object_event_add(ForceANature,ev_other,ev_user3,'
-    shotSpeed = random(6)+10;
-    shotDir = random(15)-7;
+    shotSpeed[0] = 6+10;
+    shotSpeed[1] = 10;
+    shotDir[0] = 15;
+    shotDir[1] = 7;
     event_inherited();
     with(owner){
         motion_add(aimDirection, -3);
@@ -611,8 +614,10 @@ object_event_add(Rundown,ev_create,0,'
     reloadImageSpeed = reloadAnimLength/reloadTime;
 ');
 object_event_add(Rundown,ev_other,ev_user3,'
-    shotSpeed = random(2)+12;
-    shotDir = random(9)-5;
+    shotSpeed[0] = 2;
+    shotSpeed[1] = 12;
+    shotDir[0] = 9;
+    shotDir[1] = 5;
     event_inherited();
 ');
 WEAPON_SODAPOPPER = 3;
@@ -669,8 +674,10 @@ object_event_add(SodaPopper,ev_step,ev_step_normal, '
     }
 ');
 object_event_add(SodaPopper,ev_other,ev_user3,'
-    shotSpeed = random(4)+11;
-    shotDir = random(15)-7;
+    shotSpeed[0] = 4;
+    shotSpeed[1] = 11;
+    shotDir[0] = 15;
+    shotDir[1] = 7;
     event_inherited();
 ');
 WEAPON_FLASHLIGHT = 4;
@@ -687,7 +694,7 @@ object_event_add(Lasergun,ev_create,0,'
     reloadBuffer = 10;
     idle=true;
     shot = 0;
-    hitDamage=12;
+    hitDamage = 12;
 
     weaponGrade = UNIQUE;
     weaponType = LASERGUN;
@@ -1944,8 +1951,10 @@ object_event_add(Reserveshooter,ev_step,ev_step_normal,'
     }
 ');
 object_event_add(Reserveshooter,ev_other,ev_user1,'
-    shotSpeed=11+random(4);
-    shotDir=owner.aimDirection+(random(11)-5);
+    shotSpeed[0] = 11;
+    shotSpeed[1] = 4;
+    shotDir[0] = 11;
+    shotDir[1] = 5;
     event_inherited();
 ');
 
@@ -5064,8 +5073,10 @@ object_event_add(FamilyBusiness,ev_create,0,'
     reloadImageSpeed = reloadAnimLength/reloadTime;
 ');
 object_event_add(FamilyBusiness,ev_other,ev_user3,'
-    shotSpeed = random(4)+11;
-    shotDir = random(11)-5;
+    shotSpeed[0] = 4;
+    shotSpeed[1] = 11;
+    shotDir[0] = 11;
+    shotDir[1] = 5;
     event_inherited();
 ');
 WEAPON_CHOCOLATE = 68;
@@ -7911,8 +7922,10 @@ object_event_add(PyroShotgun,ev_create,0,'
     reloadImageSpeed = reloadAnimLength/reloadTime;
 ');
 object_event_add(PyroShotgun,ev_other,ev_user3,'
-    shotSpeed = random(4)+11;
-    shotDir = random(11)-5;
+    shotSpeed[0] = 4;
+    shotSpeed[1] = 11;
+    shotDir[0] = 11;
+    shotDir[1] = 5;
     event_inherited();
 ');
 WEAPON_FLAREGUN = 86;
