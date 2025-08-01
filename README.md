@@ -8,3 +8,7 @@ router - SFX
 Zee Scott - Reload Animations
 
 MCBoss - Lead Programmer/Networking Implementation
+
+# Status
+Scout's Kit Is finished
+Taunt Kills unimplemented

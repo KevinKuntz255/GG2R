@@ -28,4 +28,5 @@ if(global.myself.class == CLASS_ENGINEER)
 //    write_ubyte(global.serverSocket, OMNOMNOMNOM);
 } else if global.myself.class == CLASS_SNIPER {
     if (global.myself.activeWeapon == 0) write_ubyte(global.serverSocket, TOGGLE_ZOOM);
+    //if (global.myself.object.currentWeapon.weaponType == RIFLE) write_ubyte(global.serverSocket, TOGGLE_ZOOM);
 }

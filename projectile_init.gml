@@ -14,9 +14,7 @@ MiniCritS = sprite_add(pluginFilePath + "\randomizer_sprites\MiniCritS.png", 1, 
 object_set_depth(RadioBlur, 130000);
 object_event_add(RadioBlur,ev_create,0,'
 	owner=-1;
-	charging=-1;
-	radioactive=-1;
-	image_alpha=0.1;
+	image_alpha=0.5;
 ');
 object_event_add(RadioBlur,ev_draw,0,'
 	if !variable_local_exists("old_pos") {
@@ -37,149 +35,156 @@ object_event_add(RadioBlur,ev_draw,0,'
 	old_pos[0,1] = y   
     a = 0
 	// fatass copy of Character create/draw
-	if(owner.player.class == CLASS_QUOTE)
-    {
-        spriteRun = owner.sprite_index;
-        spriteJump = owner.sprite_index;
-        spriteStand = owner.sprite_index;
-        spriteLeanR = owner.sprite_index;
-        spriteLeanL = owner.sprite_index;
-        spriteIntel = owner.sprite_index; // its an underlay
-    }
-    else
-    {
-        spriteRun = getCharacterSpriteId(owner.player.class, owner.player.team, "Run");
-        spriteJump = getCharacterSpriteId(owner.player.class, owner.player.team, "Jump");
-        spriteStand = getCharacterSpriteId(owner.player.class, owner.player.team, "Stand");
-        spriteLeanR = getCharacterSpriteId(owner.player.class, owner.player.team, "LeanR");
-        spriteLeanL = getCharacterSpriteId(owner.player.class, owner.player.team, "LeanL");
-        spriteIntel = getCharacterSpriteId(owner.player.class, owner.player.team, "Intel");
-    }
-	
-	var sprite, overlayList, noNewAnim, sprite_tilt_left, sprite_tilt_right, overlays_tilt_left, overlays_tilt_right;
-	noNewAnim = owner.player.class == CLASS_QUOTE or owner.sprite_special or owner.player.humiliated;
-	
-	if (owner.zoomed)
-	{
-		if (owner.team == TEAM_RED)
-			sprite = SniperRedCrouchS;
-		else
-			sprite = SniperBlueCrouchS;
-		overlayList = owner.crouchOverlays;
-		owner.animationImage = animationImage mod 2; // sniper crouch only has two frames, avoid overflow
-	}
-	else if (!noNewAnim)
-	{
-		if(!owner.onground)
-		{
-			sprite = spriteJump;
-			overlayList = owner.jumpOverlays;
-		}
-		else
-		{
-			if(owner.hspeed==0)
-			{
-				// set up vars for slope detection
-				//charSetSolids(); i fucked around and found out thanks to bonk
-				if(owner.image_xscale > 0)
-				{
-					sprite_tilt_left = spriteLeanL;
-					sprite_tilt_right = spriteLeanR;
-					overlays_tilt_left = owner.leanLOverlays;
-					overlays_tilt_right = owner.leanROverlays;
-				}
-				else
-				{
-					sprite_tilt_left = spriteLeanR;
-					sprite_tilt_right = spriteLeanL;
-					overlays_tilt_left = owner.leanROverlays;
-					overlays_tilt_right = owner.leanLOverlays;
-				}
-				
-				// default still sprite
-				sprite = spriteStand;
-				overlayList = owner.stillOverlays;
-				
-				{ // detect slopes
-					var openright, openleft;
-					openright = !collision_point_solid(x+6, y+owner.bottom_bound_offset+2) and !collision_point_solid(x+2, y+owner.bottom_bound_offset+2);
-					openleft = !collision_point_solid(x-7, y+owner.bottom_bound_offset+2) and !collision_point_solid(x-3, y+owner.bottom_bound_offset+2);
-					if (openright)
-					{
-						sprite = sprite_tilt_right;
-						overlayList = owner.leanROverlays;
-					}
-					if (openleft)
-					{
-						sprite = sprite_tilt_left;
-						overlayList = owner.leanLOverlays;
-					}
-					if (openright and openleft)
-					{
-						openright = !collision_point_solid(x+owner.right_bound_offset, y+owner.bottom_bound_offset+2);
-						openleft = !collision_point_solid(x-owner.left_bound_offset, y+owner.bottom_bound_offset+2);
-						if (openright)
-						{
-							sprite = sprite_tilt_right;
-							overlayList = owner.leanROverlays;
-						}
-						if (openleft)
-						{
-							sprite = sprite_tilt_left;
-							overlayList = owner.leanLOverlays;
-						}
-					}
-				}
-					
-				//charUnsetSolids();
-			}
-			else
-			{
-				sprite = spriteRun;
-				overlayList = owner.runOverlays;
-				if (owner.player.class == CLASS_HEAVY and abs(owner.hspeed) < 3) // alternative sprite for extremely slow moving heavies
-				{
-					if (team == TEAM_RED)
-					{
-						sprite = HeavyRedWalkS;
-						overlayList = owner.walkOverlays;
-					}
-					else
-					{
-						sprite = HeavyBlueWalkS;
-						overlayList = owner.walkOverlays;
-					}
-				}
-			}
-		}
-	}
-	else
-	{
-		sprite = sprite_index;
-		overlayList = owner.stillOverlays;
-	}
+    if (owner != -1) {
+    	if(owner.player.class == CLASS_QUOTE)
+        {
+            spriteRun = owner.sprite_index;
+            spriteJump = owner.sprite_index;
+            spriteStand = owner.sprite_index;
+            spriteLeanR = owner.sprite_index;
+            spriteLeanL = owner.sprite_index;
+            spriteIntel = owner.sprite_index; // its an underlay
+        }
+        else
+        {
+            spriteRun = getCharacterSpriteId(owner.player.class, owner.player.team, "Run");
+            spriteJump = getCharacterSpriteId(owner.player.class, owner.player.team, "Jump");
+            spriteStand = getCharacterSpriteId(owner.player.class, owner.player.team, "Stand");
+            spriteLeanR = getCharacterSpriteId(owner.player.class, owner.player.team, "LeanR");
+            spriteLeanL = getCharacterSpriteId(owner.player.class, owner.player.team, "LeanL");
+            spriteIntel = getCharacterSpriteId(owner.player.class, owner.player.team, "Intel");
+        }
+    	
+    	var sprite, overlayList, noNewAnim, sprite_tilt_left, sprite_tilt_right, overlays_tilt_left, overlays_tilt_right;
+    	noNewAnim = owner.player.class == CLASS_QUOTE or owner.sprite_special or owner.player.humiliated;
+    	
 
-    while a <= 12-1 {
-		draw_sprite_ext(sprite,floor(owner.animationImage),old_pos[a,0],old_pos[a,1],owner.image_xscale,1,0,c_white,image_alpha/((a+2)/2));
-		a += 1;
-	}
+    	if (owner.zoomed)
+    	{
+    		if (owner.team == TEAM_RED)
+    			sprite = SniperRedCrouchS;
+    		else
+    			sprite = SniperBlueCrouchS;
+    		overlayList = owner.crouchOverlays;
+    		owner.animationImage = animationImage mod 2; // sniper crouch only has two frames, avoid overflow
+    	}
+    	else if (!noNewAnim)
+    	{
+    		if(!owner.onground)
+    		{
+    			sprite = spriteJump;
+    			overlayList = owner.jumpOverlays;
+    		}
+    		else
+    		{
+    			if(owner.hspeed==0)
+    			{
+    				// set up vars for slope detection
+    				//charSetSolids(); i fucked around and found out thanks to bonk
+    				if(owner.image_xscale > 0)
+    				{
+    					sprite_tilt_left = spriteLeanL;
+    					sprite_tilt_right = spriteLeanR;
+    					overlays_tilt_left = owner.leanLOverlays;
+    					overlays_tilt_right = owner.leanROverlays;
+    				}
+    				else
+    				{
+    					sprite_tilt_left = spriteLeanR;
+    					sprite_tilt_right = spriteLeanL;
+    					overlays_tilt_left = owner.leanROverlays;
+    					overlays_tilt_right = owner.leanLOverlays;
+    				}
+    				
+    				// default still sprite
+    				sprite = spriteStand;
+    				overlayList = owner.stillOverlays;
+    				
+    				{ // detect slopes
+    					var openright, openleft;
+    					openright = !collision_point_solid(x+6, y+owner.bottom_bound_offset+2) and !collision_point_solid(x+2, y+owner.bottom_bound_offset+2);
+    					openleft = !collision_point_solid(x-7, y+owner.bottom_bound_offset+2) and !collision_point_solid(x-3, y+owner.bottom_bound_offset+2);
+    					if (openright)
+    					{
+    						sprite = sprite_tilt_right;
+    						overlayList = owner.leanROverlays;
+    					}
+    					if (openleft)
+    					{
+    						sprite = sprite_tilt_left;
+    						overlayList = owner.leanLOverlays;
+    					}
+    					if (openright and openleft)
+    					{
+    						openright = !collision_point_solid(x+owner.right_bound_offset, y+owner.bottom_bound_offset+2);
+    						openleft = !collision_point_solid(x-owner.left_bound_offset, y+owner.bottom_bound_offset+2);
+    						if (openright)
+    						{
+    							sprite = sprite_tilt_right;
+    							overlayList = owner.leanROverlays;
+    						}
+    						if (openleft)
+    						{
+    							sprite = sprite_tilt_left;
+    							overlayList = owner.leanLOverlays;
+    						}
+    					}
+    				}
+    					
+    				//charUnsetSolids();
+    			}
+    			else
+    			{
+    				sprite = spriteRun;
+    				overlayList = owner.runOverlays;
+    				if (owner.player.class == CLASS_HEAVY and abs(owner.hspeed) < 3) // alternative sprite for extremely slow moving heavies
+    				{
+    					if (team == TEAM_RED)
+    					{
+    						sprite = HeavyRedWalkS;
+    						overlayList = owner.walkOverlays;
+    					}
+    					else
+    					{
+    						sprite = HeavyBlueWalkS;
+    						overlayList = owner.walkOverlays;
+    					}
+    				}
+    			}
+    		}
+    	}
+    	else
+    	{
+    		sprite = sprite_index;
+    		overlayList = owner.stillOverlays;
+    	}
+
+        // create vars independent of owner to use in draw_sprite
+        lastSprite = sprite;
+        index = floor(owner.animationImage);
+        lastScale = owner.image_xscale;
+    }
+
+    while a <= 12-1 
+    {
+        draw_sprite_ext(lastSprite,index,old_pos[a,0],old_pos[a,1],lastScale,1,0,c_white,image_alpha/((a+2)/2));
+        a += 1;
+    }
 ');
 object_event_add(RadioBlur,ev_step,ev_step_end,'
-	if owner {
-		charging = owner.currentWeapon.charging;
-		radioactive = owner.radioactive;
-		if radioactive or charging /*or owner.stomping or owner.raged*/ {
-			x=owner.x;
-			y=owner.y;
-		} else {
-			image_alpha -= 0.05;
-			if image_alpha <= 0.01 instance_destroy();
-		}
+	if owner != -1 {
+		x=owner.x;
+		y=owner.y;
 	} else {
-		image_alpha -= 0.05;
+        /*if (image_alpha/((clone+2)/2) >= 0.02) {
+            playsound(x,y,PickupSnd);
+            image_alpha -= 0.055 / global.delta_factor; // target the biggest variable for a smoother fade-out
+        }*/
+		image_alpha -= 0.1 / global.delta_factor;
 		if image_alpha <= 0.01 instance_destroy();
 	}
 ');
+
 object_event_add(Text,ev_create,0,'
 	vspeed-=0.5;
 ');
@@ -1289,8 +1294,6 @@ object_event_add(Ball,ev_step,ev_step_normal,'
         vspeed=0;
     }
 
-
-
     if (place_free(x, y+1))
         vspeed += 0.7 * global.delta_factor;
     else
@@ -1552,7 +1555,10 @@ object_event_add(MadMilk,ev_other,ev_user2,'
 	with (Character) {
 		if (distance_to_object(other) < other.blastRadius and !(team == other.team and id != other.ownerPlayer.object and place_meeting(x, y+1, Obstacle))){
 			if(other.team != team) && !ubered and hp > 0 && !radioactive {
-					milked=1; // in modern context this variable name is making me laugh
+					soaked = true;
+                    for(i=0; i<3; i+=1) {
+                        if (soakType[i] == -1 && soakType[i] != milked) soakType[i] = milked; // Test later
+                    }
 					alarm[8]=250-distance_to_object(other);
 					cloak=false;     
 			}
@@ -1707,13 +1713,16 @@ object_event_add(NapalmGrenade,ev_alarm,3,'
 	instance_destroy();
 ');
 object_event_add(NapalmGrenade,ev_step,ev_step_normal,'
+    wallSetSolid();
 	if(abs(vspeed)<0.2) {
 		vspeed=0;
 	}
 	if(abs(rotspeed) < 0.2) {
 		rotspeed=0
 	}
+
 	image_angle += rotspeed;
+
 	if(place_free(x,y+1)) {
 		vspeed += 0.7 * global.delta_factor;
     } else {
@@ -1735,20 +1744,20 @@ object_event_add(NapalmGrenade,ev_step,ev_step_normal,'
 
         if(!place_free(x,y+sign(vspeed)))
         {
-            vspeed *= -0.4;
+            vspeed *= -0.8;
             if(!place_free(x+hspeed,y))
             {
                 really_move_contact_solid(point_direction(x,y,x+hspeed,y+vspeed), speed);
-                hspeed *= -0.4;
+                hspeed *= -0.8;
             }
         }
         if(!place_free(x+sign(hspeed),y))
         {
-            hspeed *= -0.4;
+            hspeed *= -0.8;
             if(!place_free(x,y+vspeed))
             {
                 really_move_contact_solid(point_direction(x,y,x+hspeed,y+vspeed), speed);
-                vspeed *= -0.4;
+                vspeed *= -0.8;
             }
         }
     }
@@ -1921,6 +1930,10 @@ object_event_add(JarOPiss,ev_other,ev_user2,'
 	with (Character) {
 		if (distance_to_object(other) < other.blastRadius and !(team == other.team and id != other.ownerPlayer.object and place_meeting(x, y+1, Obstacle))){
 			if(other.team != team) && !ubered and hp > 0 && !radioactive {
+                    soaked = true;
+                    for(i=0; i<3; i+=1) {
+                        if (soakType[i] == -1 && soakType[i] != piss) soakType[i] = piss; // Test later
+                    }
 					pissed=1; // in modern context this variable name is making me laugh
 					alarm[8]=250-distance_to_object(other);
 					cloak=false; 
@@ -2264,7 +2277,15 @@ global.dealDamageFunction += '
 			text.sprite_index=MissS;
 			exit;
         }
-		if (argument1.pissed && argument1.team != argument0.team || argument0.object.currentWeapon.hype) {
+        var pissed, milked;
+        if (soaked)
+            for(i=0; i<3; i+=1) {
+                if (argument1.soakType[i] == piss)
+                    pissed = true;
+                if (argument1.soakType[i] == milk)
+                   milked = true;
+            }
+		if (pissed || argument1.crit == 2 || (argument0.abilityActive && argument0.ability = MINICRIT)) {
 			argument2 += 1*0.35; // add this dmg for healing factors
 			argument1.hp -= 1*0.35;
 			var text;
@@ -2275,7 +2296,7 @@ global.dealDamageFunction += '
 			if (argument0.object_index == Player) {
 				if (argument0.object != -1 && instance_exists(argument0.object)) {
 					if (argument0.object.currentWeapon.object_index == BlackBox && argument1.team != argument0.team) argument0.object.hp += argument2*0.3; // BlackBox heal code
-					if (argument1.milked) argument0.object.hp += argument2*0.35; // milk heal code
+                    if (amilked) argument0.object.hp += argument2*0.35; // milk heal code
 				}
 			}
 		}

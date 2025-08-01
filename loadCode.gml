@@ -555,6 +555,7 @@ object_event_add(InGameMenuController,ev_create,0,'
 //	}
 //');
 
+globalvar piss, milk, bleed;
 object_event_add(Character,ev_create,0,'
 	accel = 0;
 	blurs = 0;
@@ -571,6 +572,11 @@ object_event_add(Character,ev_create,0,'
     raged=false;
     canSwitch = true;
 	
+	soaked = false;
+	// 3 soakTypes, 3 types, if possibly at the same time
+	soakType[0]=-1;
+	soakType[1]=-1;
+	soakType[2]=-1;
 	//stuff from alt weapons
     pissed=0;
     milked = 0;
@@ -619,9 +625,10 @@ object_event_add(Character,ev_create,0,'
     sentrylevel=0;
     carrySentry=0;
     
-	meter0=-1;
-	meter1=-1;
-	
+	meter[0]=-1;
+	maxMeter=-1;
+	meter[1]=-1;
+	curMeter=-1;
 	// could test using the above instead later?
     //Things lorgan also prefers saved
     ammo[100] = false;  //uberReady
@@ -658,6 +665,18 @@ object_event_add(Character,ev_alarm,8,'
 	pissed = 0;
 ');
 
+object_event_add(Character,ev_alarm,11,'
+	{
+    loopsoundstop(DetoFlySnd);
+    }
+');
+object_event_add(Character,ev_alarm,10,'
+	buffbanner = false;
+	stunned = false;
+	radioactive = false;
+	playsound(x,y,BowSnd);
+');
+
 object_event_add(Character,ev_step,ev_step_normal,'
 	/*if (currentWeapon.charging == 1 and currentWeapon.object_index == Eyelander)
 	{
@@ -675,16 +694,21 @@ object_event_add(Character,ev_step,ev_step_normal,'
 			}
 		}
 	}*/// the trimping becomes permadisabled when used on ev_step_normal
-	
-	blur = radioactive or (currentWeapon.charging == 1 and currentWeapon.object_index == Eyelander);
+	//var abilityVisual = string(currentWeapon.abilityVisual);
+
+	abilityActive = currentWeapon.abilityActive;
+	makeBlur = abilityActive && string_count("BLUR",currentWeapon.abilityVisual) != 0;
+	blur = radioactive or (currentWeapon.abilityActive && string_count("BLUR",currentWeapon.abilityVisual) != 0);
 	if (blur) {
-		while (blurs <= 15) {
-			blur=instance_create(x,y,RadioBlur);
-			blur.owner=id;
-			blurs+=1;
-		}
+		with(RadioBlur)
+			if (owner == other.id) exit;
+		blur=instance_create(x,y,RadioBlur);
+		blur.owner=id;
 	} else {
-		blurs = 0;
+		with(RadioBlur)
+			if (owner == other.id) {
+				owner = -1;
+			}
 	}
 ');
 globalvar DetoTrimpSnd, DetoFlyStartSnd, DetoFlySnd;
@@ -709,66 +733,76 @@ object_event_add(Character,ev_step,ev_step_end,'
 	xprevious = x;
 	yprevious = y;
 	
-	if(currentWeapon.charging == 1 and currentWeapon.object_index == Eyelander) {
-		// the hspeed mod is a light buff to detect more slopes	
-		if(!place_free(x + sign(hspeed*0.5), y)) { // we hit a wall on the left or right
-			if(place_free(x + sign(hspeed*0.5), y - 6)) // if we could just walk up the step
+	if (weapons[0] != -1) {
+		if(currentWeapon.abilityActive and weapons[1] == Eyelander) {
+			// the hspeed mod is a light buff to detect more slopes	
+			if(!place_free(x + sign(hspeed*0.5), y)) { // we hit a wall on the left or right
+				if(place_free(x + sign(hspeed*0.5), y - 6)) // if we could just walk up the step
+				{
+					playsound(x,y,DetoTrimpSnd);
+					if (keyState & $80) {
+						vspeed -= 7.3 * accel; // hold W to fly
+					}
+					//effect_create_below(ef_smoke,x-hspeed*1.2,y-vspeed*1.2+40,0,c_gray);
+					if !variable_local_exists("jumpFlameParticleType")
+					{
+						jumpFlameParticleType = part_type_create();
+						part_type_sprite(jumpFlameParticleType,FlameS,true,false,true);
+						part_type_alpha2(jumpFlameParticleType,1,0.3);
+						part_type_life(jumpFlameParticleType,2/global.delta_factor,5/global.delta_factor);
+						part_type_scale(jumpFlameParticleType,0.7,-0.65);
+					}
+					
+					if !variable_global_exists("jumpFlameParticleSystem")
+					{
+						global.jumpFlameParticleSystem = part_system_create();
+						part_system_depth(global.jumpFlameParticleSystem, 10);
+					}
+					
+					if(global.particles == PARTICLES_NORMAL or global.particles == PARTICLES_ALTERNATIVE)
+					{
+						part_particles_create(global.jumpFlameParticleSystem,x,y+19,jumpFlameParticleType,1);
+					}
+					//hspeed -= 5;
+					accel += 0.5;
+				} else {
+					accel = 0;
+				}
+			}
+			if (moveStatus == 4 && !flight)
 			{
-				playsound(x,y,DetoTrimpSnd);
-				if (keyState & $80) {
-					vspeed -= 7.3 * accel; // hold W to fly
-				}
-				//effect_create_below(ef_smoke,x-hspeed*1.2,y-vspeed*1.2+40,0,c_gray);
-				if !variable_local_exists("jumpFlameParticleType")
-				{
-					jumpFlameParticleType = part_type_create();
-					part_type_sprite(jumpFlameParticleType,FlameS,true,false,true);
-					part_type_alpha2(jumpFlameParticleType,1,0.3);
-					part_type_life(jumpFlameParticleType,2/global.delta_factor,5/global.delta_factor);
-					part_type_scale(jumpFlameParticleType,0.7,-0.65);
-				}
-				
-				if !variable_global_exists("jumpFlameParticleSystem")
-				{
-					global.jumpFlameParticleSystem = part_system_create();
-					part_system_depth(global.jumpFlameParticleSystem, 10);
-				}
-				
-				if(global.particles == PARTICLES_NORMAL or global.particles == PARTICLES_ALTERNATIVE)
-				{
-					part_particles_create(global.jumpFlameParticleSystem,x,y+19,jumpFlameParticleType,1);
-				}
-				//hspeed -= 5;
-				accel += 0.5;
-			} else {
-				accel = 0;
+				if(alarm[11] <= 0)
+					loopsoundstart(x,y,DetoFlySnd);
+				else
+					loopsoundmaintain(x,y,DetoFlySnd);
+				alarm[11] = 2 / global.delta_factor;
 			}
-		}
-		if (moveStatus == 4 && !flight)
+			if (keyState & $80) {
+				if (accel > 1.3 && !onground) {
+					moveStatus = 4; // bork it so youre always flyin
+					if (flight) {
+						playsound(x,y,DetoFlyStartSnd);
+						flight = false;
+					}
+				} else {
+					flight = true;
+				}
+			}
+		} //detected upwards slope, Fly!
+
+		for(i=0; i<1; i+=1) 
 		{
-			if(alarm[11] <= 0)
-				loopsoundstart(x,y,DetoFlySnd);
-			else
-				loopsoundmaintain(x,y,DetoFlySnd);
-			alarm[11] = 2 / global.delta_factor;
-		}
-		if (keyState & $80) {
-			if (accel > 1.3 && !onground) {
-				moveStatus = 4; // bork it so youre always flyin
-				if (flight) {
-					playsound(x,y,DetoFlyStartSnd);
-					flight = false;
-				}
-			} else {
-				flight = true;
+			if(weapons[i] == SodaPopper && (hspeed != 0 || vspeed != 0)) {
+				//playsound(x,y,DetoTrimpSnd);
+				//if (!instance_exists("currentWeapon.hype")) break;
+				//if (!currentWeapon.hype)
+				curMeter = i;
+				meter[i] += 1/16 * speed;
+				if (player.activeWeapon == i)
+					if (!currentWeapon.abilityActive) 
+					currentWeapon.meterCount = meter[i];
 			}
 		}
-	} //detected upwards slope, Fly!
-	
-	if(currentWeapon.object_index == SodaPopper && (hspeed != 0 || vspeed != 0)) {
-		if (!instance_exists("currentWeapon.hype")) break;
-		if (!currentWeapon.hype)
-			currentWeapon.meterCount += 1/16 * speed;
 	}
 	charUnsetSolids();
 
@@ -782,6 +816,7 @@ object_event_add(Character,ev_step,ev_step_end,'
 	                
 	    sendEventPlayerDeath(player, lastDamageDealer, assistant, lastDamageSource);
 	    doEventPlayerDeath(player, lastDamageDealer, assistant, lastDamageSource);
+	    if (lastDamageSource == WEAPON_FROSTBITE)
 	    with(GameServer) {
 	        ServerBalanceTeams();
 	    }
@@ -832,7 +867,7 @@ object_event_add(Character,ev_step,ev_step_end,'
 	// ykno that could be simplified into a single one
 	// like soaked and a soakType
 	if !invisibeam
-		if /*!(weapon_index > WEAPON_REVOLVER && weapon_index <= WEAPON_ZAPPER or weapon_index == WEAPON_PREDATOR) or*/ pissed or milked or bleeding cloak = false;
+		if /*!(weapon_index > WEAPON_REVOLVER && weapon_index <= WEAPON_ZAPPER or weapon_index == WEAPON_PREDATOR) or*/ soaked cloak = false;
 	    
 	// Cloak
 	if (cloak and cloakAlpha > 0 and !cloakFlicker)
@@ -869,25 +904,27 @@ object_event_add(Character,ev_step,ev_step_end,'
 	        omnomnomnom=false;
 	}
 	
-	//dripping piss
-	if pissed {
-		repeat(random(floor(2))) instance_create(x+random(32)-16,y+random(32)-16,Piss);
-	}
-	//dripping milk
-	if milked {
-		repeat(random(floor(2))) instance_create(x+random(32)-16,y+random(32)-16,Milk);
-	}
-	//bleeding
-	if bleeding {
-		hp-=0.15;
-		repeat(random(floor(2))) instance_create(x+random(32)-16,y+random(32)-16,BloodDrop);
-		lastDamageSource = WEAPON_SHIV;
-	}
-	//unpissing/unmilking if ubered
-	if ubered or megaHealed or critting {
-		pissed=0;
-		milked=0;
-		bleeding=0;
+	//dripping
+	
+	for(i=0; i<3; i+=1) {
+		if soakType[i] == piss {
+			repeat(random(floor(2))) instance_create(x+random(32)-16,y+random(32)-16,Piss);
+		}
+		//dripping milk
+		if soakType[i] == milk {
+			repeat(random(floor(2))) instance_create(x+random(32)-16,y+random(32)-16,Milk);
+		}
+		//bleeding
+		if soakType[i] == bleed {
+			hp-=0.15;
+			repeat(random(floor(2))) instance_create(x+random(32)-16,y+random(32)-16,BloodDrop);
+			lastDamageSource = WEAPON_SHIV;
+		}
+		//unpissing/unmilking if ubered
+		if ubered or megaHealed or critting {
+			soaked = false
+			soakType[i]=-1;
+		}
 	}
 
 	//for things polling whether the character is on a medcabinet
@@ -924,17 +961,6 @@ object_event_add(Character,ev_step,ev_step_end,'
 	if(deathmatch_invulnerable <= 0)
 	    deathmatch_invulnerable = 0;
 ');
-object_event_add(Character,ev_alarm,11,'
-	{
-    loopsoundstop(DetoFlySnd);
-    }
-');
-object_event_add(Character,ev_alarm,10,'
-	buffbanner = false;
-	stunned = false;
-	radioactive = false;
-	playsound(x,y,BowSnd);
-');
 object_event_add(Weapon,ev_create,0,'
 	spark = 0;
     alarm[9]=2;
@@ -966,6 +992,9 @@ object_event_add(Weapon,ev_draw,0,'
 	    exit;
 	    
 	var imageOffset;
+
+	//var abilityVisual = string(currentWeapon.abilityVisual);
+
 	if ((alarm[6] <= 0 and alarm[5] <= 0) or object_index == Blade) {
 	    //if we are not shooting or recoiling
 	    imageOffset = owner.team;
@@ -988,22 +1017,19 @@ object_event_add(Weapon,ev_draw,0,'
 	    else
 	        image_alpha = power(owner.cloakAlpha, 2);
 	    draw_sprite_ext(sprite_index, imageOffset, round(x+xoffset*image_xscale), round(y+yoffset) + owner.equipmentOffset, image_xscale, image_yscale, image_angle, c_white, image_alpha);
-	    if (variable_local_exists("charging"))
+	    if (abilityActive && string_count("WEAPON", abilityVisual) > 0) 
 	    {
-			if(charging == 1 || hype){
 				if (owner.team == TEAM_RED)
 					ubercolour = c_orange;
 				else if (owner.team == TEAM_BLUE)
 					ubercolour = c_aqua;
 				//draw_sprite_ext(sprite_index, imageOffset, round(x+xoffset*image_xscale), round(y+yoffset) + owner.equipmentOffset, image_xscale, image_yscale, image_angle, ubercolour, 0.7*image_alpha);
 				draw_sprite_ext(sprite_index,4+imageOffset/2,round(x+xoffset*image_xscale),round(y+yoffset),image_xscale,image_yscale,image_angle,ubercolour,0.7);
-				if (charging == 1) {
-					if (!isMelee) 
-						draw_sprite_ext(Spark2S,spark,round(x+xoffset*image_xscale),round(y+yoffset) + owner.equipmentOffset ,image_xscale,image_yscale,image_angle,ubercolour,0.3);
-					else
-						draw_sprite_ext(Spark2S,spark,round(x+xoffset*image_xscale),round(y+yoffset+40) + owner.equipmentOffset ,image_xscale,image_yscale,image_angle,ubercolour,0.3);
-				}
-			}
+				if (!isMelee) 
+					draw_sprite_ext(Spark2S,spark,round(x+xoffset*image_xscale),round(y+yoffset) + owner.equipmentOffset ,image_xscale,image_yscale,image_angle,ubercolour,0.3);
+				else
+					draw_sprite_ext(Spark2S,spark,round(x+xoffset*image_xscale),round(y+yoffset+40) + owner.equipmentOffset ,image_xscale,image_yscale,image_angle,ubercolour,0.3);
+	
 	    }
 	    if (owner.ubered)
 	    {
@@ -1065,7 +1091,7 @@ object_event_add(Heavy,ev_create,0,'
 object_event_clear(Heavy,ev_step,ev_step_normal);
 object_event_add(Heavy,ev_step,ev_step_normal,'
 	minigun = keyState & $10 && player.activeWeapon == 0;
-	weapon = global.myself.object.currentWeapon.object_index;
+	weapon = weapons[0];
 	if(minigun) {
 		if (weapon == Tomislav) {
 			runPower = 0.55;
