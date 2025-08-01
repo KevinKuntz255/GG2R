@@ -572,6 +572,8 @@ object_event_add(Character,ev_create,0,'
     raged=false;
     canSwitch = true;
 	
+	crit = -1;
+	
 	soaked = false;
 	// 3 soakTypes, 3 types, if possibly at the same time
 	soakType[0]=-1;

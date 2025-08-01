@@ -2278,14 +2278,17 @@ global.dealDamageFunction += '
 			exit;
         }
         var pissed, milked;
-        if (soaked)
+        pissed = false;
+        milked = false;
+        if (argument1.soaked)
             for(i=0; i<3; i+=1) {
                 if (argument1.soakType[i] == piss)
                     pissed = true;
                 if (argument1.soakType[i] == milk)
                    milked = true;
             }
-		if (pissed || argument1.crit == 2 || (argument0.abilityActive && argument0.ability = MINICRIT)) {
+		//if (pissed || argument1.object.crit == 2 || (argument0.object.currentWeapon.abilityActive && argument0.object.currentWeapon.ability = MINICRIT)) {
+        if (pissed) {
 			argument2 += 1*0.35; // add this dmg for healing factors
 			argument1.hp -= 1*0.35;
 			var text;
@@ -2296,7 +2299,7 @@ global.dealDamageFunction += '
 			if (argument0.object_index == Player) {
 				if (argument0.object != -1 && instance_exists(argument0.object)) {
 					if (argument0.object.currentWeapon.object_index == BlackBox && argument1.team != argument0.team) argument0.object.hp += argument2*0.3; // BlackBox heal code
-                    if (amilked) argument0.object.hp += argument2*0.35; // milk heal code
+                    if (milked) argument0.object.hp += argument2*0.35; // milk heal code
 				}
 			}
 		}

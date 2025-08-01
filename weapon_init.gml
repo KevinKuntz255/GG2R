@@ -2,11 +2,79 @@
 //the first 5 are primaries and the last 6 are secondaries for the classes
 //PS: This was A LOT of work. A LOT.
 
-//Updating this for modern gg2 was a LOT LOT of work
 // WeaponTypes
-globalvar SCATTERGUN, FLAMETHROWER, ROCKETLAUNCHER, MINIGUN, MINEGUN, NEEDLEGUN, SHOTGUN, REVOLVER, RIFLE, PISTOL, GRENADELAUNCHER, NEEDLEGUN, HEALBEAM, NAILGUN, KNIFE, SMG, MELEE, THROWABLE, FLASHLIGHT, FLAREGUN, LASERGUN, BANNER, CONSUMABLE, CROSSBOW, WRANGLER, SAPPER, WEAR;
-// WeaponGrades
-globalvar STOCK, UNIQUE, FUN; // Stock, Lorgan's Set, and The newer Ideas (to be implemented...) 
+globalvar SCATTERGUN, FLAMETHROWER, ROCKETLAUNCHER, MINIGUN, MINEGUN, NEEDLEGUN, SHOTGUN, REVOLVER, RIFLE, PISTOL, GRENADELAUNCHER, NEEDLEGUN, HEALBEAM, NAILGUN, KNIFE, SMG, MELEE, THROWABLE, FLASHLIGHT, FLAREGUN, LASERGUN, BANNER, CONSUMABLE, CROSSBOW, WRANGLER, SAPPER, WEAR, BLADE, MACHINEGUN;
+
+SCATTERGUN = 0; // oh huh I need to do this, sure
+FLAMETHROWER = 1;
+ROCKETLAUNCHER = 2;
+MINIGUN = 3;
+MINEGUN = 4;
+NEEDLEGUN = 5;
+SHOTGUN = 6;
+REVOLVER = 7;
+RIFLE = 8;
+PISTOL = 9;
+GRENADELAUNCHER = 10;
+NEEDLEGUN = 11;
+HEALBEAM = 12;
+NAILGUN = 13;
+KNIFE = 14;
+SMG = 15;
+MELEE = 16;
+THROWABLE = 17;
+FLASHLIGHT = 18;
+FLAREGUN = 19;
+LASERGUN = 20;
+BANNER = 21;
+CONSUMABLE = 22;
+CROSSBOW = 23;
+WRANGLER = 24;
+SAPPER = 25;
+WEAR = 26;
+BLADE = 27;
+MACHINEGUN = 28;
+// WeaponGrades, them too
+globalvar STOCK, UNIQUE, FUN; // Stock, Lorgan's Set, and The newer Ideas (to be implemented...)
+STOCK = 0;
+UNIQUE = 1;
+FUN = 2;
+
+
+global.weaponTypes = ds_map_create();
+
+ds_map_add(global.weaponTypes, SCATTERGUN, SCATTERGUN);
+ds_map_add(global.weaponTypes, FLAMETHROWER, FLAMETHROWER);
+ds_map_add(global.weaponTypes, ROCKETLAUNCHER, ROCKETLAUNCHER);
+ds_map_add(global.weaponTypes, MINIGUN, MINIGUN);
+ds_map_add(global.weaponTypes, MINEGUN, MINEGUN);
+ds_map_add(global.weaponTypes, NEEDLEGUN, NEEDLEGUN);
+ds_map_add(global.weaponTypes, SHOTGUN, SHOTGUN);
+ds_map_add(global.weaponTypes, REVOLVER, REVOLVER);
+ds_map_add(global.weaponTypes, RIFLE, RIFLE);
+ds_map_add(global.weaponTypes, PISTOL, PISTOL);
+ds_map_add(global.weaponTypes, GRENADELAUNCHER, GRENADELAUNCHER);
+ds_map_add(global.weaponTypes, NEEDLEGUN, NEEDLEGUN);
+ds_map_add(global.weaponTypes, HEALBEAM, HEALBEAM);
+ds_map_add(global.weaponTypes, NAILGUN, NAILGUN);
+ds_map_add(global.weaponTypes, KNIFE, KNIFE);
+ds_map_add(global.weaponTypes, SMG, SMG);
+ds_map_add(global.weaponTypes, MELEE, MELEE);
+ds_map_add(global.weaponTypes, THROWABLE, THROWABLE);
+ds_map_add(global.weaponTypes, FLASHLIGHT, FLASHLIGHT);
+ds_map_add(global.weaponTypes, FLAREGUN, FLAREGUN);
+ds_map_add(global.weaponTypes, LASERGUN, LASERGUN);
+ds_map_add(global.weaponTypes, BANNER, BANNER);
+ds_map_add(global.weaponTypes, CONSUMABLE, CONSUMABLE);
+ds_map_add(global.weaponTypes, CROSSBOW, CROSSBOW);
+ds_map_add(global.weaponTypes, WRANGLER, WRANGLER);
+ds_map_add(global.weaponTypes, SAPPER, SAPPER);
+ds_map_add(global.weaponTypes, WEAR, WEAR);
+ds_map_add(global.weaponTypes, BLADE, BLADE);
+ds_map_add(global.weaponTypes, MACHINEGUN, MACHINEGUN);
+
+//Updating this for modern gg2 was a LOT LOT of work
+
 // Sounds
 globalvar SwitchSnd, FlashlightSnd, swingSnd, BallSnd, DirecthitSnd, ManglerChargesnd, LaserShotSnd, BowSnd, ChargeSnd1, ChargeSnd2, ChargeSnd3, FlaregunSnd, BuffbannerSnd, CritSnd, ShotSnd;
 SwitchSnd = sound_add(directory + '/randomizer_sounds/switchSnd.wav', 0, 1);
@@ -40,14 +108,13 @@ object_event_add(Weapon,ev_create,0,'
     abilityVisual = "";
     abilityType= -1;
 
-    // weaponType for each weapon
-    weaponType = SHOTGUN;
     // weaponGrade for Unique/Stock/Special
     weaponGrade = STOCK;
+    // weaponType for each weapon
+    weaponType = SHOTGUN;
 
     damSource = DAMAGE_SOURCE_SHOTGUN;
     // do not name it Dee Mage. do not even comment it. Compilation Error. Game Maker 8 was made by Satan.
-    //alarm[9]=2;
 	baseDamage=-1; // stops crashing when youre zooming in
 	
     isMelee = false;
@@ -61,7 +128,10 @@ object_event_add(Weapon,ev_create,0,'
     shots = 1;
     specialShot = -1;
     shotDamage = -1;
-    shotDir = 15;
+    shotSpeed = -1;
+    shotDir = -1;
+    shotDir=15;
+
 	// Implement fixed reload times by parented variables
 	with(owner) { // reminder: activeWeapon is modified before Weapon ev_create is called
 		with (player)
@@ -100,15 +170,241 @@ object_event_add(Weapon,ev_destroy,0,'
 	} else {
 		owner.fire = true;
 	}
-	if (alarm[2] > 0) {
+	if (alarm[2] > 0 && !isMelee) {
 		owner.reloadFlare = alarm[2];
 	}
+
+    switch(weaponType)
+    {
+        case MELEE:
+            with (MeleeMask) if (ownerPlayer == other.ownerPlayer) instance_destroy();
+            with (StabMask) if (ownerPlayer == other.ownerPlayer) instance_destroy();
+            with (StabAnim) if (ownerPlayer == other.ownerPlayer) instance_destroy();
+        break;
+        case REVOLVER:
+            with (SapAnimation) if (ownerPlayer == other.ownerPlayer) instance_destroy();
+            with (SapMask) if (ownerPlayer == other.ownerPlayer) instance_destroy();
+        break;
+        case FLAMETHROWER:
+            loopsoundstop(FlamethrowerSnd);
+        break;
+    }
+');
+object_event_add(Weapon,ev_alarm,1,'
+    switch(weaponType)
+    {
+        case MELEE:
+            shot = instance_create(x,y,MeleeMask);
+            shot.direction=owner.aimDirection;
+            shot.speed=owner.speed;
+            shot.owner=owner;
+            shot.ownerPlayer=ownerPlayer;
+            shot.team=owner.team;
+            shot.hitDamage = shotDamage;
+            shot.weapon=object_index;
+
+            alarm[2] = 10;
+        break;
+        case FLAMETHROWER:
+            readyToBlast = true;
+        break;
+    }
+');
+object_event_add(Weapon,ev_alarm,2,'
+    switch(weaponType)
+    {
+        case MELEE:
+            readyToStab = true;
+        break;
+        case FLAMETHROWER:
+            readyToFlare = true;
+        break;
+        default:
+            readyToShoot = true;
+        break;
+    }
+');
+object_event_add(Weapon,ev_alarm,3,'
+    switch(weaponType)
+    {
+        case MELEE:
+            shot = instance_create(x,y,StabMask);
+            shot.direction=stabdirection;
+            shot.speed=0;
+            shot.owner=owner;
+            shot.ownerPlayer=ownerPlayer;
+            shot.team=owner.team;
+            shot.hitDamage = 200;
+            shot.weapon=DAMAGE_SOURCE_KNIFE;
+
+            alarm[2] = 18;
+        break;
+        case FLAMETHROWER:
+            loopsoundstop(FlamethrowerSnd);
+        break;
+    }
+');
+object_event_add(Weapon,ev_alarm,5,'
+    switch(weaponType)
+    {
+        case SCATTERGUN:
+        case SHOTGUN:
+        case PISTOL:
+        case ROCKETLAUNCHER:
+            if (ammoCount < maxAmmo)
+            {
+                ammoCount += 1;
+            }
+            if (ammoCount < maxAmmo)
+            {
+                alarm[5] = reloadTime / global.delta_factor;
+                sprite_index = reloadSprite;
+                image_index = 0;
+                image_speed = reloadImageSpeed * global.delta_factor;
+            }
+        break;
+        case MINIGUN || FLAMETHROWER:
+            isRefilling = true;
+        break;
+        case REVOLVER: 
+        case FLAREGUN:
+            if (ammoCount < maxAmmo)
+            {
+                ammoCount = maxAmmo;
+                ejected = 0;
+            }
+        break;
+        case THROWABLE || MELEE:
+            ammoCount = maxAmmo;
+        break;
+    }
+');
+object_event_add(Weapon,ev_alarm,6,'
+    switch(weaponType)
+    {
+        case MINIGUN:
+            //Reset the sprite
+            sprite_index = normalSprite;
+            image_speed = 0;
+        break;
+        case CONSUMABLE:
+             if (reloadSprite != -1 && object_index != Rifle && alarm[5] > 0)
+            {
+                sprite_index = reloadSprite;
+                image_index = 0;
+                image_speed = 0;
+            } 
+            else
+            {
+                sprite_index = normalSprite;
+                image_speed = 0;
+            }
+        break;
+        case FLAMETHROWER:
+            //Override this if we are airblasting
+            if (sprite_index != blastSprite) {
+                sprite_index = dropSprite;
+                image_speed = dropImageSpeed * global.delta_factor;
+                image_index = 0;
+                alarm[7] = dropTime / global.delta_factor;
+            }
+        break;
+    }
+');
+object_event_add(Weapon,ev_alarm,7,'
+    if (global.particles == PARTICLES_NORMAL) {
+        switch(weaponType)
+        {
+            case SHOTGUN:
+                var shell;
+                shell = instance_create(x, y, Shell);
+                shell.direction = owner.aimDirection + (140 - random(40)) * image_xscale;
+                shell.image_index = 1;
+            break;
+            case RIFLE:
+                var shell;
+                shell = instance_create(x, y, Shell);
+                shell.direction = owner.aimDirection + (100 + random(30)) * image_xscale;
+                shell.hspeed -= 1 * image_xscale;
+                shell.vspeed -= 1;
+                shell.image_index = 2;
+            break;
+            case REVOLVER:
+                if !variable_local_exists("ejected") break;
+                if (image_alpha > 0.1)
+                {
+                    repeat(maxAmmo-ammoCount-ejected)
+                    {
+                        var shell;
+                        shell = instance_create(x + lengthdir_x(8, owner.aimDirection), y + lengthdir_y(8, owner.aimDirection) - 5, Shell);
+                        shell.direction = 180 + owner.aimDirection + (70 - random(80)) * image_xscale;
+                        shell.speed *= 0.7;
+                        ejected +=1;
+                    }
+                }
+            break;
+            case FLAMETHROWER:
+                sprite_index = normalSprite;
+                image_speed = 0;
+            break;
+        }
+    }
+');
+object_event_add(Weapon,ev_step,ev_step_normal,'
+    switch(weaponType)
+    {
+        case MELEE:
+            if !variable_local_exists("smashing") break;
+            if smashing {
+                image_speed=0.3;
+                if 1 != 1 { //Removed crit here
+                    if image_index >= 11{
+                        image_speed=0;
+                        image_index=8;
+                        stabbing = false;
+                    } 
+                } else if image_index >= 4*owner.team+3 {
+                    image_speed=0;
+                    image_index=4*owner.team;
+                    stabbing = false;
+                }    
+            } else {
+                if 1 <= 1  image_index=4*owner.team;
+                else image_index = 8;
+            }
+        break;
+    }
+');
+object_event_add(Weapon,ev_step,ev_step_begin,'
+    switch(weaponType)
+    {
+        case MINIGUN:
+            if !variable_local_exists("isRefilling") exit;
+            if (ammoCount < 0)
+                ammoCount = 0;
+            else if (ammoCount <= maxAmmo and isRefilling)
+                ammoCount += 1 * global.delta_factor;
+            if(!readyToShoot and alarm[5] < (25 / global.delta_factor) and !isRefilling)
+                alarm[5] += 1;
+        break;
+        case FLAMETHROWER:
+            if (ammoCount < 0)
+                ammoCount = 0;
+            else if (ammoCount <= maxAmmo and isRefilling)
+                ammoCount += 1.8 * global.delta_factor;
+        break;
+    }
 ');
 object_event_add(Weapon,ev_other,ev_user1,'
     //if (weaponGrade.object_index != STOCK) { // STOCK detected, dont change anything
-    switch(weaponType)
-    {
-        case SCATTERGUN || SHOTGUN:
+    //show_error(object_get_name(weaponType), false);
+    switch(weaponType) {
+        case SCATTERGUN:
+        case ROCKETLAUNCHER: 
+        case SHOTGUN: 
+        case RIFLE:
+        case PISTOL: 
+        case LASERGUN:
             if(readyToShoot and ammoCount > 0 and global.isHost)
             {
                 var seed;
@@ -116,36 +412,121 @@ object_event_add(Weapon,ev_other,ev_user1,'
                 sendEventFireWeapon(ownerPlayer, seed);
                 doEventFireWeapon(ownerPlayer, seed);
             }
+        break;
+        case MELEE:
+            //if !variable_local_exists("Stabreloadtime") break;
+            if(readyToStab && !owner.cloak){
+                //owner.runPower = 0;
+                //owner.jumpStrength = 0;
+                smashing = 1;
+
+                justShot=true;
+                readyToStab = false;
+                alarm[1] = StabreloadTime / global.delta_factor;
+                playsound(x,y,swingSnd);
+            }
+        break;
+        case MINIGUN:
+            // prevent sputtering
+            if (ammoCount < 2)
+                ammoCount -= 2;
+            if(readyToShoot and ammoCount >= 2)
+            {
+                playsound(x,y,ChaingunSnd);
+                var shot, shotx, shoty;
+                randomize();
+                
+                shotx = x+lengthdir_x(20,owner.aimDirection);
+                shoty = y+12+lengthdir_y(20,owner.aimDirection);
+                if(!collision_line_bulletblocking(x, y, shotx, shoty))
+                {
+                    shot = createShot(shotx, shoty, Shot, DAMAGE_SOURCE_MINIGUN, owner.aimDirection+(random(7)-3.5), 12+random(1));
+                    if(golden)
+                        shot.sprite_index = ShotGoldS;
+                    shot.hspeed += owner.hspeed;
+                    shot.alarm[0] = 30 / global.delta_factor;
+                }
+                else
+                {
+                    var imp;
+                    imp = instance_create(shotx, shoty, Impact);
+                    imp.image_angle = owner.aimDirection;
+                }
+                
+                justShot=true;
+                readyToShoot=false;
+                isRefilling = false;
+                ammoCount -= 3;
+                
+                var reloadBufferFactor;
+                if(ammoCount < 3)
+                    reloadBufferFactor = 2.5;
+                else
+                    //reloadBufferFactor = 1+(cos((ammoCount+2.2)/maxAmmo*pi)+1)/2; // spline from (full ammo = 1*) to (empty ammo = 2*)
+                    reloadBufferFactor = 1;
+                
+                alarm[0] = refireTime / global.delta_factor;
+                alarm[5] = reloadBuffer*reloadBufferFactor / global.delta_factor;
+                
+                if (global.particles == PARTICLES_NORMAL)
+                {
+                    var shell;
+                    shell = instance_create(x, y+4, Shell);
+                    shell.direction = owner.aimDirection + (140 - random(40)) * image_xscale;
+                }
+            }
+        break;
     }
 ');
 object_event_add(Weapon,ev_other,ev_user3, '
     //if (weaponGrade.object_index != STOCK) { // STOCK detected, dont change anything
     switch(weaponType)
     {
-        case SCATTERGUN || SHOTGUN:
-            if(readyToShoot and ammoCount > 0 and global.isHost)
-            {
-                playsound(x,y,ShotgunSnd);
-                ammoCount = max(0, ammoCount-1);
-                var shot;
-                repeat(shots) {
-                    if (specialShot != -1) shot = createShot(x, y, specialShot, damSource, owner.aimDirection, 13); else shot = createShot(x, y, Shot, damSource, owner.aimDirection, 13);
-                    if (shotDamage != -1) shot.hitDamage = shotDamage;
-                    if(golden)
-                        shot.sprite_index = ShotGoldS;
-                    shot.hspeed += owner.hspeed;
-                    shot.speed += random(4)-2;
-                    shot.direction += random(15)-7.5;
-                    // Move shot forward to avoid immediate collision with a wall behind the character
-                    shot.x += lengthdir_x(15, shot.direction);
-                    shot.y += lengthdir_y(15, shot.direction);
-                    shot.alarm[0] = 35 * ((min(1, abs(cos(degtorad(owner.aimDirection)))*13/abs(cos(degtorad(owner.aimDirection))*13+owner.hspeed))-1)/2+1) / global.delta_factor;
-                }
-                justShot = true;
-                readyToShoot = false;
-                alarm[0] = refireTime / global.delta_factor;
-                alarm[5] = (reloadBuffer + reloadTime) / global.delta_factor;
+        case SCATTERGUN:
+            playsound(x,y,ShotgunSnd);
+            ammoCount = max(0, ammoCount-1);
+            var shot;
+            repeat(shots) {
+                if (specialShot != -1) shot = createShot(x, y, specialShot, damSource, owner.aimDirection, 13); else shot = createShot(x, y, Shot, damSource, owner.aimDirection, 13);
+                if (shotDamage != -1) shot.hitDamage = shotDamage;
+                if(golden)
+                    shot.sprite_index = ShotGoldS;
+                shot.hspeed += owner.hspeed;
+                if (shotSpeed != -1) shot.speed += shotSpeed; else shot.speed += random(4)-2;
+                if (shotDir != -1) shot.direction += shotDir; else shot.direction += random(15)-7.5;
+                // Move shot forward to avoid immediate collision with a wall behind the character
+                shot.x += lengthdir_x(15, shot.direction);
+                shot.y += lengthdir_y(15, shot.direction);
+                shot.alarm[0] = 35 * ((min(1, abs(cos(degtorad(owner.aimDirection)))*13/abs(cos(degtorad(owner.aimDirection))*13+owner.hspeed))-1)/2+1) / global.delta_factor;
             }
+            justShot = true;
+            readyToShoot = false;
+            alarm[0] = refireTime / global.delta_factor;
+            alarm[5] = (reloadBuffer + reloadTime) / global.delta_factor;
+        break;
+        case SHOTGUN: // they use slightly different variables, but whatever, better than copypasted lines
+            ammoCount = max(0, ammoCount-1);
+            playsound(x,y,ShotgunSnd);
+            var shot;
+            repeat(5) {
+                if (specialShot != -1) shot = createShot(x, y, specialShot, damSource, owner.aimDirection, 13); else shot = createShot(x, y, Shot, damSource, owner.aimDirection, 13);
+                if (shotDamage != -1) shot.hitDamage = shotDamage;
+                if(golden)
+                    shot.sprite_index = ShotGoldS;
+                
+                shot.hspeed += owner.hspeed;
+                if (shotSpeed != -1) shot.speed += shotSpeed; else shot.speed += random(4)-2;
+                if (shotDir != -1) shot.direction += shotDir; else shot.direction += random(11)-5.5;
+                // Move shot forward to avoid immediate collision with a wall behind the character
+                shot.x += lengthdir_x(15, shot.direction);
+                shot.y += lengthdir_y(15, shot.direction);
+            }
+            justShot=true;
+            readyToShoot=false;
+            alarm[0] = refireTime / global.delta_factor;
+            alarm[5] = (reloadBuffer + reloadTime) / global.delta_factor;
+            alarm[7] = alarm[0] / 2;
+        break;
     }
 ');
 // Scout
@@ -166,6 +547,7 @@ object_event_add(ForceANature,ev_create,0,'
     reloadTime = 90;
     reloadBuffer = 20;
     idle=true;
+
     weaponGrade = UNIQUE;
     weaponType = SCATTERGUN;
     damSource = DAMAGE_SOURCE_SCATTERGUN;
@@ -184,56 +566,9 @@ object_event_add(ForceANature,ev_create,0,'
     reloadAnimLength = sprite_get_number(reloadSprite)/2;
     reloadImageSpeed = reloadAnimLength/reloadTime;
 ');
-object_event_add(ForceANature,ev_alarm,5,'
-    event_inherited();
-
-    if ammoCount < maxAmmo {
-        ammoCount = maxAmmo;
-        
-        if (global.particles == PARTICLES_NORMAL)
-        {
-            var shell;
-            shell = instance_create(x, y, Shell);
-            shell.direction = owner.aimDirection + (140 - random(40)) * image_xscale;
-            shell.image_index = 1;
-        }
-    }
-    if ammoCount < maxAmmo {
-        alarm[5] = reloadTime / global.delta_factor;
-        sprite_index = reloadSprite;
-        image_index = 0;
-        image_speed = reloadImageSpeed * global.delta_factor;
-    }
-');
-/*object_event_add(ForceANature,ev_other,ev_user1,'
-    event_inherited();
-    if(readyToShoot and ammoCount >0 and global.isHost)
-    {
-        var seed;
-        seed = irandom(65535);
-        sendEventFireWeapon(ownerPlayer, seed);
-        doEventFireWeapon(ownerPlayer, seed);
-    }
-');*/
 object_event_add(ForceANature,ev_other,ev_user3,'
-    /*ammoCount = max(0, ammoCount-1);
-    playsound(x,y,ShotgunSnd);
-    var shot;
-    repeat(12) {
-        shot = createShot(x, y, FANShot, DAMAGE_SOURCE_SCATTERGUN, owner.aimDirection, 13);
-        if(golden)
-            shot.sprite_index = ShotGoldS;
-        shot.hspeed += owner.hspeed;
-        shot.speed = random(6)+10;
-        shot.direction += random(15)-7;
-        // Move shot forward to avoid immediate collision with a wall behind the character
-        shot.x += lengthdir_x(15, shot.direction);
-        shot.y += lengthdir_y(15, shot.direction);
-        shot.alarm[0] = 35 * ((min(1, abs(cos(degtorad(owner.aimDirection)))*13
-                              /abs(cos(degtorad(owner.aimDirection))*13+owner.hspeed))-1)/2+1)
-                        / global.delta_factor;
-    }
-    */
+    shotSpeed = random(6)+10;
+    shotDir = random(15)-7;
     event_inherited();
     with(owner){
         motion_add(aimDirection, -3);
@@ -242,11 +577,6 @@ object_event_add(ForceANature,ev_other,ev_user3,'
         //moveStatus = 3;
         if abs(sin(aimDirection)) > abs(cos(aimDirection)) speed*=0.8;
     }
-    /*
-    justShot = true;
-    readyToShoot = false;
-    alarm[0] = refireTime / global.delta_factor;
-    alarm[5] = (reloadBuffer + reloadTime) / global.delta_factor;*/
 ');
 WEAPON_RUNDOWN = 2;
 Rundown = object_add();
@@ -262,10 +592,10 @@ object_event_add(Rundown,ev_create,0,'
     reloadTime = 45.6;
     reloadBuffer = 20;
     idle=true;
-    weaponGrade = UNIQUE;
-    weaponType = SCATTERGUN;
+    weaponGrade = 1;
+    weaponType = 0;
     damSouce = DAMAGE_SOURCE_SCATTERGUN;
-    shots= 3;
+    shots = 3;
     shotDamage = 14;
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\ShortStopS.png", 2, 1, 0, 8, 7);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\ShortStopFS.png", 4, 1, 0, 8, 7);
@@ -280,59 +610,10 @@ object_event_add(Rundown,ev_create,0,'
     reloadAnimLength = sprite_get_number(reloadSprite)/2;
     reloadImageSpeed = reloadAnimLength/reloadTime;
 ');
-object_event_add(Rundown,ev_alarm,5,'
-    event_inherited();
-
-    if ammoCount < maxAmmo {
-        ammoCount = maxAmmo;
-        
-        if (global.particles == PARTICLES_NORMAL)
-        {
-            var shell;
-            shell = instance_create(x, y, Shell);
-            shell.direction = owner.aimDirection + (140 - random(40)) * image_xscale;
-            shell.image_index = 1;
-        }
-    }
-    if ammoCount < maxAmmo {
-        alarm[5] = reloadTime / global.delta_factor;
-        sprite_index = reloadSprite;
-        image_index = 0;
-        image_speed = reloadImageSpeed * global.delta_factor;
-    }
-');
-object_event_add(Rundown,ev_other,ev_user1,'
-    if(readyToShoot and ammoCount >0 and global.isHost)
-    {
-        var seed;
-        seed = irandom(65535);
-        sendEventFireWeapon(ownerPlayer, seed);
-        doEventFireWeapon(ownerPlayer, seed);
-    }
-');
 object_event_add(Rundown,ev_other,ev_user3,'
-    ammoCount = max(0, ammoCount-1);
-    playsound(x,y,ShotgunSnd);
-    var shot;
-    repeat(3) {
-        shot = createShot(x, y, Shot, DAMAGE_SOURCE_SCATTERGUN, owner.aimDirection, 13);
-        if(golden)
-            shot.sprite_index = ShotGoldS;
-        shot.hspeed += owner.hspeed;
-        shot.speed = random(2)+12;
-        shot.direction += random(9)-5;
-        shot.hitDamage = 14;
-        // Move shot forward to avoid immediate collision with a wall behind the character
-        shot.x += lengthdir_x(15, shot.direction);
-        shot.y += lengthdir_y(15, shot.direction);
-        shot.alarm[0] = 35 * ((min(1, abs(cos(degtorad(owner.aimDirection)))*13
-                              /abs(cos(degtorad(owner.aimDirection))*13+owner.hspeed))-1)/2+1)
-                        / global.delta_factor;
-    }
-    justShot = true;
-    readyToShoot = false;
-    alarm[0] = refireTime / global.delta_factor;
-    alarm[5] = (reloadBuffer + reloadTime) / global.delta_factor;
+    shotSpeed = random(2)+12;
+    shotDir = random(9)-5;
+    event_inherited();
 ');
 WEAPON_SODAPOPPER = 3;
 SodaPopper = object_add();
@@ -357,6 +638,11 @@ object_event_add(SodaPopper,ev_create,0,'
     abilityVisual = "WEAPON";
     //ability = MINICRIT;
 	
+    weaponGrade = UNIQUE;
+    weaponType = SCATTERGUN;
+    shots = 6;
+    shotDamage = 8;
+
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\SodaPopperS.png", 2, 1, 0, 8, -2);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\SodaPopperFS.png", 4, 1, 0, 8, -2);
     reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\SodaPopperFRS.png", 16, 1, 0, 12, 6);
@@ -370,27 +656,6 @@ object_event_add(SodaPopper,ev_create,0,'
     reloadAnimLength = sprite_get_number(reloadSprite)/2;
     reloadImageSpeed = reloadAnimLength/reloadTime;
 ');
-object_event_add(SodaPopper,ev_alarm,5,'
-    event_inherited();
-
-    if ammoCount < maxAmmo {
-        ammoCount = maxAmmo;
-        
-        if (global.particles == PARTICLES_NORMAL)
-        {
-            var shell;
-            shell = instance_create(x, y, Shell);
-            shell.direction = owner.aimDirection + (140 - random(40)) * image_xscale;
-            shell.image_index = 1;
-        }
-    }
-    if ammoCount < maxAmmo {
-        alarm[5] = reloadTime / global.delta_factor;
-        sprite_index = reloadSprite;
-        image_index = 0;
-        image_speed = reloadImageSpeed * global.delta_factor;
-    }
-');
 object_event_add(SodaPopper,ev_step,ev_step_normal, '
 	if meterCount >= maxMeter {
 		abilityActive = true;
@@ -403,38 +668,10 @@ object_event_add(SodaPopper,ev_step,ev_step_normal, '
         if (owner.curMeter == 0) owner.meter[0] = 0; else owner.meter[1] = 0;
     }
 ');
-object_event_add(SodaPopper,ev_other,ev_user1,'
-    if(readyToShoot and ammoCount >0 and global.isHost)
-    {
-        var seed;
-        seed = irandom(65535);
-        sendEventFireWeapon(ownerPlayer, seed);
-        doEventFireWeapon(ownerPlayer, seed);
-    }
-');
 object_event_add(SodaPopper,ev_other,ev_user3,'
-    ammoCount = max(0, ammoCount-1);
-    playsound(x,y,ShotgunSnd);
-    var shot;
-    repeat(6) {
-        shot = createShot(x, y, Shot, DAMAGE_SOURCE_SCATTERGUN, owner.aimDirection, 13);
-        if(golden)
-            shot.sprite_index = ShotGoldS;
-        shot.hspeed += owner.hspeed;
-        shot.speed = random(4)+11;
-        shot.direction += random(15)-7;
-        shot.hitDamage = 8;
-        // Move shot forward to avoid immediate collision with a wall behind the character
-        shot.x += lengthdir_x(15, shot.direction);
-        shot.y += lengthdir_y(15, shot.direction);
-        shot.alarm[0] = 35 * ((min(1, abs(cos(degtorad(owner.aimDirection)))*13
-                              /abs(cos(degtorad(owner.aimDirection))*13+owner.hspeed))-1)/2+1)
-                        / global.delta_factor;
-    }
-    justShot = true;
-    readyToShoot = false;
-    alarm[0] = refireTime / global.delta_factor;
-    alarm[5] = (reloadBuffer + reloadTime) / global.delta_factor;
+    shotSpeed = random(4)+11;
+    shotDir = random(15)-7;
+    event_inherited();
 ');
 WEAPON_FLASHLIGHT = 4;
 Lasergun = object_add();
@@ -452,6 +689,9 @@ object_event_add(Lasergun,ev_create,0,'
     shot = 0;
     hitDamage=12;
 
+    weaponGrade = UNIQUE;
+    weaponType = LASERGUN;
+    shotDamage = 12;
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\LasergunS.png", 2, 1, 0, 8, -2);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\LasergunFS.png", 4, 1, 0, 8, -2);
     reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\LasergunS.png", 2, 1, 0, 8, -2);
@@ -483,15 +723,6 @@ object_event_add(Lasergun,ev_alarm,5,'
         sprite_index = reloadSprite;
         image_index = 0;
         image_speed = reloadImageSpeed * global.delta_factor;
-    }
-');
-object_event_add(Lasergun,ev_other,ev_user1,'
-    if(readyToShoot and ammoCount >0 and global.isHost)
-    {
-        var seed;
-        seed = irandom(65535);
-        sendEventFireWeapon(ownerPlayer, seed);
-        doEventFireWeapon(ownerPlayer, seed);
     }
 ');
 object_event_add(Lasergun,ev_other,ev_user3,'
@@ -670,15 +901,6 @@ object_event_add(Pistol,ev_alarm,5,'
         image_speed = reloadImageSpeed * global.delta_factor;
     }
 ');
-object_event_add(Pistol,ev_other,ev_user1,'
-    if(readyToShoot and ammoCount >0 and global.isHost)
-    {
-        var seed;
-        seed = irandom(65535);
-        sendEventFireWeapon(ownerPlayer, seed);
-        doEventFireWeapon(ownerPlayer, seed);
-    }
-');
 object_event_add(Pistol,ev_other,ev_user3,'
     ammoCount = max(0, ammoCount-1);
     playsound(x,y,ShotgunSnd);
@@ -721,6 +943,8 @@ object_event_add(BonkHand,ev_create,0,'
 	owner.ammo[105] = -1;
 	isMelee = true;
 	
+    weaponType = CONSUMABLE;
+    weaponGrade = UNIQUE;
 	normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\BonkHandS.png", 4, 0, 0, 21, 25);
 	recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\BonkHandS.png", 4, 0, 1, 21, 25);
 	reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\BonkHandS.png", 4, 0, 1, 21, 25);
@@ -754,10 +978,6 @@ object_event_add(BonkHand,ev_alarm,6,'
         sprite_index = normalSprite;
         image_speed = 0;
     }
-');
-object_event_add(BonkHand,ev_alarm,10,'
-    owner.radioactive = false;
-	playsound(x,y,BowSnd);
 ');
 object_event_add(BonkHand,ev_step,ev_step_normal,'
     image_index = owner.team+2*real(ammoCount);
@@ -824,21 +1044,28 @@ object_event_add(Sandman,ev_create,0,'
     yoffset=0;
     refireTime=18;
     event_inherited();
-    StabreloadTime = 5;
-    //readyToStab = false;
-    alarm[2] = 15;
-    smashing = false;
 
-    stabdirection=0;
     maxAmmo = 1;
     ammoCount = maxAmmo;
     reloadTime = 300;
     reloadBuffer = refireTime;
     idle=true;
+
+    weaponGrade = UNIQUE;
+    weaponType = MELEE;
+    shotDamage = 25;
+
+    StabreloadTime = 5; 
+    readyToStab = false;
+    alarm[2] = 15;
+    smashing = false;
+
+    stabdirection=0;
+    
     owner.ammo[107] = -1;
     depth = 1;
     isMelee = true;
-
+    
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\SandmanS.png", 2, 1, 0, 21, 25);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\SandmanFS.png", 8, 1, 0, 21, 25);
     reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\SandmanS.png", 2, 1, 0, 21, 25);
@@ -852,74 +1079,7 @@ object_event_add(Sandman,ev_create,0,'
     reloadAnimLength = sprite_get_number(reloadSprite)/2;
     reloadImageSpeed = reloadAnimLength/reloadTime;
 ');
-object_event_add(Sandman,ev_destroy,0,'
-    with (MeleeMask) {
-        if (ownerPlayer == other.ownerPlayer) {
-            instance_destroy();
-        }
-    }
 
-    if owner != -1 owner.ammo[107] = alarm[5];
-');
-object_event_add(Sandman,ev_alarm,1,'
-    { 
-        shot = instance_create(x,y,MeleeMask);
-        shot.direction=owner.aimDirection;
-        shot.speed=owner.speed;
-        shot.owner=owner;
-        shot.ownerPlayer=ownerPlayer;
-        shot.team=owner.team;
-        shot.hitDamage = 25;
-        shot.weapon=WEAPON_SANDMAN;
-        //Removed crit thing here
-        alarm[2] = 10;
-    }
-');
-object_event_add(Sandman,ev_alarm,2,'
-    {
-    readyToStab = true;
-    }
-');
-object_event_add(Sandman,ev_alarm,5,'
-    ammoCount = 1;
-    owner.ammo[107] = -1;
-');
-object_event_add(Sandman,ev_step,ev_step_normal,'
-    if smashing {
-        image_speed=0.3;
-        if 1 != 1 { //Removed crit here
-            if image_index >= 11{
-                image_speed=0;
-                image_index=8;
-                stabbing = false;
-            } 
-        } else if image_index >= 4*owner.team+3 {
-            image_speed=0;
-            image_index=4*owner.team;
-            stabbing = false;
-        }    
-    } else {
-        if 1 <= 1  image_index=4*owner.team;
-        else image_index = 8;
-    }
-
-    if !variable_local_exists("ammoCheck") {
-        ammoCheck = 1;
-        alarm[5] = owner.ammo[107];
-    }
-');
-object_event_add(Sandman,ev_other,ev_user1,'
-    if(readyToStab && !owner.cloak){
-        //owner.runPower = 0;
-        //owner.jumpStrength = 0;
-        smashing = 1;
-
-        justShot=true;
-        readyToStab = false;
-        alarm[1] = StabreloadTime / global.delta_factor;
-        playsound(x,y,swingSnd);
-    }
-');
 object_event_add(Sandman,ev_other,ev_user2,'
     if (readyToStab && !owner.cloak && ammoCount>=1) {
         var oid, newx, newy;
@@ -1066,6 +1226,8 @@ object_event_add(Atomizer,ev_create,0,'
     alarm[2] = 15;
     smashing = false;
 
+    weaponGrade = UNIQUE;
+    weaponType = MELEE;
     stabdirection=0;
     maxAmmo = 1;
     ammoCount = maxAmmo;
@@ -1090,38 +1252,6 @@ object_event_add(Atomizer,ev_create,0,'
     reloadAnimLength = sprite_get_number(reloadSprite)/2;
     reloadImageSpeed = reloadAnimLength/reloadTime;
 ');
-object_event_add(Atomizer,ev_destroy,0,'
-    with (MeleeMask) {
-        if (ownerPlayer == other.ownerPlayer) {
-            instance_destroy();
-        }
-    }
-
-    if owner != -1 owner.ammo[107] = alarm[5];
-');
-object_event_add(Atomizer,ev_alarm,1,'
-    { 
-        shot = instance_create(x,y,MeleeMask);
-        shot.direction=owner.aimDirection;
-        shot.speed=owner.speed;
-        shot.owner=owner;
-        shot.ownerPlayer=ownerPlayer;
-        shot.team=owner.team;
-        shot.hitDamage = 25;
-        shot.weapon=WEAPON_ATOMIZER;
-        //Removed crit thing here
-        alarm[2] = 10;
-    }
-');
-object_event_add(Atomizer,ev_alarm,2,'
-    {
-    readyToStab = true;
-    }
-');
-object_event_add(Atomizer,ev_alarm,5,'
-    ammoCount = 1;
-    owner.ammo[107] = -1;
-');
 object_event_add(Atomizer,ev_step,ev_step_normal,'
 	if (owner.doublejumpUsed and !trip){
 		owner.doublejumpUsed = false;
@@ -1129,39 +1259,11 @@ object_event_add(Atomizer,ev_step,ev_step_normal,'
 	}
 	if (owner.onground)
 		trip = false;
-	if smashing {
-        image_speed=0.3;
-        if 1 != 1 { //Removed crit here
-            if image_index >= 11{
-                image_speed=0;
-                image_index=8;
-                stabbing = false;
-            } 
-        } else if image_index >= 4*owner.team+3 {
-            image_speed=0;
-            image_index=4*owner.team;
-            stabbing = false;
-        }    
-    } else {
-        if 1 <= 1  image_index=4*owner.team;
-        else image_index = 8;
-    }
+    event_inherited();
 
     if !variable_local_exists("ammoCheck") {
         ammoCheck = 1;
         alarm[5] = owner.ammo[107];
-    }
-');
-object_event_add(Atomizer,ev_other,ev_user1,'
-    if(readyToStab && !owner.cloak){
-        //owner.runPower = 0;
-        //owner.jumpStrength = 0;
-        smashing = 1;
-
-        justShot=true;
-        readyToStab = false;
-        alarm[1] = StabreloadTime / global.delta_factor;
-        playsound(x,y,swingSnd);
     }
 ');
 
@@ -1542,10 +1644,12 @@ object_event_add(SoldierShotgun,ev_create,0,'
     reloadTime = 15;
     reloadBuffer = 20;
     idle=true;
-    shots=5;
-    shotDamage=7;
-    weaponGrade= UNIQUE;
+
+    weaponGrade = UNIQUE;
     weaponType = SHOTGUN;
+    shots = 5;
+    shotDamage = 7;
+
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\SoldierShotgunS.png", 2, 1, 0, 6, 6);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\SoldierShotgunFS.png", 4, 1, 0, 6, 6);
     reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\SoldierShotgunFRS.png", 16, 1, 0, 18, 18);
@@ -1558,29 +1662,6 @@ object_event_add(SoldierShotgun,ev_create,0,'
 
     reloadAnimLength = sprite_get_number(reloadSprite)/2;
     reloadImageSpeed = reloadAnimLength/reloadTime;
-');
-object_event_add(SoldierShotgun,ev_alarm,5,'
-    event_inherited();
-
-    if ammoCount < maxAmmo {
-        ammoCount+=1;
-    }
-    if ammoCount < maxAmmo {
-        alarm[5] = reloadTime / global.delta_factor;
-        
-        sprite_index = reloadSprite;
-        image_index = 0;
-        image_speed = reloadImageSpeed * global.delta_factor;
-    }
-');
-object_event_add(SoldierShotgun,ev_alarm,7,'
-    if (global.particles == PARTICLES_NORMAL)
-    {
-        var shell;
-        shell = instance_create(x, y, Shell);
-        shell.direction = owner.aimDirection + (140 - random(40)) * image_xscale;
-        shell.image_index = 1;
-    }
 ');
 // Introduce Metered weapons
 WEAPON_BUFFBANNER = 16;
@@ -1834,6 +1915,9 @@ object_event_add(Reserveshooter,ev_create,0,'
     couldSwitch = false;
     readyToShoot=true;
 
+    shotDamage = 7;
+    shots = 5;
+
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\reserveshooterS.png", 2, 1, 0, 6, 6);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\reserveshooterFS.png", 4, 1, 0, 6, 6);
     reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\reserveshooterFRS.png", 16, 1, 0, 18, 18);
@@ -1850,27 +1934,7 @@ object_event_add(Reserveshooter,ev_create,0,'
 object_event_add(Reserveshooter,ev_alarm,5,'
     event_inherited();
 
-    if ammoCount < maxAmmo {
-        ammoCount+=1;
-    }
-    if ammoCount < maxAmmo {
-        alarm[5] = reloadTime / global.delta_factor;
-        
-        sprite_index = reloadSprite;
-        image_index = 0;
-        image_speed = reloadImageSpeed * global.delta_factor;
-    }
-
     if ammoCount >= maxAmmo owner.canSwitch = true;
-');
-object_event_add(Reserveshooter,ev_alarm,7,'
-    if (global.particles == PARTICLES_NORMAL)
-    {
-        var shell;
-        shell = instance_create(x, y, Shell);
-        shell.direction = owner.aimDirection + (140 - random(40)) * image_xscale;
-        shell.image_index = 1;
-    }
 ');
 object_event_add(Reserveshooter,ev_step,ev_step_normal,'
     if(ammoCount >= maxAmmo){
@@ -1880,31 +1944,9 @@ object_event_add(Reserveshooter,ev_step,ev_step_normal,'
     }
 ');
 object_event_add(Reserveshooter,ev_other,ev_user1,'
-    if(readyToShoot && ammoCount >0 && !owner.cloak) {
-        ammoCount-=1;
-        owner.canSwitch = false;
-        playsound(x,y,ShotgunSnd);
-        var shot;
-        randomize();
-        repeat(5) {
-            shot = instance_create(x,y,Shot);
-            shot.hitDamage = 7;
-            shot.direction=owner.aimDirection+(random(11)-5);
-            shot.speed=11+random(4);
-            shot.owner=owner;
-            shot.ownerPlayer=ownerPlayer;
-            shot.team=owner.team;
-            shot.weapon=WEAPON_SHOTGUN;
-            with(shot) {
-                hspeed+=owner.hspeed;
-                //motion_add(owner.direction, owner.speed);
-            }
-        }
-        justShot=true;
-        readyToShoot=false;
-        alarm[0]=refireTime;
-        alarm[5] = reloadBuffer + reloadTime;
-    }
+    shotSpeed=11+random(4);
+    shotDir=owner.aimDirection+(random(11)-5);
+    event_inherited();
 ');
 
 global.weapons[WEAPON_ROCKETLAUNCHER] = Rocketlauncher;
@@ -4819,10 +4861,10 @@ object_event_add(HeavyShotgun,ev_create,0,'
     reloadTime = 15;
     reloadBuffer = 20;
     idle=true;
-    shots=5;
+    shots = 5;
     weaponGrade = UNIQUE;
     weaponType = SHOTGUN;
-    shotDamage=7;
+    shotDamage = 7;
 
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\HeavyShottyS.png", 2, 1, 0, 8, -1);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\HeavyShottyFS.png", 4, 1, 0, 8, -1);
@@ -4836,29 +4878,6 @@ object_event_add(HeavyShotgun,ev_create,0,'
 
     reloadAnimLength = sprite_get_number(reloadSprite)/2;
     reloadImageSpeed = reloadAnimLength/reloadTime;
-');
-object_event_add(HeavyShotgun,ev_alarm,5,'
-    event_inherited();
-
-    if ammoCount < maxAmmo {
-        ammoCount+=1;
-    }
-    if ammoCount < maxAmmo {
-        alarm[5] = reloadTime / global.delta_factor;
-        
-        sprite_index = reloadSprite;
-        image_index = 0;
-        image_speed = reloadImageSpeed * global.delta_factor;
-    }
-');
-object_event_add(HeavyShotgun,ev_alarm,7,'
-    if (global.particles == PARTICLES_NORMAL)
-    {
-        var shell;
-        shell = instance_create(x, y, Shell);
-        shell.direction = owner.aimDirection + (140 - random(40)) * image_xscale;
-        shell.image_index = 1;
-    }
 ');
 WEAPON_SANDVICH = 66;
 SandvichHand = object_add();
@@ -5028,6 +5047,9 @@ object_event_add(FamilyBusiness,ev_create,0,'
     reloadBuffer = 20;
     idle=true;
     
+    shots = 5;
+    shotDamage = 6;
+    weaponGrade = UNIQUE;
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\FamilyBusinessS.png", 2, 1, 0, 8, -1);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\FamilyBusinessFS.png", 4, 1, 0, 8, -1);
     reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\FamilyBusinessFRS.png", 16, 1, 0, 20, 11);
@@ -5041,59 +5063,10 @@ object_event_add(FamilyBusiness,ev_create,0,'
     reloadAnimLength = sprite_get_number(reloadSprite)/2;
     reloadImageSpeed = reloadAnimLength/reloadTime;
 ');
-object_event_add(FamilyBusiness,ev_alarm,5,'
-    event_inherited();
-
-    if ammoCount < maxAmmo {
-        ammoCount+=1;
-    }
-    if ammoCount < maxAmmo {
-        alarm[5] = reloadTime / global.delta_factor;
-        
-        sprite_index = reloadSprite;
-        image_index = 0;
-        image_speed = reloadImageSpeed * global.delta_factor;
-    }
-');
-object_event_add(FamilyBusiness,ev_alarm,7,'
-    if (global.particles == PARTICLES_NORMAL)
-    {
-        var shell;
-        shell = instance_create(x, y, Shell);
-        shell.direction = owner.aimDirection + (140 - random(40)) * image_xscale;
-        shell.image_index = 1;
-    }
-');
-object_event_add(FamilyBusiness,ev_other,ev_user1,'
-    if(readyToShoot and ammoCount >0 and global.isHost)
-    {
-        var seed;
-        seed = irandom(65535);
-        sendEventFireWeapon(ownerPlayer, seed);
-        doEventFireWeapon(ownerPlayer, seed);
-    }
-');
 object_event_add(FamilyBusiness,ev_other,ev_user3,'
-    ammoCount = max(0, ammoCount-1);
-    playsound(x,y,ShotgunSnd);
-    var shot;
-    repeat(5) {
-        shot = createShot(x, y, Shot, DAMAGE_SOURCE_SCATTERGUN, owner.aimDirection, 13);
-        if(golden)
-            shot.sprite_index = ShotGoldS;
-        shot.hspeed += owner.hspeed;
-        shot.speed = random(4)+11;
-        shot.direction += random(11)-5;
-        shot.hitDamage = 6;
-        // Move shot forward to avoid immediate collision with a wall behind the character
-        shot.x += lengthdir_x(15, shot.direction);
-        shot.y += lengthdir_y(15, shot.direction);
-    }
-    justShot = true;
-    readyToShoot = false;
-    alarm[0] = refireTime / global.delta_factor;
-    alarm[5] = (reloadBuffer + reloadTime) / global.delta_factor;
-    alarm[7] = alarm[0] / 2;
+    shotSpeed = random(4)+11;
+    shotDir = random(11)-5;
+    event_inherited();
 ');
 WEAPON_CHOCOLATE = 68;
 ChocolateHand = object_add();
@@ -7918,7 +7891,7 @@ object_event_add(PyroShotgun,ev_create,0,'
     ammoCount = maxAmmo;
     reloadTime = 15;
     reloadBuffer = 20;
-    shots=5;
+    shots = 5;
     weaponGrade = UNIQUE;
     weaponType = SHOTGUN;
     idle=true;
@@ -7937,59 +7910,10 @@ object_event_add(PyroShotgun,ev_create,0,'
     reloadAnimLength = sprite_get_number(reloadSprite)/2;
     reloadImageSpeed = reloadAnimLength/reloadTime;
 ');
-object_event_add(PyroShotgun,ev_alarm,5,'
-    event_inherited();
-
-    if ammoCount < maxAmmo {
-        ammoCount+=1;
-    }
-    if ammoCount < maxAmmo {
-        alarm[5] = reloadTime / global.delta_factor;
-        
-        sprite_index = reloadSprite;
-        image_index = 0;
-        image_speed = reloadImageSpeed * global.delta_factor;
-    }
-');
-object_event_add(PyroShotgun,ev_alarm,7,'
-    if (global.particles == PARTICLES_NORMAL)
-    {
-        var shell;
-        shell = instance_create(x, y, Shell);
-        shell.direction = owner.aimDirection + (140 - random(40)) * image_xscale;
-        shell.image_index = 1;
-    }
-');
-object_event_add(PyroShotgun,ev_other,ev_user1,'
-    if(readyToShoot and ammoCount >0 and global.isHost)
-    {
-        var seed;
-        seed = irandom(65535);
-        sendEventFireWeapon(ownerPlayer, seed);
-        doEventFireWeapon(ownerPlayer, seed);
-    }
-');
 object_event_add(PyroShotgun,ev_other,ev_user3,'
-    ammoCount = max(0, ammoCount-1);
-    playsound(x,y,ShotgunSnd);
-    var shot;
-    repeat(5) {
-        shot = createShot(x, y, Shot, DAMAGE_SOURCE_SHOTGUN, owner.aimDirection, 13);
-        if(golden)
-            shot.sprite_index = ShotGoldS;
-        shot.hspeed += owner.hspeed;
-        shot.speed = random(4)+11;
-        shot.direction += random(11)-5;
-        shot.hitDamage = 7;
-        // Move shot forward to avoid immediate collision with a wall behind the character
-        shot.x += lengthdir_x(15, shot.direction);
-        shot.y += lengthdir_y(15, shot.direction);
-    }
-    justShot = true;
-    readyToShoot = false;
-    alarm[0] = refireTime / global.delta_factor;
-    alarm[5] = (reloadBuffer + reloadTime) / global.delta_factor;
-    alarm[7] = alarm[0] / 2;
+    shotSpeed = random(4)+11;
+    shotDir = random(11)-5;
+    event_inherited();
 ');
 WEAPON_FLAREGUN = 86;
 Flaregun = object_add();
