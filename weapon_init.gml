@@ -221,6 +221,7 @@ object_event_add(Weapon,ev_alarm,1,'
         break;
         case FLAMETHROWER:
             readyToBlast = true;
+        break;
         case BOW:
             abilityActive = false;
         break;
