@@ -205,6 +205,8 @@ object_event_add(MeleeMask,ev_create,0,'
         durationIncrease = 30;
         sprite_index = StabMaskS;
         visible = false;
+        splashHit = false;
+        splashAmount = 0;
     }
 ');
 object_event_add(MeleeMask,ev_destroy,0,'
@@ -315,7 +317,17 @@ object_event_add(MeleeMask,ev_collision,Character,'
                     blood.direction = direction-180;
                 }
             }
-            instance_destroy();
+            if (!splashHit) {
+                instance_destroy(); 
+            } else {
+                splashAmount -= 1;
+                hitDamage -= 13 * splashAmount;
+                if (splashAmount <= 0)
+                {
+                    splashHit = false;
+                }
+                alarm[0] = 1;
+            }
         }
         else {
             alarm[0] = 1;

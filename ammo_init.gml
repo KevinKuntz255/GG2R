@@ -17,7 +17,8 @@ object_event_add(AmmoCounter,ev_draw,0,'
 		if instance_exists(global.myself.object.currentWeapon) {
 			var weapon;
 			weapon = global.myself.object.currentWeapon;
-			if (weapon.isMelee) exit;
+			weaponType = weapon.weaponType;
+			if (weaponType == MELEE) exit;
 			barcolor = make_color_rgb(217,217,183);
 			draw_set_color(barcolor);
 		

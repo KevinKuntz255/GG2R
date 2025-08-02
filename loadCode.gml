@@ -818,7 +818,9 @@ object_event_add(Character,ev_step,ev_step_end,'
 	                
 	    sendEventPlayerDeath(player, lastDamageDealer, assistant, lastDamageSource);
 	    doEventPlayerDeath(player, lastDamageDealer, assistant, lastDamageSource);
-	    if (lastDamageSource == WEAPON_FROSTBITE)
+	    if (lastDamageSource == WEAPON_FROSTBITE) {
+
+	    }
 	    with(GameServer) {
 	        ServerBalanceTeams();
 	    }
@@ -1434,7 +1436,8 @@ object_event_add(SpecialHud,ev_draw,0,'
 	
 	var weapon;
 	weapon = global.myself.object.currentWeapon;
-	
+	weaponType = weapon.weaponType;
+	//if weaponType == 
 	if global.myself.class == CLASS_DEMOMAN
 		yoffset += 50;
 	if weapon.hasMeter {
@@ -1460,8 +1463,8 @@ object_event_add(PlayerControl,ev_step,ev_step_end,'
 	//Changes the number telling randomizer what weapon should be shown
 	if (keyboard_check_pressed(global.switchWeapon)) {
 		if(global.myself.object != -1){
-			canSwitch = !global.myself.object.taunting /*or */;
-			if (!canSwitch) exit;
+			canSwitch = !global.myself.object.taunting or global.myself.object.weapons[1] == WEAPON_BOOTS or global.myself.object.canSwitch;
+			if (!canSwitch) break;
 			if(global.myself.activeWeapon == 0){
 				global.myself.activeWeapon = 1;
 				if (global.myself.object.zoomed) {
