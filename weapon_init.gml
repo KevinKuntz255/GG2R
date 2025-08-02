@@ -67,10 +67,6 @@ object_event_add(Weapon,ev_create,0,'
 			fire = true;
 		}
 	}
-    if (global.myself.class == CLASS_DEMOMAN) {
-        if (owner.placedMines != 0)
-            lobbed = owner.placedMines;
-    }
 
 	playsound(x,y,SwitchSnd);
 ');
@@ -87,9 +83,7 @@ object_event_add(Weapon,ev_destroy,0,'
 	if (alarm[2] > 0 && !isMelee) {
 		owner.reloadFlare = alarm[2];
 	}
-    if (global.myself.class == CLASS_DEMOMAN) {
-        if (variable_local_exists("placedMines")) owner.placedMines = lobbed;
-    }
+
     switch(weaponType)
     {
         case MELEE:
@@ -334,14 +328,109 @@ object_event_add(Kukri,ev_create,0,'
 ');
 
 // Demoman
-object_event_clear(Minegun,ev_destroy,0);
-object_event_add(Minegun,ev_destroy,0,'
-    event_inherited();
-    if (owner.placedMines != 0) exit;
-    with(Mine) {
-        if ownerPlayer == other.ownerPlayer instance_destroy();
+object_event_clear(Mine,ev_destroy,0);
+object_event_add(Mine,ev_destroy,0,'
+    if(instance_exists(ownerPlayer)){
+        if(ownerPlayer.object != -1){
+            if(instance_exists(ownerPlayer.object.currentWeapon)){
+                if(ownerPlayer.class == CLASS_DEMOMAN){
+                    ownerPlayer.object.currentWeapon.lobbed -= 1;
+                }
+            }
+        }
     }
 ');
+object_event_add(Mine,ev_step,ev_step_normal,'
+    if(instance_exists(ownerPlayer)){
+        if(ownerPlayer.class != CLASS_DEMOMAN or ownerPlayer.team != team){
+            instance_destroy();
+        }
+    }else{
+        instance_destroy();
+    }
+');
+
+
+object_event_clear(Minegun,ev_destroy,0);
+object_event_add(Minegun,ev_destroy,0,'
+    with(Mine) {
+        if(ownerPlayer == other.ownerPlayer and (ownerPlayer.class != CLASS_DEMOMAN or ownerPlayer.object.hp <= 0)){
+            instance_destroy();
+        }
+    }
+');
+object_event_clear(Minegun,ev_other,ev_user1);
+object_event_add(Minegun,ev_other,ev_user1,'
+    var mine_count;
+    mine_count = 0;
+    with(Mine){
+        if(ownerPlayer == other.ownerPlayer){
+            mine_count += 1;
+        }
+    }
+    if(readyToShoot and ammoCount >0 and mine_count<maxMines and global.isHost)
+    {
+        var seed;
+        seed = irandom(65535);
+        sendEventFireWeapon(ownerPlayer, seed);
+        doEventFireWeapon(ownerPlayer, seed);
+    }
+');
+object_event_clear(Minegun,ev_other,ev_user12);
+object_event_add(Minegun,ev_other,ev_user12,'
+    event_inherited();
+    {
+        var mine_count;
+        mine_count = 0;
+        with(Mine){
+            if(ownerPlayer == other.ownerPlayer){
+                mine_count += 1;
+            }
+        }
+        write_ubyte(global.serializeBuffer, mine_count);
+        with(Mine) {
+            if(ownerPlayer == other.ownerPlayer) {
+                event_user(12);
+            }
+        }
+    }
+');
+object_event_clear(StickyCounter,ev_draw,0);
+object_event_add(StickyCounter,ev_draw,0,'
+    if (global.myself.team == TEAM_RED)
+        image_index = 0;
+    else
+        image_index = 1;
+
+    var xoffset, yoffset, xsize, ysize;
+        
+    xoffset = view_xview[0];
+    yoffset = view_yview[0];
+    xsize = view_wview[0];
+    ysize = view_hview[0];
+    draw_set_alpha(1);
+    draw_set_color(make_color_rgb(217, 217, 183));
+    draw_set_valign(fa_center);
+    draw_set_halign(fa_left);
+        
+    if (global.myself.object != -1 and global.myself.class == CLASS_DEMOMAN)
+    {    
+        draw_sprite_ext(sprite_index, image_index, xoffset+xsize-65, yoffset+ysize-78, 3, 3, 0, c_white, 1);
+        if (instance_exists(global.myself.object.currentWeapon))
+        {
+            var mine_count;
+            mine_count = 0;
+            with(Mine){
+                if(ownerPlayer == global.myself){
+                    mine_count += 1;
+                }
+            }
+            draw_text_transformed(xoffset+xsize-83, yoffset+ysize-76, mine_count, 1.5, 1.5, 0);
+            draw_text_transformed(xoffset+xsize-70, yoffset+ysize-76, "/8", 1.5, 1.5, 0);
+        }
+    }
+');
+
 globalvar Eyelander; // my favorite!
 Eyelander = object_add();
 object_set_parent(Eyelander, Weapon);
@@ -351,7 +440,7 @@ object_event_add(Eyelander,ev_create,0,'
     refireTime=18;
 	event_inherited();
 	maxMines = 8;
-    if (owner.placedMines != 0) lobbed = owner.placedMines; else lobbed = 0;
+    lobbed = 0;
     StabreloadTime = 5;
     //readyToStab = false;
     alarm[2] = 15;
@@ -386,6 +475,13 @@ object_event_add(Eyelander,ev_create,0,'
 
     reloadAnimLength = sprite_get_number(reloadSprite)/2;
     reloadImageSpeed = reloadAnimLength/reloadTime;
+');
+object_event_add(Eyelander,ev_destroy,0,'
+    with(Mine) {
+        if(ownerPlayer == other.ownerPlayer and (ownerPlayer.class != CLASS_DEMOMAN or ownerPlayer.object.hp <= 0)){
+            instance_destroy();
+        }
+    }
 ');
 object_event_add(Eyelander,ev_alarm,1,'
     { 
@@ -485,9 +581,18 @@ object_event_add(Eyelander,ev_other,ev_user2,'
         if (smashing != 1) readyToStab = true;
     }
 ');
+
 object_event_add(Eyelander,ev_other,ev_user12,'
+    event_inherited();
     {
-        write_ubyte(global.serializeBuffer, lobbed);
+        var mine_count;
+        mine_count = 0;
+        with(Mine){
+            if(ownerPlayer == other.ownerPlayer){
+                mine_count += 1;
+            }
+        }
+        write_ubyte(global.serializeBuffer, mine_count);
         with(Mine) {
             if(ownerPlayer == other.ownerPlayer) {
                 event_user(12);
@@ -496,6 +601,7 @@ object_event_add(Eyelander,ev_other,ev_user12,'
     }
 ');
 object_event_add(Eyelander,ev_other,ev_user13,'
+    event_inherited();
     {
         var i, mine;
         receiveCompleteMessage(global.serverSocket, 1, global.deserializeBuffer);
