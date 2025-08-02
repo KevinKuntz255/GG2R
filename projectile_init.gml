@@ -225,7 +225,7 @@ object_event_add(MeleeMask,ev_collision,Character,'
     {
         if(!collision_line(x,y-12,other.x,other.y,Obstacle,true,true)) and (!collision_line(x,y-12,other.x,other.y,TeamGate,true,true) and (!collision_line(x,y-12,other.x,other.y,BulletWall,true,true)))
         {
-            if weapon == WEAPON_WRECKER && other.burnDuration > 0 hitDamage*= 1;
+            //if weapon == WEAPON_WRECKER && other.burnDuration > 0 hitDamage*= 1;
 			hitDamage *= (1+0*0.35)*1;
 			damageCharacter(ownerPlayer.object, other.id, hitDamage);
 			
@@ -252,6 +252,7 @@ object_event_add(MeleeMask,ev_collision,Character,'
 
             with(other) {motion_add(other.owner.aimDirection,3);}
 
+            /*
             if(!object_is_ancestor(other.object_index, Pyro) && true && weapon = WEAPON_AXE) { //Removed thing here
                 with(other) {
                     if (burnDuration < maxDuration) {
@@ -267,7 +268,8 @@ object_event_add(MeleeMask,ev_collision,Character,'
                     alarm[0] = decayDelay;
                 }
             }
-            
+            */
+            /*
             if (weapon == WEAPON_HAXXY && 1 > 1){ 
                 if global.isHost{
                     //doEventBallstun(other.player,0); simply no
@@ -297,6 +299,7 @@ object_event_add(MeleeMask,ev_collision,Character,'
                     }
                 }
             }
+            */
 
             other.timeUnscathed = 0;
             if (other.lastDamageDealer != ownerPlayer && other.lastDamageDealer != other.player)
@@ -310,7 +313,7 @@ object_event_add(MeleeMask,ev_collision,Character,'
             other.lastDamageSource = weapon;
 
             var blood;
-            if(global.gibLevel > 0 && !other.radioactive)
+            if(global.gibLevel > 0)
             {
                 repeat(10)
                 {
@@ -341,12 +344,12 @@ object_event_add(MeleeMask,ev_collision,Sentry,'
     {
         if(!collision_line(x,y-12,other.x,other.y,Obstacle,true,true)) and (!collision_line(x,y-12,other.x,other.y,TeamGate,true,true) and (!collision_line(x,y-12,other.x,other.y,BulletWall,true,true)))
         {
-            if weapon == WEAPON_WRECKER  hitDamage = 80; //Enough to 1-hit a mini and 2-hit any other
+            //if weapon == WEAPON_WRECKER  hitDamage = 80; //Enough to 1-hit a mini and 2-hit any other
             other.hp -= hitDamage;
-            if weapon == WEAPON_ZAPPER other.hp -= 35;
+            //if weapon == WEAPON_ZAPPER other.hp -= 35;
             other.lastDamageDealer = ownerPlayer;
             other.lastDamageSource = weapon;
-            other.lastDamageCrit = crit;
+            //other.lastDamageCrit = crit;
             playsound(x,y,MeleeHitMapSnd);
             instance_destroy();
         }
@@ -410,9 +413,9 @@ object_event_add(MeleeMask,ev_collision,Generator,'
         other.alarm[0] = other.regenerationBuffer;
         other.isShieldRegenerating = false;
         //allow overkill to be applied directly to the target
-        if weapon == WEAPON_PAINTRAIN {
+        //if weapon == WEAPON_PAINTRAIN {
             other.hp -= hitDamage;
-        } else if (hitDamage > other.shieldHp) {
+        if (hitDamage > other.shieldHp) {
             other.hp -= hitDamage - other.shieldHp;
             other.hp -= other.shieldHp * other.shieldResistance;
             other.shieldHp = 0;

@@ -31,6 +31,7 @@ object_event_add(AmmoCounter,ev_draw,0,'
 	            case Shovel:
 	            case KGOB:
 	            case Atomizer:
+	            case Rifle:
 	            case Ubersaw:
 	            	break;
 

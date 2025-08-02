@@ -624,6 +624,7 @@ object_event_add(Eyelander,ev_other,ev_user13,'
         }
     }
 ');
+
 // Medic
 globalvar Ubersaw;
 Ubersaw = object_add();
@@ -860,7 +861,7 @@ object_event_add(Knife,ev_other,ev_user1,'
         stab.ownerPlayer = ownerPlayer;
         stab.team = owner.team;
         stab.hitDamage = 0;
-        stab.weapon = WEAPON_KNIFE;
+        //stab.weapon = WEAPON_KNIFE;
         stab.golden = golden;
         if owner.stabspeed > 0 {
             owner.stabspeed -= 1;

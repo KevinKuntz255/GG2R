@@ -25,17 +25,17 @@ object_event_add(PlayerControl, ev_create, 0, '
         if(!global.isHost and id == global.myself and joined == false){
             //Have to put this here
             global.myself.activeWeapon = 0;
-            global.myself.playerLoadout = global.currentLoadout;
+            //global.myself.playerLoadout = global.currentLoadout;
 
             //Send Loadout
-            write_ubyte(randomizer.sendBuffer, randomizer.loadoutReceive);
-            write_ushort(randomizer.sendBuffer, global.currentLoadout);
-            if(global.isHost){
-                PluginPacketSendTo(randomizer.packetID, randomizer.sendBuffer, global.myself);
-            }else{
-                PluginPacketSend(randomizer.packetID,randomizer.sendBuffer);
-            }
-            buffer_clear(randomizer.sendBuffer);
+            //write_ubyte(randomizer.sendBuffer, randomizer.loadoutReceive);
+            //write_ushort(randomizer.sendBuffer, global.currentLoadout);
+            //if(global.isHost){
+            //    PluginPacketSendTo(randomizer.packetID, randomizer.sendBuffer, global.myself);
+            //}else{
+            //    PluginPacketSend(randomizer.packetID,randomizer.sendBuffer);
+            //}
+            //buffer_clear(randomizer.sendBuffer);
 
             //Send Active Weapon
             write_ubyte(randomizer.sendBuffer, randomizer.activeWeapon);

@@ -173,9 +173,7 @@ object_event_add(Character,ev_step,ev_step_end,'
 	                
 	    sendEventPlayerDeath(player, lastDamageDealer, assistant, lastDamageSource);
 	    doEventPlayerDeath(player, lastDamageDealer, assistant, lastDamageSource);
-	    if (lastDamageSource == WEAPON_FROSTBITE) {
-
-	    }
+	    
 	    with(GameServer) {
 	        ServerBalanceTeams();
 	    }
