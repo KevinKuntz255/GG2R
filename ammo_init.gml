@@ -1,9 +1,3 @@
-globalvar AmmoHUDsS, TemplateS, BlackBoxClipS, DirectHitClipS;
-AmmoHUDsS = sprite_add(pluginFilePath + "\randomizer_sprites\AmmoHUDsS.png", 99, 1, 0, 25, 14);
-TemplateS = sprite_add(pluginFilePath + "\randomizer_sprites\TemplateS.png", 2, 1, 0, 25, 8);
-BlackBoxClipS = sprite_add(pluginFilePath + "\randomizer_sprites\BlackBoxClipS.png", 10, 1, 0, 25, 9);
-DirectHitClipS = sprite_add(pluginFilePath + "\randomizer_sprites\DirectHitClipS.png", 10, 1, 0, 25, 8);
-
 object_event_clear(AmmoCounter,ev_draw,0);
 object_event_add(AmmoCounter,ev_draw,0,'
 	var xoffset, yoffset, xsize, ysize;
@@ -35,58 +29,15 @@ object_event_add(AmmoCounter,ev_draw,0,'
 			}
 			
 			switch(weapon.object_index) {
-				case Wrench: 
-	            case Eeffect:
+				case Wrench:
 	            case Sandman:
 	            case Kukri:
 	            case Eyelander:
 	            case Knife:
-	            case BigEarner:
-	            case Spycicle:
 	            case Axe:
-	            case Haxxy:
-	            case Fists:
-	            case ChocolateHand:
-	            case Volcanofragment:
-	            case Rifle:
-	            case HuntsMan:
-	            case SydneySleeper:
-	            case BonkHand:
-	            case BuffBanner:
-	            case JarateHand: 
-	            //case Invisibeam: ???
-	            case Kritzieg:
-	            case QuickFix:
-	            case Widowmaker:
-	            case Stungun:
-	            case SandvichHand:
-	            case Wrangler:
-	            case MadmilkHand:
-	            case Shiv:
 	            case Shovel:
-	            case Machina:
-	            case Nailgun:
-	            case SaxtonFist:
-	            case Overhealer:
-	            case Paintrain:
-	            case Pumson:
-	            case ChainStab:
-	            case BazaarBargain:
-	            case Jetpack:
-	            case Randomoozer:
-	            case CowMangler:
-	            case NapalmHand:
-	            case Brewinggun:
 	            case KGOB:
-	            case Zapper: 
 	            case Atomizer:
-	            case Tomislav:
-	            case Natacha:
-	            case BrassBeast:
-	            case Backburner:
-	            case Frostbite:
-	            case Machinegun:
-	            case Phlog:
 	            case Ubersaw:
 	            	break;
 
@@ -97,22 +48,6 @@ object_event_add(AmmoCounter,ev_draw,0,'
 					draw_sprite_ext(Rocketclip,weapon.ammoCount+toffset,xoffset+728,yoffset+ysize/1.26+86,2.4,2.4,0,c_white,100);
 					draw_healthbar(xoffset+689,yoffset+ysize/1.26+90,xoffset+723,yoffset+ysize/1.26+98,reloadscalar,c_black,barcolor,barcolor,0,true,false);
 					break;
-
-				case BlackBox:
-	            	if global.myself.team == TEAM_BLUE toffset = 5;
-	                else toffset = 0;
-	                reloadscalar = 100-weapon.alarm[5]*global.delta_factor/weapon.reloadTime*100;
-	                draw_sprite_ext(BlackBoxClipS,weapon.ammoCount+toffset,xoffset+728,yoffset+ysize/1.26+86,2.4,2.4,0,c_white,100);
-	                draw_healthbar(xoffset+689,yoffset+ysize/1.26+90,xoffset+723,yoffset+ysize/1.26+98,reloadscalar,c_black,barcolor,barcolor,0,true,false);
-	                break;
-
-	            case DirectHit:
-	                if global.myself.team == TEAM_BLUE toffset = 5;
-	                else toffset = 0;
-	                reloadscalar = 100-weapon.alarm[5]*global.delta_factor/weapon.reloadTime*100;
-	                draw_sprite_ext(DirectHitClipS,weapon.ammoCount+toffset,xoffset+728,yoffset+ysize/1.26+86,2.4,2.4,0,c_white,100);
-	                draw_healthbar(xoffset+689,yoffset+ysize/1.26+90,xoffset+723,yoffset+ysize/1.26+98,reloadscalar,c_black,barcolor,barcolor,0,true,false);
-	                break;
 	                
 				case Minegun:        
 					reloadscalar = 100-weapon.alarm[5]*global.delta_factor/weapon.reloadTime*100;
@@ -172,13 +107,6 @@ object_event_add(AmmoCounter,ev_draw,0,'
 					}
 					break;
 
-				case Transmutator :
-	                draw_sprite_ext(TemplateS,toffset,xoffset+728,yoffset+ysize/1.26+86,2.4,2.4,0,c_white,100);
-	                draw_sprite_ext(AmmoHUDsS,weapon_index,xoffset+728,yoffset+ysize/1.26+86,2.4,2.4,0,c_white,100);
-	                if (weapon.ammoCount <= 1/4 * weapon.maxAmmo) { barcolor = make_color_rgb(255,0,0); }
-	                draw_healthbar(xoffset+689,yoffset+ysize/1.26+90,xoffset+723,yoffset+ysize/1.26+98,weapon.ammoCount/2,c_black,barcolor,barcolor,0,true,false);
-	                break;
-
 				case Minigun:    
 					draw_sprite_ext(MinigunAmmoS,toffset,xoffset+728,yoffset+ysize/1.26+86,2.4,2.4,0,c_white,100);
 					barcolor = merge_color(barcolor, make_color_rgb(255,0,0), 1-(weapon.ammoCount/weapon.maxAmmo));
@@ -186,14 +114,6 @@ object_event_add(AmmoCounter,ev_draw,0,'
 					draw_healthbar(xoffset+689,yoffset+ysize/1.26+90,xoffset+723,yoffset+ysize/1.26+98,
 								   weapon.ammoCount/weapon.maxAmmo*100,c_black,barcolor,barcolor,0,true,false);
 					break;
-
-				case IronMaiden:
-	                draw_sprite_ext(TemplateS,toffset,xoffset+728,yoffset+ysize/1.26+86,2.4,2.4,0,c_white,100);
-	                draw_sprite_ext(AmmoHUDsS,weapon_index,xoffset+728,yoffset+ysize/1.26+86,2.4,2.4,0,c_white,100);
-	                if (weapon.ammoCount <= 1/4 * weapon.maxAmmo) { barcolor = make_color_rgb(255,0,0); } //ammoCount*1.111
-	                draw_healthbar(xoffset+689,yoffset+ysize/1.26+90,xoffset+723,yoffset+ysize/1.26+98,
-	                	           weapon.ammoCount/3,c_black,barcolor,barcolor,0,true,false);
-	                break;
 
 				case Blade:     
 					draw_sprite_ext(BladeAmmoS,toffset,xoffset+728,yoffset+ysize/1.26+86,2.4,2.4,0,c_white,100);

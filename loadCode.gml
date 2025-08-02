@@ -1,502 +1,3 @@
-var fd, readScript;
-readScript = "";
-fd = file_text_open_read(pluginFilePath + "\move_all_bullets_but_better.gml");
-while(not file_text_eof(fd)) {
-	readScript += file_text_read_string(fd) + "
-	";
-	file_text_readln(fd);
-}
-file_text_close(fd);
-
-//Swapping out scripts for modified versions
-object_event_clear(GameServer,ev_step,ev_step_normal);
-object_event_add(GameServer,ev_step,ev_step_normal, readScript + '
-	script_execute(move_all_gore);
-');
-object_event_clear(Client,ev_step,ev_step_normal);
-object_event_add(Client,ev_step,ev_step_normal, readScript + '
-	script_execute(move_all_gore);
-');
-
-
-//Loadout Stuff
-globalvar loadout, Back, LoadoutSwitcher, LoadoutMenu;
-loadout = room_add();
-room_set_width(loadout, 600);
-room_set_height(loadout, 600);
-
-Back=object_add();
-Page=object_add();
-LoadoutSwitcher=object_add();
-LoadoutMenu=object_add();
-
-object_event_add(Back,ev_create,0,'
-	BackS = sprite_add(pluginFilePath + "\randomizer_sprites\BackS.png", 2, 0, 0, 0, 0);
-	depth = -140000;
-	image_speed=0;
-	//alarm[0] = 1;
-	xoffset = view_xview[0];
-	yoffset = view_yview[0];
-');
-object_event_add(Back,ev_step,ev_step_normal,'
-	if mouse_x >xoffset+32 && mouse_x < xoffset+96 && mouse_y > yoffset+544 && mouse_y < yoffset + 576 image_index = 1;
-	else image_index = 0;
-
-	/*
-	Temporary Workaround
-	if(variable_global_exists("myself")){
-		if(global.myself.object != -1){
-			global.myself.object.keyState = 0;
-			global.myself.object.lastKeyState = 0;
-		}
-	}
-	*/
-');
-object_event_add(Back,ev_mouse,ev_global_left_press,'
-	if image_index == 1 {
-	    if room = loadout room_goto_fix(Menu);
-	    else with(LoadoutMenu) {instance_destroy();};
-	}
-');
-object_event_add(Back,ev_draw,0,'
-	xoffset = view_xview[0];
-	yoffset = view_yview[0];
-
-	draw_sprite(BackS,image_index,xoffset+32,yoffset+544);
-');
-
-object_event_add(Page,ev_create,0,'
-	PageS = sprite_add(pluginFilePath + "\randomizer_sprites\PageS.png", 2, 0, 0, 0, 0);
-	depth = -140000;
-	image_speed=0;
-	//alarm[0] = 1;
-	xoffset = view_xview[0];
-	yoffset = view_yview[0];
-');
-object_event_add(Page,ev_step,ev_step_normal,'
-	if mouse_x >xoffset+32 && mouse_x < xoffset+96 && mouse_y > yoffset+544 && mouse_y < yoffset + 576 image_index = 1;
-	else image_index = 0;
-
-	/*
-	Temporary Workaround
-	if(variable_global_exists("myself")){
-		if(global.myself.object != -1){
-			global.myself.object.keyState = 0;
-			global.myself.object.lastKeyState = 0;
-		}
-	}
-	*/
-');
-object_event_add(Page,ev_mouse,ev_global_left_press,'
-	if image_index == 1 {
-	    if room = loadout room_goto_fix(Menu);
-	    else with(LoadoutMenu) {instance_destroy();};
-	}
-');
-object_event_add(Page,ev_draw,0,'
-	xoffset = view_xview[0];
-	yoffset = view_yview[0];
-
-	draw_sprite(PageS,image_index,xoffset+32,yoffset+544);
-');
-
-object_event_add(LoadoutSwitcher,ev_create,0,'
-	SelectionS = sprite_add(pluginFilePath + "\randomizer_sprites\SelectionS.png", 180, 0, 0, 0, 0);
-	SelectionS2 = sprite_add(pluginFilePath + "\randomizer_sprites\SelectionS2.png", 2, 0, 0, 0, 0); // Expand later.
-	sprite_index = sprite_add(pluginFilePath + "\randomizer_sprites\ScrollerS.png", 5, 0, 0, 0, 0);
-	depth = -140000;
-	image_speed=0;
-	image_alpha=0;
-	image_xscale=2;
-	image_yscale=2;
-
-	if room == loadout xoffset = view_xview[0];
-	else xoffset = view_xview[0]+100;
-	yoffset = view_yview[0];
-	xsize = view_wview[0];
-	ysize = view_hview[0];
-
-	selection = 0;
-	page=0;
-	
-	description[0,0] = "";
-	description[0,1] = "";
-	description[0,2] = "";
-
-	description[1,0] = "";
-	description[1,1] = "";
-	description[1,2] = "";
-
-	description[2,0] = "";
-	description[2,1] = "";
-	description[2,2] = "";
-
-	description[3,0] = "";
-	description[3,1] = "";
-	description[3,2] = "";
-
-	description[4,0] = "";
-	description[4,1] = "";
-	description[4,2] = "";
-');
-object_event_add(LoadoutSwitcher,ev_step,ev_step_normal,'
-	if room == loadout xoffset = view_xview[0];
-	else xoffset = view_xview[0]+100;
-	yoffset = view_yview[0];
-	xsize = view_wview[0];
-	ysize = view_hview[0];
-
-
-	if mouse_x > x+xoffset && mouse_x <x+48*2+xoffset {
-	    if mouse_y > y+yoffset && mouse_y < y+30*2+yoffset {
-	        selection = 0;
-	        LoadoutMenu.name = global.name[value+selection];
-	        LoadoutMenu.description[0] = description[0,0];
-	        LoadoutMenu.description[1] = description[0,1];
-	        LoadoutMenu.description[2] = description[0,2];
-	    } else if mouse_y > y+30*2+yoffset && mouse_y < y+60*2+yoffset {
-	        selection = 1;
-	        LoadoutMenu.name = global.name[value+selection];
-	        LoadoutMenu.description[0] = description[1,0];
-	        LoadoutMenu.description[1] = description[1,1];
-	        LoadoutMenu.description[2] = description[1,2];
-	    }else if mouse_y > y+60*2+yoffset && mouse_y < y+90*2+yoffset {
-	        selection = 2;
-	        LoadoutMenu.name = global.name[value+selection];
-	        LoadoutMenu.description[0] = description[2,0];
-	        LoadoutMenu.description[1] = description[2,1];
-	        LoadoutMenu.description[2] = description[2,2];
-	    } else if mouse_y > y+90*2+yoffset && mouse_y < y+120*2+yoffset {
-	        selection = 3;
-	        LoadoutMenu.name = global.name[value+selection];
-	        LoadoutMenu.description[0] = description[3,0];
-	        LoadoutMenu.description[1] = description[3,1];
-	        LoadoutMenu.description[2] = description[3,2];
-	    } else if mouse_y > y+120*2+yoffset && mouse_y < y+150*2+yoffset {
-	        selection = 4;
-	        LoadoutMenu.name = global.name[value+selection];
-	        LoadoutMenu.description[0] = description[4,0];
-	        LoadoutMenu.description[1] = description[4,1];
-	        LoadoutMenu.description[2] = description[4,2];
-	    } else selection = loaded-value;
-	} else selection = loaded-value;
-
-	image_alpha=1;
-');
-object_event_add(LoadoutSwitcher,ev_mouse,ev_global_left_press,'
-	loaded = value + selection;
-');
-object_event_add(LoadoutSwitcher,ev_draw,0,'
-	if room == loadout xoffset = view_xview[0];
-	else xoffset = view_xview[0]+100;
-	yoffset = view_yview[0];
-	xsize = view_wview[0];
-	ysize = view_hview[0];
-
-	draw_sprite_ext(sprite_index,loaded-value,x+xoffset,y+yoffset,image_xscale,image_yscale,0,c_white,image_alpha);
-
-	for(i=0;i<5;i+=1) {
-	    if (page==0) {
-			if selection == i draw_sprite_ext(SelectionS,value+i+90,x+xoffset+8,y+yoffset+56*i+8,image_xscale,image_yscale,0,c_white,image_alpha);
-				else draw_sprite_ext(SelectionS,value+i,x+xoffset+8,y+yoffset+56*i+8,image_xscale,image_yscale,0,c_white,image_alpha);
-		} else {
-			if selection == i draw_sprite_ext(SelectionS2,value+i+90,x+xoffset+8,y+yoffset+56*i+8,image_xscale,image_yscale,0,c_white,image_alpha);
-				else draw_sprite_ext(SelectionS2,value+i,x+xoffset+8,y+yoffset+56*i+8,image_xscale,image_yscale,0,c_white,image_alpha);
-		}
-	}
-');
-
-//Loadout Menu stuff
-object_set_parent(LoadoutMenu, MenuController);
-object_event_add(LoadoutMenu,ev_create,0,'
-	INGAMELOADOUTBG = sprite_add(pluginFilePath + "\randomizer_sprites\INGAMELOADOUTBG.png", 1, 0, 0, 0, 0);
-	LoadoutSelectS = sprite_add(pluginFilePath + "\randomizer_sprites\LoadoutSelectS.png", 1, 0, 0, 0, 0);
-	DescriptionBoardS = sprite_add(pluginFilePath + "\randomizer_sprites\DescriptionBoardS.png", 1, 0, 0, 0, 0);
-	LoadoutS = sprite_add(pluginFilePath + "\randomizer_sprites\LoadoutS.png", 10, 0, 0, 26, 26);
-	depth = -140000;
-    name = "Mouse over weapons to see their#description. Left click them to#add the corresponding weapon #to your loadout.";
-    description[0] = "";
-    description[1] = "";
-    description[2] = "";
-    done = false;
-    newclass=-1;
-    currentclass=-1;
-    mousedclass=-1
-    xoffset2=88;
-    offset=0;
-    team=0;
-    class = "";
-    rotation=1;
-    firstX=-1;
-    if room == loadout xoffset = view_xview[0];
-    else xoffset = view_xview[0]+100;
-    yoffset = view_yview[0];
-    xsize = view_wview[0];
-    ysize = view_hview[0];
-    //instance_create(16,416,Back);
-    instance_create(0,0,Back);
-');
-object_event_add(LoadoutMenu,ev_destroy,0,'
-	if instance_exists(LoadoutSwitcher) event_user(1);
-	if instance_exists(Back) with(Back) {instance_destroy();};
-
-	if room != loadout {
-	    if instance_exists(global.myself) && global.myself != -1 {
-	        if global.myself.object != -1 && instance_exists(global.myself.object){
-	            ClientPlayerChangeclass(global.myself.class, global.serverSocket);
-        		socket_send(global.serverSocket);
-	        }
-	    }
-	}
-');
-object_event_add(LoadoutMenu,ev_step,ev_step_normal,'
-	if room == loadout xoffset = view_xview[0];
-	else xoffset = view_xview[0]+100;
-	yoffset = view_yview[0];
-	xsize = view_wview[0];
-	ysize = view_hview[0];
-
-	if !instance_exists(Back) instance_create(32+view_xview[0],544+yoffset,Back);
-
-	if mouse_x>xoffset+xoffset2+24 && mouse_x <xoffset+xoffset2+60 && mouse_y<yoffset+60{
-	    newclass=0;
-	    drawx=24;
-	}
-
-	else if mouse_x>xoffset+xoffset2+64 && mouse_x <xoffset+xoffset2+100 && mouse_y<yoffset+60{
-	    newclass=1;
-	    drawx=64;
-	}
-
-	else if mouse_x>xoffset+xoffset2+104 && mouse_x <xoffset+xoffset2+140 && mouse_y<yoffset+60{
-	    newclass=2;
-	    drawx=104;
-	}
-
-	else if mouse_x>xoffset+xoffset2+156 && mouse_x <xoffset+xoffset2+192 && mouse_y<yoffset+60{
-	    newclass=3;
-	    drawx=156;
-	}
-
-	else if mouse_x>xoffset+xoffset2+196 && mouse_x <xoffset+xoffset2+232 && mouse_y<yoffset+60{
-	    newclass=4;
-	    drawx=196;
-	}
-
-	else if mouse_x>xoffset+xoffset2+236 && mouse_x <xoffset+xoffset2+272 && mouse_y<yoffset+60{
-	    newclass=5;
-	    drawx=236;
-	}
-
-	else if mouse_x>xoffset+xoffset2+288 && mouse_x <xoffset+xoffset2+324 && mouse_y<yoffset+60{
-	    newclass=6;
-	    drawx=288;
-	}
-
-	else if mouse_x>xoffset+xoffset2+328 && mouse_x <xoffset+xoffset2+364 && mouse_y<yoffset+60{
-	    newclass=7;
-	    drawx=328;
-	}
-
-	else if mouse_x>xoffset+xoffset2+368 && mouse_x <xoffset+xoffset2+404 && mouse_y<yoffset+60{
-	    newclass=8;
-	    drawx=368;
-	}
-
-	else newclass=-1;  
-
-	if mouse_check_button(mb_left){ 
-	    if newclass !=-1{
-	        mousedclass = newclass;
-	        if(newclass>=0 and newclass<=9) {
-	            if instance_exists(LoadoutSwitcher) event_user(1); //get rid of the loadout for the old class and write their loadout to the file
-	            event_user(2); //create the loadout for the new class
-	        }
-	    }else if mouse_y > (250-104)+yoffset && mouse_y < (250+104)+yoffset{
-	        if mouse_x > (300-100)+xoffset && mouse_x < (300+100)+xoffset {
-	            if firstX == -1 firstX=mouse_x;
-	            else if firstX > mouse_x + 10{
-	                rotation= -1;
-	                firstX=-1;
-	            }
-	            else if firstX < mouse_x - 10{
-	                rotation= 1;
-	                firstX=-1;
-	            }
-	        }
-	    }
-	} else if firstX != -1 firstX = -1;
-')
-object_event_add(LoadoutMenu,ev_step,ev_step_begin,'
-	name = "Mouse over weapons to see their#description. Left click them to#add the corresponding weapon #to your loadout.";
-	description[0] = "";
-	description[1] = "";
-	description[2] = "";
-');
-object_event_add(LoadoutMenu,ev_other,ev_user1,'
-	ini_open("Loadout.gg2");
-	if load1.loaded <=9 load1="0"+string(load1.loaded);
-	else load1 = string(load1.loaded);
-	if load2.loaded <=9 load2="0"+string(load2.loaded);
-	else load2 = string(load2.loaded);
-
-	switch(currentclass){
-	    case 0:
-	        global.scoutLoadout=real(string(1)+load1+load2);
-	        ini_write_real("Class","Scout",global.scoutLoadout);
-	        break;
-	    case 1:
-	        global.pyroLoadout=real(string(1)+load1+load2);
-	        ini_write_real("Class","Pyro",global.pyroLoadout);
-	        break;
-	    case 2:
-	        global.soldierLoadout=real(string(1)+load1+load2);
-	        ini_write_real("Class","Soldier",global.soldierLoadout);
-	        break;
-	    case 3:
-	        global.heavyLoadout=real(string(1)+load1+load2);
-	        ini_write_real("Class","heavy",global.heavyLoadout);
-	        break;
-	    case 4:
-	        global.demomanLoadout=real(string(1)+load1+load2);
-	        ini_write_real("Class","Demoman",global.demomanLoadout);
-	        break;
-	    case 5:
-	        global.medicLoadout=real(string(1)+load1+load2);
-	        ini_write_real("Class","Medic",global.medicLoadout);
-	        break;
-	    case 6:
-	        global.engineerLoadout=real(string(1)+load1+load2);
-	        ini_write_real("Class","Engineer",global.engineerLoadout);
-	        break;
-	    case 7:
-	        global.spyLoadout=real(string(1)+load1+load2);
-	        ini_write_real("Class","Spy",global.spyLoadout);
-	        break;
-	    case 8:
-	        global.sniperLoadout=real(string(1)+load1+load2);
-	        ini_write_real("Class","sniper",global.sniperLoadout);
-	        break;
-	}
-	ini_close(); 
-
-	switch (global.myself.class)
-	{
-	case CLASS_SCOUT:
-		global.currentLoadout = global.scoutLoadout;
-		break;
-
-	case CLASS_PYRO:
-		global.currentLoadout = global.pyroLoadout;
-		break;
-
-	case CLASS_SOLDIER:
-		global.currentLoadout = global.soldierLoadout;
-		break;
-
-	case CLASS_HEAVY:
-		global.currentLoadout = global.heavyLoadout;
-		break;
-
-	case CLASS_DEMOMAN:
-		global.currentLoadout = global.demomanLoadout;
-		break;
-
-	case CLASS_MEDIC:
-		global.currentLoadout = global.medicLoadout;
-		break;
-
-	case CLASS_ENGINEER:
-		global.currentLoadout = global.engineerLoadout;
-		break;
-
-	case CLASS_SPY:
-		global.currentLoadout = global.spyLoadout;
-		break;
-
-	case CLASS_SNIPER:
-		global.currentLoadout = global.sniperLoadout;
-		break;
-	}
-
-	var coolSendBuffer;
-	coolSendBuffer = buffer_create();
-
-	//Send Loadout
-    write_ubyte(coolSendBuffer, randomizer.loadoutReceive);
-    write_ushort(coolSendBuffer, global.currentLoadout);
-    if(global.isHost){
-        PluginPacketSendTo(randomizer.packetID, coolSendBuffer, global.myself);
-    }else{
-        PluginPacketSend(randomizer.packetID, coolSendBuffer);
-    }
-    buffer_clear(coolSendBuffer);   
-
-	if instance_exists(LoadoutSwitcher) with(LoadoutSwitcher) instance_destroy();
-');
-
-
-// Read the script from the file
-readScript = "";
-fd = file_text_open_read(pluginFilePath + "\loadout_menu_ev_user2.gml");
-while(not file_text_eof(fd)) {
-	readScript += file_text_read_string(fd) + "
-	";
-	file_text_readln(fd);
-}
-file_text_close(fd);
-object_event_add(LoadoutMenu,ev_other,ev_user2, readScript);
-
-object_event_add(LoadoutMenu,ev_other,ev_user3,'
-	if(mousedclass>=0 and mousedclass<=8) {
-	    if instance_exists(LoadoutSwitcher) event_user(1); //get rid of the loadout for the old class and write their loadout to the file
-	    event_user(2); //create the loadout for the new class
-	}
-');
-object_event_add(LoadoutMenu,ev_draw,0,'
-	if room == loadout xoffset = view_xview[0];
-	else xoffset = view_xview[0]+100;
-	yoffset = view_yview[0];
-	xsize = view_wview[0];
-	ysize = view_hview[0];
-
-	if room != loadout {
-	    draw_sprite_ext(INGAMELOADOUTBG,0,xoffset-100,yoffset,80,2.5,0,c_white,0.8); 
-	}
-	draw_sprite_ext(LoadoutSelectS, 0, 112+xoffset, 16+yoffset, 1, 1, 0, c_white, 1);
-	if newclass != -1 draw_sprite_ext(ClassSelectSpritesS,newclass,drawx+xoffset+xoffset2,16+yoffset,1,1,0,c_white, 1);
-	    
-	draw_sprite(DescriptionBoardS,0,160+xoffset,352+yoffset);
-	draw_set_font(global.gg2Font); //Not sure if this is needed
-	draw_set_color(c_white);
-	draw_set_halign(fa_left);
-	draw_set_valign(fa_top);
-	draw_text_transformed(20+xoffset,96+yoffset,class,3,3,0);
-
-
-	draw_set_color(c_white);
-	draw_text(175+xoffset,390+yoffset,name);    //name
-	draw_text(175+xoffset,390+yoffset+13,description[0]);  //info
-	draw_set_color(make_color_rgb(10,245,10));
-	draw_text(175+xoffset,390+yoffset+string_height(description[0])+13,description[1]);  //good
-	draw_set_color(make_color_rgb(220,0,0));
-	draw_text(175+xoffset,390+yoffset+string_height(description[0])+string_height(description[1])+13,description[2]);  //bad
-
-	draw_set_halign(fa_center)
-	draw_set_color(c_white);
-	//draw_text(300+xoffset,144+yoffset,"Currently equipped:"");
-
-	if mousedclass=-1 draw_sprite_ext(LoadoutS,9,300+xoffset,250+yoffset,4*rotation,4,0,c_white,1);
-	else  draw_sprite_ext(LoadoutS,mousedclass,300+offset*rotation*4+xoffset,250+yoffset,4*rotation,4,0,c_white,1);
-');
-object_event_add(LoadoutMenu, ev_keypress, vk_escape,'
-	instance_destroy();
-	if(room == loadout) {
-	    room_goto_fix(Menu);
-	} /*else
-	    instance_create(0,0,InGameMenuController);*/
-');
-
 ini_open("gg2.ini");
 global.switchWeapon = ini_read_real("RM","switch_weapon",ord('Q'));
 ini_close();
@@ -539,23 +40,7 @@ object_event_add(global.pluginOptions, ev_destroy, 0, '
     ini_close();
 ');
 
-//Adds loadout to ingame menu
-object_event_add(InGameMenuController,ev_create,0,'
-    menu_addlink("Loadout", "
-        instance_destroy();
-        instance_create(0,0,LoadoutMenu);
-    ");
-');
 
-//object_event_add(Character, ev_draw, 0, '
-//	if (currentWeapon.charging == 1 && player.class == CLASS_DEMO)  {
-//		for (i=0; i<6; i+=1) {
-//			draw_sprite_ext(sprite_index, 0 + team, x-hspeed*1.2, y-vspeed*1.2, image_xscale, 1, 0, c_white, 0.2);
-//						}
-//	}
-//');
-
-globalvar piss, milk, bleed;
 object_event_add(Character,ev_create,0,'
 	accel = 0;
 	blurs = 0;
@@ -563,93 +48,10 @@ object_event_add(Character,ev_create,0,'
 	//player.playerLoadout=-1;
 	expectedWeaponBytes = 0;
 	flight = 0;
-	
-	loaded1 = 0;
-	loaded2 = 0;
-	
-	overheal = 0;
-    isSaxtonHale = false;
-    raged=false;
+
     canSwitch = true;
 	
 	crit = -1;
-	
-	soaked = false;
-	// 3 soakTypes, 3 types, if possibly at the same time
-	soakType[0]=-1;
-	soakType[1]=-1;
-	soakType[2]=-1;
-	//stuff from alt weapons
-    pissed=0;
-    milked = 0;
-    bleeding = 0;
-    buffing=false;
-    buffbanner=false;
-    critting=0;
-    critzed = 0;
-    invisibeam = false;
-    megaHealed=false;
-    stunned=0;
-    radioactive=false;
-    bonus=1;
-    charge=false;
-    speedboost=0;
-    cooldown=0;
-    revengeCrits = 0;
-    sapCrits = 0;
-    active = false;
-    regenRate = 2;
-    invincible = false;
-    stabspeed = 0;
-    highJump = 0;
-    fireproof = 0;
-    currentKills = 0;
-    drCharge=0;
-    frozen = 0;
-    phlogDmg = 0;
-    phlogCrit = 0;
-    glowindex = 0;
-	
-	//passive effects
-    hasDangershield = false;
-    hasOverdose = false;
-    stomping = false;
-    hasOverdose = false;
-    hasRazorback = false;
-    hasBootlegger = false;
-    hasBoots = false;
-    bootfuel = 150;
-    floating = false;
-    
-    //for picking up sentries
-    sentryhp=0;
-    sentryupgraded=0;
-    sentrylevel=0;
-    carrySentry=0;
-    
-	meter[0]=-1;
-	maxMeter=-1;
-	meter[1]=-1;
-	curMeter=-1;
-	// could test using the above instead later?
-    //Things lorgan also prefers saved
-    ammo[100] = false;  //uberReady
-    ammo[101] = 0;      //lobbed (scottish resistance)
-    ammo[102] = -1;     //Bonk timer
-    ammo[103] = 0;      //lobbed (minegun)
-    ammo[104] = -1;     //Jarate timer
-    ammo[105] = -1;     //Sandvich timer
-    ammo[106] = 0;      //bazaar bargain bonus
-    ammo[107] = -1;     //Ball timer
-    ammo[108] = 0;      //Lobbed (tiger uppercut)   
-    ammo[109] = 0;      //hyve amount
-    ammo[110] = 0;      //lobbed (stickyjumper)
-    ammo[111] = -1;     //chocolate timer
-    ammo[112] = 15*30;  //spycicle timer
-    ammo[113] = -1;     //Milk timer
-    ammo[114] = -1;     //napalm grenade timer
-    ammo[115] = 0;      //lobbed (sticky sticker)
-    // damn that is alot of work
 ');
 
 object_event_add(Character,ev_destroy,0,'
@@ -658,45 +60,10 @@ object_event_add(Character,ev_destroy,0,'
             instance_destroy();
         }
 	}
-	loopsoundstop(DetoFlySnd);
 ');
 
-object_event_add(Character,ev_alarm,8,'
-	milked = 0;
-	bleeding = 0;
-	pissed = 0;
-');
-
-object_event_add(Character,ev_alarm,11,'
-	{
-    loopsoundstop(DetoFlySnd);
-    }
-');
-object_event_add(Character,ev_alarm,10,'
-	buffbanner = false;
-	stunned = false;
-	radioactive = false;
-	playsound(x,y,BowSnd);
-');
 
 object_event_add(Character,ev_step,ev_step_normal,'
-	/*if (currentWeapon.charging == 1 and currentWeapon.object_index == Eyelander)
-	{
-		if (moveStatus != 4) {
-			if (image_xscale = -1) {
-				hspeed -= 3;
-			} else if (image_xscale = 1) {
-				hspeed += 3;
-			}
-		} else {
-			if (image_xscale == -1) {
-				hspeed -= 1.8;
-			} else if (image_xscale == 1) {
-				hspeed += 1.8;
-			}
-		}
-	}*/// the trimping becomes permadisabled when used on ev_step_normal
-	//var abilityVisual = string(currentWeapon.abilityVisual);
 
 	abilityActive = currentWeapon.abilityActive;
 	makeBlur = abilityActive && string_count("BLUR",currentWeapon.abilityVisual) != 0;
@@ -716,7 +83,7 @@ object_event_add(Character,ev_step,ev_step_normal,'
 globalvar DetoTrimpSnd, DetoFlyStartSnd, DetoFlySnd;
 DetoTrimpSnd = sound_add(directory + '/randomizer_sounds/DetoTrimpSnd.wav', 0, 1);
 DetoFlyStartSnd = sound_add(directory + '/randomizer_sounds/DetoFlyStartSnd.wav', 0, 1);
-DetoFlySnd = sound_add(directory + '/randomizer_sounds/DetoFlySnd.wav', 0, 1);
+//DetoFlySnd = sound_add(directory + '/randomizer_sounds/DetoFlySnd.wav', 0, 1); honestly irritating, and the flames are indicator enough
 object_event_clear(Character,ev_step,ev_step_end);
 object_event_add(Character,ev_step,ev_step_end,'
 	charSetSolids();
@@ -771,14 +138,14 @@ object_event_add(Character,ev_step,ev_step_end,'
 					accel = 0;
 				}
 			}
-			if (moveStatus == 4 && !flight)
+			/*if (moveStatus == 4 && !flight)
 			{
 				if(alarm[11] <= 0)
 					loopsoundstart(x,y,DetoFlySnd);
 				else
 					loopsoundmaintain(x,y,DetoFlySnd);
 				alarm[11] = 2 / global.delta_factor;
-			}
+			}*/
 			if (keyState & $80) {
 				if (accel > 1.3 && !onground) {
 					moveStatus = 4; // bork it so youre always flyin
@@ -791,20 +158,6 @@ object_event_add(Character,ev_step,ev_step_end,'
 				}
 			}
 		} //detected upwards slope, Fly!
-
-		for(i=0; i<1; i+=1) 
-		{
-			if(weapons[i] == SodaPopper && (hspeed != 0 || vspeed != 0)) {
-				//playsound(x,y,DetoTrimpSnd);
-				//if (!instance_exists("currentWeapon.hype")) break;
-				//if (!currentWeapon.hype)
-				curMeter = i;
-				meter[i] += 1/16 * speed;
-				if (player.activeWeapon == i)
-					if (!currentWeapon.abilityActive) 
-					currentWeapon.meterCount = meter[i];
-			}
-		}
 	}
 	charUnsetSolids();
 
@@ -965,23 +318,10 @@ object_event_add(Character,ev_step,ev_step_end,'
 	if(deathmatch_invulnerable <= 0)
 	    deathmatch_invulnerable = 0;
 ');
+
 object_event_add(Weapon,ev_create,0,'
 	spark = 0;
     alarm[9]=2;
-');
-object_event_clear(Weapon,ev_alarm,6);
-object_event_add(Weapon,ev_alarm,6,'
-	if (reloadSprite != -1 && object_index != Rifle && object_index != BazaarBargain && object_index != Machina && alarm[5] > 0)
-	{
-	    sprite_index = reloadSprite;
-	    image_index = 0;
-	    image_speed = reloadImageSpeed * global.delta_factor;
-	} 
-	else
-	{
-	    sprite_index = normalSprite;
-	    image_speed = 0;
-	}
 ');
 object_event_add(Weapon,ev_alarm,9,'
 	alarm[9] = 2;
@@ -1050,8 +390,8 @@ object_event_clear(Scout,ev_create,0);
 object_event_add(Scout,ev_create,0,'
 	baseRunPower = 1.4;
 	maxHp = 100;
-	weapons[0] = global.weapons[real(string_copy(string(global.scoutLoadout), 2, 2))];
-	weapons[1] = global.weapons[real(string_copy(string(global.scoutLoadout), 4, 2))];
+	weapons[0] = Scattergun;
+	weapons[1] = Atomizer;
 	haxxyStatue = ScoutHaxxyStatueS;
 
 	if (global.paramPlayer.team == TEAM_RED)
@@ -1074,8 +414,8 @@ object_event_clear(Heavy,ev_create,0);
 object_event_add(Heavy,ev_create,0,'
 	baseRunPower = 0.8;
 	maxHp = 200;
-	weapons[0] = global.weapons[real(string_copy(string(global.heavyLoadout), 2, 2))];
-	weapons[1] = global.weapons[real(string_copy(string(global.heavyLoadout), 4, 2))];
+	weapons[0] = Minigun;
+	weapons[1] = KGOB;
 	haxxyStatue = HeavyHaxxyStatueS;
 
 	if (global.paramPlayer.team == TEAM_RED)
@@ -1092,31 +432,12 @@ object_event_add(Heavy,ev_create,0,'
 	// Override defaults
 	numFlames = 5;
 ');
-object_event_clear(Heavy,ev_step,ev_step_normal);
-object_event_add(Heavy,ev_step,ev_step_normal,'
-	minigun = keyState & $10 && player.activeWeapon == 0;
-	weapon = weapons[0];
-	if(minigun) {
-		if (weapon == Tomislav) {
-			runPower = 0.55;
-		} else if (weapon == BrassBeast) {
-			runPower = 0;
-			jumpStrength = 0;
-		} else {
-			runPower = 0.3;
-		}
-    } else {
-        runPower = 0.8;
-		jumpStrength = baseJumpStrength;
-    }
-	event_inherited();
-');
 object_event_clear(Demoman,ev_create,0);
 object_event_add(Demoman,ev_create,0,'
 	baseRunPower = 1;
 	maxHp = 120;
-	weapons[0] = global.weapons[real(string_copy(string(global.demomanLoadout), 2, 2))];
-	weapons[1] = global.weapons[real(string_copy(string(global.demomanLoadout), 4, 2))];
+	weapons[0] = Minegun;
+	weapons[1] = Eyelander; // ohohohohoho
 	haxxyStatue = DemomanHaxxyStatueS;
 
 	if (global.paramPlayer.team == TEAM_RED)
@@ -1136,8 +457,8 @@ object_event_clear(Engineer,ev_create,0);
 object_event_add(Engineer,ev_create,0,'
 	baseRunPower = 1;
 	maxHp = 120;
-	weapons[0] = global.weapons[real(string_copy(string(global.engineerLoadout), 2, 2))];
-	weapons[1] = global.weapons[real(string_copy(string(global.engineerLoadout), 4, 2))];
+	weapons[0] = Shotgun;
+	weapons[1] = Wrench;
 	haxxyStatue = EngineerHaxxyStatueS;
 
 	if (global.paramPlayer.team == TEAM_RED)
@@ -1157,8 +478,8 @@ object_event_clear(Pyro,ev_create,0);
 object_event_add(Pyro,ev_create,0,'
 	baseRunPower = 1.1;
 	maxHp = 120;
-	weapons[0] = global.weapons[real(string_copy(string(global.pyroLoadout), 2, 2))];
-	weapons[1] = global.weapons[real(string_copy(string(global.pyroLoadout), 4, 2))];
+	weapons[0] = Flamethrower;
+	weapons[1] = Axe;
 	haxxyStatue = PyroHaxxyStatueS;
 
 	if (global.paramPlayer.team == TEAM_RED)
@@ -1179,8 +500,8 @@ object_event_clear(Spy,ev_create,0);
 object_event_add(Spy,ev_create,0,'
 	maxHp = 100;
 	baseRunPower = 1.08;
-	weapons[0] = global.weapons[real(string_copy(string(global.spyLoadout), 2, 2))];
-	weapons[1] = global.weapons[real(string_copy(string(global.spyLoadout), 4, 2))];
+	weapons[0] = Revolver;
+	weapons[1] = Knife;
 	haxxyStatue = SpyHaxxyStatueS;
 
 	if (global.paramPlayer.team == TEAM_RED)
@@ -1204,8 +525,8 @@ object_event_clear(Sniper,ev_create,0);
 object_event_add(Sniper,ev_create,0,'
 	maxHp = 120;
 	baseRunPower = 0.9;
-	weapons[0] = global.weapons[real(string_copy(string(global.sniperLoadout), 2, 2))];
-	weapons[1] = global.weapons[real(string_copy(string(global.sniperLoadout), 4, 2))];
+	weapons[0] = SniperRifle;
+	weapons[1] = Kukri;
 	haxxyStatue = SniperHaxxyStatueS;
 
 	if (global.paramPlayer.team == TEAM_RED)
@@ -1226,8 +547,8 @@ object_event_clear(Soldier,ev_create,0);
 object_event_add(Soldier,ev_create,0,'
 	maxHp = 160;
 	baseRunPower = .9;
-	weapons[0] = global.weapons[real(string_copy(string(global.soldierLoadout), 2, 2))];
-	weapons[1] = global.weapons[real(string_copy(string(global.soldierLoadout), 4, 2))];
+	weapons[0] = Rocketlauncher;
+	weapons[1] = Shovel;
 	
 	haxxyStatue = SoldierHaxxyStatueS;
 
@@ -1248,8 +569,8 @@ object_event_clear(Medic,ev_create,0);
 object_event_add(Medic,ev_create,0,'
 	maxHp = 120;
 	baseRunPower = 1.09;
-	weapons[0] = global.weapons[real(string_copy(string(global.medicLoadout), 2, 2))];
-	weapons[1] = global.weapons[real(string_copy(string(global.medicLoadout), 4, 2))];
+	weapons[0] = Medigun;
+	weapons[1] = Ubersaw;
 	haxxyStatue = MedicHaxxyStatueS;
 
 	alarm[11] = 30 / global.delta_factor;
@@ -1267,29 +588,6 @@ object_event_add(Medic,ev_create,0,'
 
 	// Override defaults
 	numFlames = 4;
-');
-object_event_clear(Quote,ev_create,0);
-object_event_add(Quote,ev_create,0,'
-	maxHp = 140;
-	baseRunPower = 1.07;
-	weapons[0] = Blade;
-	weapons[1] = Machinegun;
-
-	if (global.paramPlayer.team == TEAM_RED)
-	{
-		sprite_index = QuerlyRedS;
-		haxxyStatue = QuoteHaxxyStatueS;
-	}
-	else if (global.paramPlayer.team == TEAM_BLUE)
-	{
-		sprite_index = QuerlyBlueS;
-		haxxyStatue = CurlyHaxxyStatueS;
-	}
-
-	event_inherited();
-
-	// Override defaults
-	numFlames = 3;
 ');
 
 
@@ -1463,7 +761,7 @@ object_event_add(PlayerControl,ev_step,ev_step_end,'
 	//Changes the number telling randomizer what weapon should be shown
 	if (keyboard_check_pressed(global.switchWeapon)) {
 		if(global.myself.object != -1){
-			canSwitch = !global.myself.object.taunting or global.myself.object.weapons[1] == WEAPON_BOOTS or global.myself.object.canSwitch;
+			canSwitch = !global.myself.object.taunting or global.myself.object.abilityActive; // prevent switching when taunting or eyelander charging
 			if (!canSwitch) break;
 			if(global.myself.activeWeapon == 0){
 				global.myself.activeWeapon = 1;
