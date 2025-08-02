@@ -5,7 +5,7 @@ globalvar PyroShotgun;
 PyroShotgun = object_add();
 object_set_parent(PyroShotgun, ShotgunWeapon);
 
-object_event_add(PyroShotgun,ev_create,0,'
+object_event_add(PyroShotgun, ev_create, 0, '
     xoffset=3;
     yoffset=-3;
     refireTime=20;

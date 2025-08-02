@@ -22,9 +22,11 @@ object_event_add(ShotgunWeapon, ev_create, 0, '
     shotDir[0] = 11;
     shotDir[1] = 5;
 
-    normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\ShotgunS.png", 2, 1, 0, 8, -1);
-    recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\ShotgunFS.png", 4, 1, 0, 8, -1);
-    reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\ShotgunFRS.png", 16, 1, 0, 20, 11);
+    spriteBase = "Shotgun"
+
+    normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\" + spriteBase + "S.png", 2, 1, 0, 8, -1);
+    recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\" + spriteBase + "FS.png", 4, 1, 0, 8, -1);
+    reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\" + spriteBase + "FRS.png", 16, 1, 0, 20, 11);
 
     sprite_index = normalSprite;
 

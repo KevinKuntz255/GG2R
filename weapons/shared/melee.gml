@@ -2,7 +2,17 @@ globalvar MeleeWeapon;
 MeleeWeapon = object_add();
 object_set_parent(MeleeWeapon, Weapon);
 
+object_event_add(Weapon, ev_destroy, 0, '
+    event_inherited();
+
+    with (MeleeMask) if (ownerPlayer == other.ownerPlayer) instance_destroy();
+    with (StabMask) if (ownerPlayer == other.ownerPlayer) instance_destroy();
+    with (StabAnim) if (ownerPlayer == other.ownerPlayer) instance_destroy();
+');
+
 object_event_add(MeleeWeapon, ev_alarm, 1, '
+    event_inherited();
+
     shot = instance_create(x,y,MeleeMask);
     shot.direction=owner.aimDirection;
     shot.speed=owner.speed;
@@ -13,4 +23,10 @@ object_event_add(MeleeWeapon, ev_alarm, 1, '
     shot.weapon=id;
 
     alarm[2] = 10;
+');
+
+object_event_add(Weapon,ev_alarm,2,'
+    event_inherited();
+
+    readyToStab = true;
 ');
