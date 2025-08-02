@@ -4,17 +4,8 @@
 
 // WeaponTypes
 globalvar KNIFE, MELEE;
-
-
 KNIFE = 0;
 MELEE = 1;
-
-// WeaponGrades, them too
-globalvar STOCK, UNIQUE, FUN; // Stock, Lorgan's Set, and The newer Ideas (to be implemented...)
-STOCK = 0;
-UNIQUE = 1;
-FUN = 2;
-
 
 global.weaponTypes = ds_map_create();
 
@@ -27,11 +18,6 @@ ds_map_add(global.weaponTypes, KNIFE, KNIFE);
 globalvar SwitchSnd, FlashlightSnd, swingSnd, BallSnd, DirecthitSnd, ManglerChargesnd, LaserShotSnd, BowSnd, ChargeSnd1, ChargeSnd2, ChargeSnd3, FlaregunSnd, BuffbannerSnd, CritSnd, ShotSnd;
 SwitchSnd = sound_add(directory + '/randomizer_sounds/switchSnd.wav', 0, 1);
 swingSnd = sound_add(directory + '/randomizer_sounds/swingSnd.wav', 0, 1);
-BallSnd = sound_add(directory + '/randomizer_sounds/BallSnd.wav', 0, 1);
-DirecthitSnd = sound_add(directory + '/randomizer_sounds/DirecthitSnd.wav', 0, 1);
-ManglerChargesnd = sound_add(directory + '/randomizer_sounds/ManglerchargeSnd.wav', 0, 1);
-LaserShotSnd = sound_add(directory + '/randomizer_sounds/LaserShotSnd.wav', 0, 1);
-BowSnd = sound_add(directory + '/randomizer_sounds/BowSnd.wav', 0, 1);
 ChargeSnd1 = sound_add(directory + '/randomizer_sounds/DetoCharge1Snd.wav', 0, 1);
 ChargeSnd2 = sound_add(directory + '/randomizer_sounds/DetoCharge2Snd.wav', 0, 1);
 ChargeSnd3 = sound_add(directory + '/randomizer_sounds/DetoCharge3Snd.wav', 0, 1);
@@ -47,10 +33,8 @@ object_event_add(Weapon,ev_create,0,'
     t=0;
     //speedboost=0;
 
-    // weaponGrade for Unique/Stock/Special
-    weaponGrade = STOCK;
     // weaponType for each weapon
-    weaponType = SHOTGUN;
+    weaponType = -1;
 
     isMelee = false;
 	
@@ -109,7 +93,6 @@ object_event_add(Weapon,ev_destroy,0,'
             with (StabMask) if (ownerPlayer == other.ownerPlayer) instance_destroy();
             with (StabAnim) if (ownerPlayer == other.ownerPlayer) instance_destroy();
         break;
-        break;
     }
 ');
 object_event_add(Weapon,ev_alarm,1,'
@@ -122,7 +105,7 @@ object_event_add(Weapon,ev_alarm,1,'
             shot.owner=owner;
             shot.ownerPlayer=ownerPlayer;
             shot.team=owner.team;
-            shot.hitDamage = shotDamage;
+            if (shotDamage != -1) shot.hitDamage = shotDamage; else shot.hitDamage = 35;
             shot.weapon=object_index;
 
             alarm[2] = 10;
@@ -134,7 +117,6 @@ object_event_add(Weapon,ev_alarm,2,'
     {
         case MELEE:
             readyToStab = true;
-        break;
         break;
     }
 ');
@@ -303,8 +285,9 @@ object_event_add(Shovel,ev_destroy,0,'
 object_event_add(Shovel,ev_step,ev_step_normal,'
     event_inherited();
 
+    // if (global.altMechanics)
 	if (owner.hp != owner.maxHp){
-		owner.runPower = owner.baseRunPower + (owner.maxHp + 40) / (owner.hp + 40) * 0.2;
+		owner.runPower = owner.baseRunPower + (owner.maxHp + 40) / (owner.hp + 40) * 0.1;
 		owner.basemaxspeed = abs(owner.runPower * owner.baseControl / (owner.baseFriction-1));
 	} else {
 		owner.runPower = owner.baseRunPower;
@@ -398,11 +381,6 @@ object_event_add(Eyelander,ev_create,0,'
     reloadAnimLength = sprite_get_number(reloadSprite)/2;
     reloadImageSpeed = reloadAnimLength/reloadTime;
 ');
-object_event_add(Eyelander,ev_destroy,0,'
-    event_inherited();
-    charging = 0;
-    owner.jumpStrength = 8+(0.6/2);
-');
 object_event_add(Eyelander,ev_alarm,1,'
     { 
         shot = instance_create(x,y,MeleeMask);
@@ -427,16 +405,14 @@ object_event_add(Eyelander,ev_alarm,1,'
             shot.hitDamage = 35;
         }
         shot.weapon=WEAPON_EYELANDER;
+        shot.splashHit = true;
+        shot.splashAmount = 3;
         //Removed crit thing here
         alarm[2] = 10;
     }
 ');
 object_event_add(Eyelander,ev_alarm,5,'
-    //ammoCount = 100;
     meterCount = 100;
-');
-object_event_add(Eyelander,ev_alarm,10,'
-    charging = 0;
 ');
 object_event_add(Eyelander,ev_step,ev_step_normal,'
     if (abilityActive) {
@@ -501,120 +477,10 @@ object_event_add(Eyelander,ev_other,ev_user2,'
         }
         playsound(x,y,choose(ChargeSnd1, ChargeSnd2,ChargeSnd3));
         if (smashing != 1) readyToStab = true;
-        //alarm[10] = 100;
     }
 ');
-
-WEAPON_PAINTRAIN = 10;
-Paintrain = object_add();
-object_set_parent(Paintrain, Weapon);
-object_event_add(Paintrain,ev_create,0,'
-	{
-		xoffset=-9;
-		yoffset=-40;
-		refireTime=24;
-		event_inherited();	
-		maxMines = 14;
-		lobbed = 0;
-		unscopedDamage = 0;
-		StabreloadTime = 5;
-		//readyToStab = false;
-		alarm[2] = 15;
-		smashing = false;
-		
-		stabdirection=0;
-		maxAmmo = 1;
-		ammoCount = maxAmmo;
-		reloadTime = 300;
-		reloadBuffer = 24;
-		idle=true;
-		isMelee = true;
-		
-        weaponType = MELEE;
-		normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\PainTrainS.png", 2, 1, 0, 0, 0);
-		recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\PainTrainFS.png", 2, 1, 0, 0, 0);
-		reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\PainTrainS.png", 2, 1, 0, 0, 0);
-
-		sprite_index = normalSprite;
-
-		recoilTime = refireTime;
-		recoilAnimLength = sprite_get_number(recoilSprite)/2;
-		recoilImageSpeed = recoilAnimLength/recoilTime;
-
-		reloadAnimLength = sprite_get_number(reloadSprite)/2;
-		reloadImageSpeed = reloadAnimLength/reloadTime;
-		
-		//owner.runPower = 5;
-		owner.capStrength = 2;
-	}
-');
-object_event_add(Paintrain,ev_destroy,0,'
-    event_inherited();
-	owner.capStrength = 1;
-');
-object_event_add(Paintrain,ev_alarm,1,'
-    { 
-        shot = instance_create(x,y,MeleeMask);
-        shot.direction=owner.aimDirection;
-        shot.speed=owner.speed;
-        shot.owner=owner;
-        shot.ownerPlayer=ownerPlayer;
-        shot.team=owner.team;
-        shot.hitDamage = 14;
-        shot.weapon=WEAPON_PAINTRAIN;
-        //Removed crit thing here
-        alarm[2] = 10;
-    }
-');
-object_event_add(Paintrain,ev_alarm,2,'
-    {
-    readyToStab = true;
-    }
-');
-object_event_add(Paintrain,ev_alarm,5,'
-    ammoCount = 1;
-');
-object_event_add(Paintrain,ev_step,ev_step_normal,'
-    if smashing {
-        image_speed=0.3;
-        if 1 != 1 { //Removed crit here
-            if image_index >= 11{
-                image_speed=0;
-                image_index=8;
-                stabbing = false;
-            } 
-        } else if image_index >= 4*owner.team+3 {
-            image_speed=0;
-            image_index=4*owner.team;
-            stabbing = false;
-        }    
-    } else {
-        if 1 <= 1  image_index=4*owner.team;
-        else image_index = 8;
-    }
-');
-object_event_add(Paintrain,ev_other,ev_user1,'
-    if(readyToStab && !owner.cloak){
-        //owner.runPower = 0;
-        //owner.jumpStrength = 0;
-        smashing = 1;
-
-        justShot=true;
-        readyToStab = false;
-        alarm[1] = StabreloadTime / global.delta_factor;
-        playsound(x,y,swingSnd);
-    }
-');
-
-global.weapons[WEAPON_MINEGUN] = Minegun;
-global.name[WEAPON_MINEGUN] = "Minegun";
-global.weapons[WEAPON_EYELANDER] = Eyelander;
-global.name[WEAPON_EYELANDER] = "Eyelander";
-global.weapons[WEAPON_PAINTRAIN] = Paintrain;
-global.name[WEAPON_PAINTRAIN] = "Paintrain";
 
 // Medic
-globalvar WEAPON_MEDIGUN;
 globalvar Ubersaw;
 Ubersaw = object_add();
 object_set_parent(Ubersaw, Weapon);
@@ -659,17 +525,9 @@ object_event_add(Ubersaw,ev_create,0,'
     reloadAnimLength = sprite_get_number(reloadSprite)/2;
     reloadImageSpeed = reloadAnimLength/reloadTime;
 ');
-WEAPON_MEDIGUN = 45;
-global.weapons[WEAPON_OVERDOSE] = Ubersaw;
-global.name[WEAPON_OVERDOSE] = "Ubersaw (unfinished)";
-global.weapons[WEAPON_MEDIGUN] = Medigun;
-global.name[WEAPON_MEDIGUN] = "Medigun"
 
 // Engineer
-globalvar WEAPON_SHOTGUN, WEAPON_WRENCH;
 globalvar Wrench;
-WEAPON_SHOTGUN = 50;
-WEAPON_WRENCH = 57;
 Wrench = object_add();
 object_set_parent(Wrench, Weapon);
 object_event_add(Wrench,ev_create,0,'
@@ -690,7 +548,6 @@ object_event_add(Wrench,ev_create,0,'
     reloadBuffer = refireTime;
     idle=true;
     cooldown = 0;
-    unscopedDamage = 0;
 	
 	isMelee = true;
     weaponType = MELEE;
@@ -708,16 +565,8 @@ object_event_add(Wrench,ev_create,0,'
     reloadImageSpeed = reloadAnimLength/reloadTime;
 ');
 
-global.weapons[WEAPON_SHOTGUN] = Shotgun;
-global.name[WEAPON_SHOTGUN] = "Shotgun"
-global.weapons[WEAPON_WRENCH] = Wrench;
-global.name[WEAPON_WRENCH] = "Wrench";
-
 // Heavy
-globalvar WEAPON_MINIGUN, WEAPON_KGOB;
-globalvar  KGOB;
-WEAPON_MINIGUN = 60;
-WEAPON_KGOB = 69;
+globalvar KGOB;
 KGOB = object_add();
 object_set_parent(KGOB, Weapon);
 object_event_add(KGOB,ev_create,0,'
@@ -752,82 +601,10 @@ object_event_add(KGOB,ev_create,0,'
     reloadAnimLength = sprite_get_number(reloadSprite)/2;
     reloadImageSpeed = reloadAnimLength/reloadTime;
 ');
-object_event_add(KGOB,ev_destroy,0,'
-    with (MeleeMask) {
-        if (ownerPlayer == other.ownerPlayer) {
-            instance_destroy();
-        }
-    }
-');
-object_event_add(KGOB,ev_alarm,1,'
-    { 
-        shot = instance_create(x,y,MeleeMask);
-        shot.direction=owner.aimDirection;
-        shot.speed=owner.speed;
-        shot.owner=owner;
-        shot.ownerPlayer=ownerPlayer;
-        shot.team=owner.team;
-        shot.hitDamage = 45;
-        shot.weapon=WEAPON_KGOB;
-        //Removed crit thing here
-        alarm[2] = 15;
-    }
-');
-object_event_add(KGOB,ev_alarm,2,'
-    {
-    readyToStab = true;
-    }
-');
-object_event_add(KGOB,ev_alarm,5,'
-    ammoCount = 1;
-');
-object_event_add(KGOB,ev_step,ev_step_normal,'
-    if smashing {
-        image_speed=0.3;
-        if 1 != 1 { //Removed crit here
-            if image_index >= 11{
-                image_speed=0;
-                image_index=8;
-                stabbing = false;
-            } 
-        } else if image_index >= 4*owner.team+3 {
-            image_speed=0;
-            image_index=4*owner.team;
-            stabbing = false;
-        }    
-    } else {
-        if 1 <= 1  image_index=4*owner.team;
-        else image_index = 8;
-    }
 
-    if !variable_local_exists("ammoCheck") {
-        ammoCheck = 1;
-        alarm[5] = owner.ammo[105];
-    }
-');
-object_event_add(KGOB,ev_other,ev_user1,'
-    if(readyToStab && !owner.cloak){
-        //owner.runPower = 0;
-        //owner.jumpStrength = 0;
-        smashing = 1;
-
-        justShot=true;
-        readyToStab = false;
-        alarm[1] = StabreloadTime / global.delta_factor;
-        playsound(x,y,swingSnd);
-    }
-');
-
-global.weapons[WEAPON_MINIGUN] = Minigun;
-global.name[WEAPON_MINIGUN] = "Minigun";
-global.weapons[WEAPON_KGOB] = KGOB;
-global.name[WEAPON_KGOB] = "Killing Gloves Of Boxing";
 
 // Spy
-globalvar WEAPON_REVOLVER, WEAPON_ETRANGER, WEAPON_DIAMONDBACK, WEAPON_DIPLOMAT, WEAPON_NORDICGOLD, WEAPON_KNIFE, WEAPON_MEDICHAIN, WEAPON_BIGEARNER, WEAPON_SPYCICLE, WEAPON_ZAPPER;
-globalvar Etranger, Diamondback, Diplomat, Goldassistant, Knife, ChainStab, BigEarner, Spycicle, Zapper;
-WEAPON_REVOLVER = 70;
-WEAPON_KNIFE = 75;
+globalvar Knife;
 Knife = object_add();
 object_set_parent(Knife, Weapon);
 object_event_add(Knife,ev_create,0,'
@@ -851,6 +628,7 @@ object_event_add(Knife,ev_create,0,'
     isMelee = true;
     justShot = false;
 
+    weaponType = MELEE;
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\Knife2S.png", 2, 1, 0, 32, 32);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\Knife2FS.png", 8, 1, 0, 32, 32);
     reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\Knife2S.png", 2, 1, 0, 32, 32);
@@ -864,23 +642,6 @@ object_event_add(Knife,ev_create,0,'
     reloadAnimLength = sprite_get_number(reloadSprite)/2;
     reloadImageSpeed = reloadAnimLength/reloadTime;
 ');
-object_event_add(Knife,ev_destroy,0,'
-    with (StabAnim) {
-        if (ownerPlayer == other.ownerPlayer) {
-            instance_destroy();
-        }
-    }
-    with (MeleeMask) {
-        if (ownerPlayer == other.ownerPlayer) {
-            instance_destroy();
-        }
-    }
-    with (StabMask) {
-        if (ownerPlayer == other.ownerPlayer) {
-            instance_destroy();
-        }
-    }
-');
 object_event_add(Knife,ev_alarm,1,'
     { 
         shot = instance_create(x,y,MeleeMask);
@@ -893,11 +654,6 @@ object_event_add(Knife,ev_alarm,1,'
         shot.weapon=WEAPON_KNIFE;
 
         alarm[2] = 10;
-    }
-');
-object_event_add(Knife,ev_alarm,2,'
-    {
-    readyToStab = true;
     }
 ');
 object_event_add(Knife,ev_alarm,3,'

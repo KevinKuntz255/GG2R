@@ -207,6 +207,7 @@ object_event_add(MeleeMask,ev_create,0,'
         visible = false;
         splashHit = false;
         splashAmount = 0;
+        pierced = 1;
     }
 ');
 object_event_add(MeleeMask,ev_destroy,0,'
@@ -321,7 +322,8 @@ object_event_add(MeleeMask,ev_collision,Character,'
                 instance_destroy(); 
             } else {
                 splashAmount -= 1;
-                hitDamage -= 13 * splashAmount;
+                hitDamage -= 13 * pierced;
+                pierced += 1;
                 if (splashAmount <= 0)
                 {
                     splashHit = false;
