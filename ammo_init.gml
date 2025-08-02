@@ -21,16 +21,9 @@ object_event_add(AmmoCounter,ev_draw,0,'
 			if global.myself.team == TEAM_BLUE toffset = 1;
 			else toffset = 0;
 
-			var weapon_index;
-			if(global.myself.activeWeapon == 1){
-				weapon_index = real(string_copy(string(global.myself.playerLoadout), 4, 2));
-			}else{
-				weapon_index = real(string_copy(string(global.myself.playerLoadout), 2, 2));
-			}
 			
 			switch(weapon.object_index) {
 				case Wrench:
-	            case Sandman:
 	            case Kukri:
 	            case Eyelander:
 	            case Knife:

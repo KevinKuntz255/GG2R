@@ -51,6 +51,9 @@ object_event_add(Character,ev_create,0,'
 
     canSwitch = true;
 	
+	tripleJumpUsed = false;
+
+	placedMines = 0;
 	crit = -1;
 ');
 
@@ -64,10 +67,9 @@ object_event_add(Character,ev_destroy,0,'
 
 
 object_event_add(Character,ev_step,ev_step_normal,'
-
 	abilityActive = currentWeapon.abilityActive;
 	makeBlur = abilityActive && string_count("BLUR",currentWeapon.abilityVisual) != 0;
-	blur = radioactive or (currentWeapon.abilityActive && string_count("BLUR",currentWeapon.abilityVisual) != 0);
+	blur = (currentWeapon.abilityActive && string_count("BLUR",currentWeapon.abilityVisual) != 0);
 	if (blur) {
 		with(RadioBlur)
 			if (owner == other.id) exit;
@@ -102,7 +104,7 @@ object_event_add(Character,ev_step,ev_step_end,'
 	xprevious = x;
 	yprevious = y;
 	
-	if (weapons[0] != -1) {
+	if (player.class != CLASS_QUOTE) {
 		if(currentWeapon.abilityActive and weapons[1] == Eyelander) {
 			// the hspeed mod is a light buff to detect more slopes	
 			if(!place_free(x + sign(hspeed*0.5), y)) { // we hit a wall on the left or right
@@ -219,12 +221,6 @@ object_event_add(Character,ev_step,ev_step_end,'
 	if(y>map_height()){
 	    y = map_height();
 	}
-	
-	// or pissed or milked or bleeding thats 3 variables in one place
-	// ykno that could be simplified into a single one
-	// like soaked and a soakType
-	if !invisibeam
-		if /*!(weapon_index > WEAPON_REVOLVER && weapon_index <= WEAPON_ZAPPER or weapon_index == WEAPON_PREDATOR) or*/ soaked cloak = false;
 	    
 	// Cloak
 	if (cloak and cloakAlpha > 0 and !cloakFlicker)
@@ -259,29 +255,6 @@ object_event_add(Character,ev_step,ev_step_end,'
 	        hp += 1.6 * global.delta_factor;
 	    if (omnomnomnomindex >= omnomnomnomend)
 	        omnomnomnom=false;
-	}
-	
-	//dripping
-	
-	for(i=0; i<3; i+=1) {
-		if soakType[i] == piss {
-			repeat(random(floor(2))) instance_create(x+random(32)-16,y+random(32)-16,Piss);
-		}
-		//dripping milk
-		if soakType[i] == milk {
-			repeat(random(floor(2))) instance_create(x+random(32)-16,y+random(32)-16,Milk);
-		}
-		//bleeding
-		if soakType[i] == bleed {
-			hp-=0.15;
-			repeat(random(floor(2))) instance_create(x+random(32)-16,y+random(32)-16,BloodDrop);
-			lastDamageSource = WEAPON_SHIV;
-		}
-		//unpissing/unmilking if ubered
-		if ubered or megaHealed or critting {
-			soaked = false
-			soakType[i]=-1;
-		}
 	}
 
 	//for things polling whether the character is on a medcabinet
@@ -345,7 +318,7 @@ object_event_add(Weapon,ev_draw,0,'
 	} else {
 	    //Play the current animation normally
 	    var animLength;
-	    if (object_index != Rifle && object_index != BazaarBargain && object_index != Machina && alarm[5] <= 0)
+	    if (object_index != Rifle && alarm[5] <= 0)
 	        animLength = recoilAnimLength;
 	    else if (sprite_index == recoilSprite)
 	        animLength = recoilAnimLength;
@@ -431,6 +404,17 @@ object_event_add(Heavy,ev_create,0,'
 
 	// Override defaults
 	numFlames = 5;
+');
+object_event_clear(Heavy,ev_step,ev_step_normal);
+object_event_add(Heavy,ev_step,ev_step_normal,'
+	minigun = keyState & $10 && player.activeWeapon == 0;
+	if(minigun) {
+			runPower = 0.3;
+    } else {
+        runPower = 0.8;
+		jumpStrength = baseJumpStrength;
+    }
+	event_inherited();
 ');
 object_event_clear(Demoman,ev_create,0);
 object_event_add(Demoman,ev_create,0,'
@@ -525,7 +509,7 @@ object_event_clear(Sniper,ev_create,0);
 object_event_add(Sniper,ev_create,0,'
 	maxHp = 120;
 	baseRunPower = 0.9;
-	weapons[0] = SniperRifle;
+	weapons[0] = Rifle;
 	weapons[1] = Kukri;
 	haxxyStatue = SniperHaxxyStatueS;
 
@@ -590,126 +574,6 @@ object_event_add(Medic,ev_create,0,'
 	numFlames = 4;
 ');
 
-
-readScript = "";
-fd = file_text_open_read(pluginFilePath + "\input_special_but_better.gml");
-while(not file_text_eof(fd)) {
-	readScript += file_text_read_string(fd) + "
-	";
-	file_text_readln(fd);
-}
-file_text_close(fd);
-//This event sucks
-object_event_clear(PlayerControl,ev_step,ev_step_begin);
-object_event_add(PlayerControl,ev_step,ev_step_begin,'
-	if(instance_exists(MenuController))
-	    exit;
-	    
-	var kickOpen;
-	kickOpen = false
-	if (instance_exists(ScoreTableController))
-	    if (ScoreTableController.showadmin)
-	        kickOpen = true;
-	    
-	if(instance_exists(TeamSelectController) || instance_exists(ClassSelectController) || kickOpen)
-	    menuOpen = true;
-	else
-	    menuOpen = false;
-
-	//Checking for input - Mapped Keys
-	if(keyboard_check_pressed(global.changeTeam))
-	    inputChangeTeam();
-	if(keyboard_check_pressed(global.changeClass))
-	    inputChangeClass();
-
-	event_user(8);
-	    
-	var keybyte;
-	keybyte = 0;
-
-	/* KeyByte flags:
-	    02 - down
-	    
-	    08 - primary
-	    10 - secondary
-	    
-	    20 - right
-	    40 - left
-	    80 - up
-	*/
-
-	//character object exists
-	if(global.myself.object != -1)
-	{
-	    if(!menuOpen)
-	    {
-	        if(keyboard_check(global.left) || keyboard_check(global.left2)) keybyte |= $40;
-	        if(keyboard_check(global.right) || keyboard_check(global.right2)) keybyte |= $20;
-	        if(keyboard_check(global.jump) || keyboard_check(global.jump2)) keybyte |= $80;
-	        if(keyboard_check(global.down) || keyboard_check(global.down2)) keybyte |= $02;
-	        if(keyboard_check(global.taunt)) keybyte |= $01;
-	        if(keyboard_check_pressed(global.chat1)) inputChat1();
-	        if(keyboard_check_pressed(global.chat2)) inputChat2();
-	        if(keyboard_check_pressed(global.chat3)) inputChat3();
-	        if(keyboard_check_pressed(global.drop)) inputDrop();
-	        
-	        if(keyboard_check_pressed(global.medic))
-	        {
-	            inputCallMedic();
-	        }
-	        
-	        if(!global.myself.humiliated)
-	        {
-	            if(keyboard_check(global.attack) && !global.myself.object.radioactive) keybyte |= $10;
-	            if(keyboard_check(global.special)) keybyte |= $08;
-	            if(keyboard_check_pressed(global.special)) inputSpecial();
-	            if(keyboard_check_pressed(global.taunt)) inputTaunt();
-	            
-	            if(mouse_check_button(mb_left))
-	            {
-	                if(global.attack == MOUSE_LEFT && !global.myself.object.radioactive) keybyte |= $10;
-	                if(global.special == MOUSE_LEFT) keybyte |= $08;
-	            }
-	            if(mouse_check_button_pressed(mb_left) and global.special == MOUSE_LEFT)
-	                ' + readScript + '
-
-	            if(mouse_check_button(mb_right))
-	            {
-	                if(global.attack == MOUSE_RIGHT && !global.myself.object.radioactive) keybyte |= $10;
-	                if(global.special == MOUSE_RIGHT) keybyte |= $08;
-	            }
-	            if(mouse_check_button_pressed(mb_right) and global.special == MOUSE_RIGHT)
-	                ' + readScript + '
-	            
-	        }
-	    }
-	    
-	    if(global.run_virtual_ticks)
-	        ClientInputstate(global.serverSocket, keybyte);
-	    socket_send(global.serverSocket);
-	}
-	// spectator controls
-	else if (instance_exists(Spectator))
-	{
-	    if(!menuOpen)
-	    {
-	        if(mouse_check_button_pressed(mb_left))
-	            with (Spectator) event_user(7);
-	        if(mouse_check_button_pressed(mb_right))
-	            with (Spectator) event_user(8);
-	    }
-	}
-
-	if(keybyte != 0
-	        or keyboard_check(global.left) or keyboard_check(global.left2)
-	        or keyboard_check(global.right) or keyboard_check(global.right2)
-	        or keyboard_check(global.jump) or keyboard_check(global.jump2)
-	        or keyboard_check(global.down) or keyboard_check(global.down2)) {
-	    afktimer = afktimeout;
-	}
-');
-
-
 globalvar SpecialHud;
 SpecialHud = object_add();
 object_event_add(SpecialHud,ev_step,ev_step_begin,'
@@ -761,7 +625,7 @@ object_event_add(PlayerControl,ev_step,ev_step_end,'
 	//Changes the number telling randomizer what weapon should be shown
 	if (keyboard_check_pressed(global.switchWeapon)) {
 		if(global.myself.object != -1){
-			canSwitch = !global.myself.object.taunting or global.myself.object.abilityActive; // prevent switching when taunting or eyelander charging
+			canSwitch = !global.myself.object.taunting or !global.myself.object.abilityActive or global.myself.class != CLASS_QUOTE; // prevent switching when taunting or eyelander charging or quote
 			if (!canSwitch) break;
 			if(global.myself.activeWeapon == 0){
 				global.myself.activeWeapon = 1;
@@ -790,25 +654,7 @@ object_event_add(PlayerControl,ev_step,ev_step_end,'
     with(AmmoCounter) AmmoCounterID = id;
     with(Player){
         if(object != -1){
-            //Changes the primary and secondary based on the loaded loadout
-            if(variable_local_exists("playerLoadout")){
-            	if(class == real(string_copy(string(playerLoadout), 2, 1))){
-	                if(object.weapons[0] != global.weapons[real(string_copy(string(playerLoadout), 2, 2))]){
-	                    object.weapons[0] = global.weapons[real(string_copy(string(playerLoadout), 2, 2))];
-
-	                    with(object.currentWeapon) instance_destroy();
-	                    object.currentWeapon = -1;
-
-	                    global.paramOwner = object;
-	                    object.currentWeapon = instance_create(object.x,object.y,object.weapons[0]);
-	                    global.paramOwner = noone;
-	                }
-	                if(object.weapons[1] != global.weapons[real(string_copy(string(playerLoadout), 4, 2))]){
-	                    object.weapons[1] = global.weapons[real(string_copy(string(playerLoadout), 4, 2))];
-	                }
-	            }
-            }
-
+        	if (class == CLASS_QUOTE) break;
             //Swaps the primary and secondary based on the active weapon
             if(variable_local_exists("activeWeapon")){
                 if(activeWeapon == 0){
@@ -861,11 +707,8 @@ object_event_add(PlayerControl,ev_step,ev_step_end,'
 		        instance_create(0,0,NutsNBoltsHud);
 		}
 		if(global.myself.class == CLASS_HEAVY) {
-			if (global.myself.object.weapons[1] == SandvichHand) // fix q/c
-			{
-				if(!instance_exists(SandwichHud))
-					instance_create(0,0,SandwichHud);
-			}
+			if(!instance_exists(SandwichHud))
+				instance_create(0,0,SandwichHud);
 		}
 
 		// Sticky HUD. Because real men let computers count for them.
@@ -888,119 +731,6 @@ object_event_add(PlayerControl,ev_step,ev_step_end,'
 		
 		//this hud does most of the special displays (cooldown & charge timers)
 		if !instance_exists(SpecialHud) instance_create(0,0,SpecialHud);
-	}
-');
-
-
-//Keeps the currentLoadout variable REAL nice and updated
-object_event_add(Character,ev_step,ev_step_end,'
-	if(player.id == global.myself){
-		switch (player.class)
-		{
-		case CLASS_SCOUT:
-			global.currentLoadout = global.scoutLoadout;
-			break;
-
-		case CLASS_PYRO:
-			global.currentLoadout = global.pyroLoadout;
-			break;
-
-		case CLASS_SOLDIER:
-			global.currentLoadout = global.soldierLoadout;
-			break;
-
-		case CLASS_HEAVY:
-			global.currentLoadout = global.heavyLoadout;
-			break;
-
-		case CLASS_DEMOMAN:
-			global.currentLoadout = global.demomanLoadout;
-			break;
-
-		case CLASS_MEDIC:
-			global.currentLoadout = global.medicLoadout;
-			break;
-
-		case CLASS_ENGINEER:
-			global.currentLoadout = global.engineerLoadout;
-			break;
-
-		case CLASS_SPY:
-			global.currentLoadout = global.spyLoadout;
-			break;
-
-		case CLASS_SNIPER:
-			global.currentLoadout = global.sniperLoadout;
-			break;
-		}
-	}
-');
-
-//Keeps the currentLoadout variable updated as it should be
-object_event_add(ClassSelectController,ev_other,ev_user1,'
-	{
-		global.myself.activeWeapon = 0;
-		switch (class)
-		{
-		case CLASS_SCOUT:
-			global.currentLoadout = global.scoutLoadout;
-			break;
-
-		case CLASS_PYRO:
-			global.currentLoadout = global.pyroLoadout;
-			break;
-
-		case CLASS_SOLDIER:
-			global.currentLoadout = global.soldierLoadout;
-			break;
-
-		case CLASS_HEAVY:
-			global.currentLoadout = global.heavyLoadout;
-			break;
-
-		case CLASS_DEMOMAN:
-			global.currentLoadout = global.demomanLoadout;
-			break;
-
-		case CLASS_MEDIC:
-			global.currentLoadout = global.medicLoadout;
-			break;
-
-		case CLASS_ENGINEER:
-			global.currentLoadout = global.engineerLoadout;
-			break;
-
-		case CLASS_SPY:
-			global.currentLoadout = global.spyLoadout;
-			break;
-
-		case CLASS_SNIPER:
-			global.currentLoadout = global.sniperLoadout;
-			break;
-		}
-
-		var coolSendBuffer;
-		coolSendBuffer = buffer_create();
-
-
-		//Send Loadout
-        write_ubyte(coolSendBuffer, randomizer.loadoutReceive);
-        write_ushort(coolSendBuffer, global.currentLoadout);
-        if(global.isHost){
-            PluginPacketSendTo(randomizer.packetID, coolSendBuffer, global.myself);
-        }else{
-            PluginPacketSend(randomizer.packetID, coolSendBuffer);
-        }
-        buffer_clear(coolSendBuffer);
-
-
-	    event_user(0);
-	    if((not done) and (class != global.myself.class))
-	    {
-	        ClientPlayerChangeclass(class, global.serverSocket);
-	        socket_send(global.serverSocket);
-	    }
-	    done=true;
 	}
 ');
 

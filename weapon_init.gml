@@ -24,14 +24,8 @@ ChargeSnd3 = sound_add(directory + '/randomizer_sounds/DetoCharge3Snd.wav', 0, 1
 CritSnd = sound_add(directory + '/randomizer_sounds/CritSnd.wav', 0, 1);
 object_event_add(Weapon,ev_create,0,'
     owner.expectedWeaponBytes = 2;
-    // necessary variables for weapons not to crash
-	//wrangled = false;
 	readyToStab=false;
-    //crit=1;
-    //ubering = false;
-    //uberCharge=0;
     t=0;
-    //speedboost=0;
 
     // weaponType for each weapon
     weaponType = -1;
@@ -43,7 +37,10 @@ object_event_add(Weapon,ev_create,0,'
 	maxMeter=-1;
 	meterCount=-1;
     
+    abilityActive = false;
+    abilityVisual = "";
 
+    shotDamage = -1;
 	// Implement fixed reload times by parented variables
 	with(owner) { // reminder: activeWeapon is modified before Weapon ev_create is called
 		with (player)
@@ -70,6 +67,11 @@ object_event_add(Weapon,ev_create,0,'
 			fire = true;
 		}
 	}
+    if (global.myself.class == CLASS_DEMOMAN) {
+        if (owner.placedMines != 0)
+            lobbed = owner.placedMines;
+    }
+
 	playsound(x,y,SwitchSnd);
 ');
 object_event_add(Weapon,ev_destroy,0,'
@@ -85,7 +87,9 @@ object_event_add(Weapon,ev_destroy,0,'
 	if (alarm[2] > 0 && !isMelee) {
 		owner.reloadFlare = alarm[2];
 	}
-
+    if (global.myself.class == CLASS_DEMOMAN) {
+        if (variable_local_exists("placedMines")) owner.placedMines = lobbed;
+    }
     switch(weaponType)
     {
         case MELEE:
@@ -106,7 +110,7 @@ object_event_add(Weapon,ev_alarm,1,'
             shot.ownerPlayer=ownerPlayer;
             shot.team=owner.team;
             if (shotDamage != -1) shot.hitDamage = shotDamage; else shot.hitDamage = 35;
-            shot.weapon=object_index;
+            shot.weapon=DAMAGE_SOURCE_KNIFE;
 
             alarm[2] = 10;
         break;
@@ -171,8 +175,6 @@ object_event_add(Weapon,ev_step,ev_step_normal,'
     }
 ');
 object_event_add(Weapon,ev_other,ev_user1,'
-    //if (weaponGrade.object_index != STOCK) { // STOCK detected, dont change anything
-    //show_error(object_get_name(weaponType), false);
     switch(weaponType) {
         case MELEE:
             //if !variable_local_exists("Stabreloadtime") break;
@@ -203,7 +205,6 @@ object_event_add(Atomizer,ev_create,0,'
     alarm[2] = 15;
     smashing = false;
 
-    weaponGrade = UNIQUE;
     weaponType = MELEE;
     stabdirection=0;
     maxAmmo = 1;
@@ -214,7 +215,6 @@ object_event_add(Atomizer,ev_create,0,'
     owner.ammo[107] = -1;
     depth = 1;
     isMelee = true;
-	trip = false;
 
     weaponType = MELEE;
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\AtomizerS.png", 2, 1, 0, 21, 25);
@@ -231,12 +231,12 @@ object_event_add(Atomizer,ev_create,0,'
     reloadImageSpeed = reloadAnimLength/reloadTime;
 ');
 object_event_add(Atomizer,ev_step,ev_step_normal,'
-	if (owner.doublejumpUsed and !trip){
+	if (owner.doublejumpUsed && !owner.tripleJumpUsed){
 		owner.doublejumpUsed = false;
-		trip = true;
+        owner.tripleJumpUsed = true;
 	}
 	if (owner.onground)
-		trip = false;
+		owner.tripleJumpUsed = false;
     event_inherited();
 ');
 
@@ -334,6 +334,14 @@ object_event_add(Kukri,ev_create,0,'
 ');
 
 // Demoman
+object_event_clear(Minegun,ev_destroy,0);
+object_event_add(Minegun,ev_destroy,0,'
+    event_inherited();
+    if (owner.placedMines != 0) exit;
+    with(Mine) {
+        if ownerPlayer == other.ownerPlayer instance_destroy();
+    }
+');
 globalvar Eyelander; // my favorite!
 Eyelander = object_add();
 object_set_parent(Eyelander, Weapon);
@@ -343,8 +351,7 @@ object_event_add(Eyelander,ev_create,0,'
     refireTime=18;
 	event_inherited();
 	maxMines = 8;
-    lobbed = 0;
-	unscopedDamage = 0;
+    if (owner.placedMines != 0) lobbed = owner.placedMines; else lobbed = 0;
     StabreloadTime = 5;
     //readyToStab = false;
     alarm[2] = 15;
@@ -366,7 +373,6 @@ object_event_add(Eyelander,ev_create,0,'
 	maxMeter = 100;
 	
     weaponType = MELEE;
-    weaponGrade = UNIQUE;
 
 	normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\EyelanderS.png", 2, 1, 0, 2, 0);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\EyelanderFS.png", 8, 1, 0, 2, 0);
@@ -404,7 +410,7 @@ object_event_add(Eyelander,ev_alarm,1,'
         } else {
             shot.hitDamage = 35;
         }
-        shot.weapon=WEAPON_EYELANDER;
+        shot.weapon=DAMAGE_SOURCE_KNIFE;
         shot.splashHit = true;
         shot.splashAmount = 3;
         //Removed crit thing here
@@ -479,7 +485,39 @@ object_event_add(Eyelander,ev_other,ev_user2,'
         if (smashing != 1) readyToStab = true;
     }
 ');
-
+object_event_add(Eyelander,ev_other,ev_user12,'
+    {
+        write_ubyte(global.serializeBuffer, lobbed);
+        with(Mine) {
+            if(ownerPlayer == other.ownerPlayer) {
+                event_user(12);
+            }
+        }
+    }
+');
+object_event_add(Eyelander,ev_other,ev_user13,'
+    {
+        var i, mine;
+        receiveCompleteMessage(global.serverSocket, 1, global.deserializeBuffer);
+        lobbed = read_ubyte(global.deserializeBuffer);
+        
+        with(Mine) {
+            if(ownerPlayer == other.ownerPlayer) {
+                instance_destroy();
+            }
+        }
+        
+        for(i=0; i<lobbed; i+=1) {
+            mine = instance_create(0,0,Mine);
+            mine.owner = owner;
+            mine.ownerPlayer = ownerPlayer;
+            mine.team = owner.team;
+            with(mine) {
+                event_user(13);
+            }
+        }
+    }
+');
 // Medic
 globalvar Ubersaw;
 Ubersaw = object_add();
@@ -585,9 +623,9 @@ object_event_add(KGOB,ev_create,0,'
     reloadTime = 300;
     reloadBuffer = refireTime;
     idle=true;
-    owner.ammo[105] = -1;
     isMelee = true;
 
+    weaponType = MELEE;
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\BoxingGlovesS.png", 2, 1, 0, 4, 10);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\BoxingGlovesFS.png", 8, 1, 0, 4, 10);
     reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\BoxingGlovesS.png", 2, 1, 0, 4, 10);
@@ -651,7 +689,7 @@ object_event_add(Knife,ev_alarm,1,'
         shot.ownerPlayer=ownerPlayer;
         shot.team=owner.team;
         shot.hitDamage = damage;
-        shot.weapon=WEAPON_KNIFE;
+        shot.weapon=DAMAGE_SOURCE_KNIFE;
 
         alarm[2] = 10;
     }
@@ -726,6 +764,7 @@ object_event_add(Knife,ev_other,ev_user1,'
         readyToStab = false;
     }
 ');
+globalvar Axe;
 Axe = object_add();
 object_set_parent(Axe, Weapon);
 object_event_add(Axe,ev_create,0,'
