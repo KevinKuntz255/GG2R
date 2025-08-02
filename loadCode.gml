@@ -1757,6 +1757,15 @@ object_event_add(Character,ev_other,ev_user12,'
 	    write_ubyte(global.serializeBuffer, intel);
 	    write_short(global.serializeBuffer, intelRecharge);
 	    
+	    if(currentWeapon.object_index == Minegun){
+	    	expectedWeaponBytes = 3;
+		    with(Mine){
+		        if(ownerPlayer == other.player){
+		            other.expectedWeaponBytes += 7;
+		        }
+		    }
+		    //show_error(string(expectedWeaponBytes), false);
+	    }
 	    write_ubyte(global.serializeBuffer, expectedWeaponBytes);
 	    with(currentWeapon) {
 	        event_user(12);
