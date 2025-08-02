@@ -188,7 +188,6 @@ object_event_add(Weapon,ev_destroy,0,'
 		owner.reloadFlare = alarm[2];
 	}
 ');
-
 object_event_add(Weapon,ev_alarm,3,'
     switch(weaponType)
     {
