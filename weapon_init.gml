@@ -76,7 +76,7 @@ ds_map_add(global.weaponTypes, MACHINEGUN, MACHINEGUN);
 //Updating this for modern gg2 was a LOT LOT of work
 
 // Sounds
-globalvar SwitchSnd, FlashlightSnd, swingSnd, BallSnd, DirecthitSnd, ManglerChargesnd, LaserShotSnd, BowSnd, ChargeSnd1, ChargeSnd2, ChargeSnd3, FlaregunSnd, BuffbannerSnd, CritSnd, ShotSnd;
+globalvar SwitchSnd, FlashlightSnd, swingSnd, BallSnd, DirecthitSnd, ManglerChargesnd, LaserShotSnd, BowSnd, ChargeSnd, FlaregunSnd, BuffbannerSnd, CritSnd, ShotSnd;
 SwitchSnd = sound_add(directory + '/randomizer_sounds/switchSnd.wav', 0, 1);
 FlashlightSnd = sound_add(directory + '/randomizer_sounds/FlashlightSnd.wav', 0, 1);
 swingSnd = sound_add(directory + '/randomizer_sounds/swingSnd.wav', 0, 1);
@@ -85,9 +85,7 @@ DirecthitSnd = sound_add(directory + '/randomizer_sounds/DirecthitSnd.wav', 0, 1
 ManglerChargesnd = sound_add(directory + '/randomizer_sounds/ManglerchargeSnd.wav', 0, 1);
 LaserShotSnd = sound_add(directory + '/randomizer_sounds/LaserShotSnd.wav', 0, 1);
 BowSnd = sound_add(directory + '/randomizer_sounds/BowSnd.wav', 0, 1);
-ChargeSnd1 = sound_add(directory + '/randomizer_sounds/DetoCharge1Snd.wav', 0, 1);
-ChargeSnd2 = sound_add(directory + '/randomizer_sounds/DetoCharge2Snd.wav', 0, 1);
-ChargeSnd3 = sound_add(directory + '/randomizer_sounds/DetoCharge3Snd.wav', 0, 1);
+ChargeSnd = sound_add(directory + '/randomizer_sounds/DetoChargeSnd.wav', 0, 1);
 FlaregunSnd = sound_add(directory + '/randomizer_sounds/FlaregunSnd.wav', 0, 1);
 BuffbannerSnd = sound_add(directory + '/randomizer_sounds/BuffbannerSnd.wav', 0, 1);
 CritSnd = sound_add(directory + '/randomizer_sounds/CritSnd.wav', 0, 1);
@@ -124,7 +122,7 @@ object_event_add(Weapon,ev_create,0,'
 	maxMeter=-1;
 	meterCount=-1;
     
-    //Scattergun/Shotgun variables
+    //Scattergun/Shotgun/minigun variables
     shots = 1;
     specialShot = -1;
     shotDamage = -1;
@@ -138,6 +136,15 @@ object_event_add(Weapon,ev_create,0,'
     rocketSound = RocketSnd; // direct hit specific
     rocketSpeed = -1;
     specialProjectile = -1;  // cow mangler specific
+
+    // Throwable variables
+    throwProjectile = -1;
+    projectileSpeed = 13;
+    randomDir = false;
+    projectileDir[0] = 7;
+    projectileDir[1] = 4;
+
+    // minigun variables
 
 	// Implement fixed reload times by parented variables
 	with(owner) { // reminder: activeWeapon is modified before Weapon ev_create is called
@@ -214,6 +221,8 @@ object_event_add(Weapon,ev_alarm,1,'
         break;
         case FLAMETHROWER:
             readyToBlast = true;
+        case BOW:
+            abilityActive = false;
         break;
     }
 ');
@@ -256,6 +265,7 @@ object_event_add(Weapon,ev_alarm,5,'
         case PISTOL:
         case ROCKETLAUNCHER:
         case LASERGUN:
+        case SMG:
             if (ammoCount < maxAmmo)
             {
                 if fullReload ammoCount = maxAmmo; else ammoCount += 1;
@@ -270,6 +280,8 @@ object_event_add(Weapon,ev_alarm,5,'
         break;
         case MINIGUN:
         case FLAMETHROWER:
+        case BLADE:
+        case MACHINEGUN:
             isRefilling = true;
         break;
         case REVOLVER: 
@@ -322,42 +334,78 @@ object_event_add(Weapon,ev_alarm,6,'
     }
 ');
 object_event_add(Weapon,ev_alarm,7,'
-    if (global.particles == PARTICLES_NORMAL) {
-        switch(weaponType)
-        {
-            case SHOTGUN:
+    switch(weaponType)
+    {
+        case SHOTGUN:
+            if (global.particles == PARTICLES_NORMAL) {
                 var shell;
                 shell = instance_create(x, y, Shell);
                 shell.direction = owner.aimDirection + (140 - random(40)) * image_xscale;
                 shell.image_index = 1;
-            break;
-            case RIFLE:
+            }
+        break;
+        case RIFLE:
+            if (global.particles == PARTICLES_NORMAL) {
                 var shell;
                 shell = instance_create(x, y, Shell);
                 shell.direction = owner.aimDirection + (100 + random(30)) * image_xscale;
                 shell.hspeed -= 1 * image_xscale;
                 shell.vspeed -= 1;
                 shell.image_index = 2;
-            break;
-            case REVOLVER:
-                if !variable_local_exists("ejected") break;
-                if (image_alpha > 0.1)
+            }
+        break;
+        case REVOLVER:
+            if !variable_local_exists("ejected") break;
+            if (global.particles == PARTICLES_NORMAL && image_alpha > 0.1)
+            {
+                repeat(maxAmmo-ammoCount-ejected)
                 {
-                    repeat(maxAmmo-ammoCount-ejected)
-                    {
-                        var shell;
-                        shell = instance_create(x + lengthdir_x(8, owner.aimDirection), y + lengthdir_y(8, owner.aimDirection) - 5, Shell);
-                        shell.direction = 180 + owner.aimDirection + (70 - random(80)) * image_xscale;
-                        shell.speed *= 0.7;
-                        ejected +=1;
-                    }
+                    var shell;
+                    shell = instance_create(x + lengthdir_x(8, owner.aimDirection), y + lengthdir_y(8, owner.aimDirection) - 5, Shell);
+                    shell.direction = 180 + owner.aimDirection + (70 - random(80)) * image_xscale;
+                    shell.speed *= 0.7;
+                    ejected +=1;
                 }
-            break;
-            case FLAMETHROWER:
-                sprite_index = normalSprite;
-                image_speed = 0;
-            break;
-        }
+            }
+        break;
+        case FLAMETHROWER:
+            sprite_index = normalSprite;
+            image_speed = 0;
+        break;
+    }
+');
+object_event_add(Weapon,ev_step,ev_step_begin,'
+    switch(weaponType)
+    {
+        case MINIGUN:
+            if !variable_local_exists("isRefilling") break;
+            if (ammoCount < 0)
+                ammoCount = 0;
+            else if (ammoCount <= maxAmmo and isRefilling)
+                ammoCount += 1 * global.delta_factor;
+            if(!readyToShoot and alarm[5] < (25 / global.delta_factor) and !isRefilling)
+                alarm[5] += 1;
+        break;
+        case FLAMETHROWER:
+            if !variable_local_exists("isRefilling") break;
+            if (ammoCount < 0)
+                ammoCount = 0;
+            else if (ammoCount <= maxAmmo and isRefilling)
+                ammoCount += 1.8 * global.delta_factor;
+        case RIFLE:
+            if(owner.zoomed and readyToShoot)
+            {
+                t += 1 * global.delta_factor;
+                if (t > chargeTime)
+                    t = chargeTime;
+            }
+            else
+                t = 0;
+            if(!owner.zoomed)
+                hitDamage = unscopedDamage;
+            else
+                hitDamage = baseDamage + floor(sqrt(t/chargeTime)*(maxDamage-baseDamage));
+        break;
     }
 ');
 object_event_add(Weapon,ev_step,ev_step_normal,'
@@ -382,29 +430,56 @@ object_event_add(Weapon,ev_step,ev_step_normal,'
                 else image_index = 8;
             }
         break;
-        case CONSUMABLE:
         case THROWABLE:
+        case BANNER:
             image_index = owner.team+2*real(ammoCount);
+        break;
+        case CONSUMABLE:
+            image_index = owner.team+2*real(owner.canEat);
         break;
     }
 ');
-object_event_add(Weapon,ev_step,ev_step_begin,'
+object_event_add(Weapon,ev_step,ev_step_end,'
     switch(weaponType)
     {
-        case MINIGUN:
-            if !variable_local_exists("isRefilling") exit;
-            if (ammoCount < 0)
-                ammoCount = 0;
-            else if (ammoCount <= maxAmmo and isRefilling)
-                ammoCount += 1 * global.delta_factor;
-            if(!readyToShoot and alarm[5] < (25 / global.delta_factor) and !isRefilling)
-                alarm[5] += 1;
-        break;
         case FLAMETHROWER:
-            if (ammoCount < 0)
-                ammoCount = 0;
-            else if (ammoCount <= maxAmmo and isRefilling)
-                ammoCount += 1.8 * global.delta_factor;
+            if (justBlast)
+            {
+                justBlast = false;
+                //Airblast Recoil Animation
+                sprite_index = blastSprite;
+                image_index = 0;
+                image_speed = blastImageSpeed * global.delta_factor;
+                alarm[7] = blastNoFlameTime / global.delta_factor;
+                alarm[6] = 0;
+            }
+        break;
+        case RIFLE:
+            if (justShot)
+            {
+                justShot = false;
+                //Recoil Animation
+                if (owner.zoomed)
+                {
+                    if (sprite_index != reloadSprite)
+                    {
+                        sprite_index = reloadSprite
+                        image_index = 0
+                        image_speed = reloadImageSpeed;
+                    }
+                    alarm[6] = longRecoilTime;
+                }
+                else
+                {
+                    if (sprite_index != recoilSprite)
+                    {
+                        sprite_index = recoilSprite
+                        image_index = 0
+                        image_speed = recoilImageSpeed;
+                    }
+                    alarm[6] = recoilTime;
+                }
+            }
         break;
     }
 ');
@@ -453,7 +528,7 @@ object_event_add(Weapon,ev_other,ev_user1,'
                 shoty = y+12+lengthdir_y(20,owner.aimDirection);
                 if(!collision_line_bulletblocking(x, y, shotx, shoty))
                 {
-                    shot = createShot(shotx, shoty, Shot, DAMAGE_SOURCE_MINIGUN, owner.aimDirection+(random(7)-3.5), 12+random(1));
+                    if (shotDir[0] != -1) shot = createShot(shotx, shoty, Shot, DAMAGE_SOURCE_MINIGUN, owner.aimDirection+(random(shotDir[0])-shotDir[1]), 12+random(1)); else shot = createShot(shotx, shoty, Shot, DAMAGE_SOURCE_MINIGUN, owner.aimDirection+(random(14)-7), 12+random(1));
                     if(golden)
                         shot.sprite_index = ShotGoldS;
                     shot.hspeed += owner.hspeed;
@@ -487,6 +562,69 @@ object_event_add(Weapon,ev_other,ev_user1,'
                     shell = instance_create(x, y+4, Shell);
                     shell.direction = owner.aimDirection + (140 - random(40)) * image_xscale;
                 }
+            }
+        case FLAREGUN:
+            if(readyToShoot && ammoCount >0 && !owner.cloak) {
+            ammoCount-=1;
+            playsound(x,y,FlaregunSnd);
+            var shot;
+            if !collision_line(x,y,x+lengthdir_x(15,owner.aimDirection),y+lengthdir_y(15,owner.aimDirection),Obstacle,1,0) and !place_meeting(x+lengthdir_x(15,owner.aimDirection),y+lengthdir_y(15,owner.aimDirection),TeamGate) {
+                shot = instance_create(x+lengthdir_x(13,owner.aimDirection),y+lengthdir_y(13,owner.aimDirection),Flare);
+                shot.direction=owner.aimDirection;
+                shot.speed=15;
+                //shot.crit=crit;
+                shot.owner=owner;
+                shot.ownerPlayer=ownerPlayer;
+                shot.team=owner.team;
+                shot.weapon=WEAPON_FLAREGUN;
+            }
+            justShot = true;
+            readyToShoot = false;
+            alarm[0] = refireTime;
+            alarm[5] = reloadBuffer + reloadTime;
+            }
+        break;
+        case SMG:
+            if(readyToShoot && !owner.cloak && ammoCount > 0) {
+                ammoCount-=1;
+                playsound(x,y,ChaingunSnd);
+                var shot;
+                randomize();
+                
+                shot = instance_create(x,y + yoffset + 1,Shot);
+                shot.direction=owner.aimDirection+ random(7)-4;
+                shot.speed=13;
+                shot.owner=owner;
+                shot.ownerPlayer=ownerPlayer;
+                shot.team=owner.team;
+                shot.hitDamage = shotDamage;
+                shot.weapon=WEAPON_SMG;
+                with(shot)
+                    hspeed+=owner.hspeed;
+                justShot=true;
+                readyToShoot=false;
+                alarm[0]=refireTime;
+                alarm[5] = reloadBuffer + reloadTime;
+            }
+        break;
+        case THROWABLE:
+            if(ammoCount >= 1 && readyToShoot) {
+                playsound(x,y,swingSnd);
+                ammoCount -= max(0, ammoCount-1); 
+                shot = instance_create(x,y + yoffset + 1,thrownProjectile);
+                if (randomDir) shot.direction=owner.aimDirection+ random(projectileDir[0])-projectileDir[1]; else shot.direction=owner.aimDirection;
+                shot.speed=projectileSpeed;
+                shot.owner=owner;
+                shot.ownerPlayer=ownerPlayer;
+                shot.team=owner.team;
+                with(shot)
+                    hspeed+=owner.hspeed;
+                ammoCount = max(0, ammoCount-1);
+                
+                alarm[5] = reloadBuffer + reloadTime;
+                owner.ammo[105] = -1;
+                readyToShoot = false;
+                alarm[0] = refireTime;
             }
         break;
     }
@@ -540,7 +678,29 @@ object_event_add(Weapon,ev_other,ev_user3, '
             alarm[5] = (reloadBuffer + reloadTime) / global.delta_factor;
             alarm[7] = alarm[0] / 2;
         break;
-        case LASERGUN:
+        case PISTOL:
+            ammoCount = max(0, ammoCount-1);
+            playsound(x,y,ShotgunSnd);
+            var shot;
+            shot = createShot(x, y, Shot, DAMAGE_SOURCE_SCATTERGUN, owner.aimDirection, 13);
+            if(golden)
+                shot.sprite_index = ShotGoldS;
+            shot.hspeed += owner.hspeed;
+            shot.speed = 13;
+            shot.direction += random(7)-4;
+            shot.hitDamage = 8;
+            // Move shot forward to avoid immediate collision with a wall behind the character
+            shot.x += lengthdir_x(15, shot.direction);
+            shot.y += lengthdir_y(15, shot.direction);
+            shot.alarm[0] = 35 * ((min(1, abs(cos(degtorad(owner.aimDirection)))*13
+                                  /abs(cos(degtorad(owner.aimDirection))*13+owner.hspeed))-1)/2+1)
+                            / global.delta_factor;
+
+            justShot = true;
+            readyToShoot = false;
+            alarm[0] = refireTime / global.delta_factor;
+            alarm[5] = (reloadBuffer + reloadTime) / global.delta_factor;
+        case FLASHLIGHT:
             // didnt work when i tested it, made the laser invisible + damage broken
         break;
         case ROCKETLAUNCHER:
@@ -566,8 +726,178 @@ object_event_add(Weapon,ev_other,ev_user3, '
             alarm[0] = refireTime / global.delta_factor;
             alarm[5] = (reloadBuffer + reloadTime) / global.delta_factor;
         break;
+        case RIFLE: // thats big.
+            playsound(x,y,SniperSnd);
+            shot=true;
+            justShot=true;
+            readyToShoot = false;
+            alarm[0] = (reloadTime + 20*owner.zoomed) / global.delta_factor;
+            alarm[7] = (reloadTime/4 + 10*owner.zoomed) / global.delta_factor;  // Eject a shell during the animation
+
+            // for drawing:
+            tracerAlpha = 0.8;
+            shotx = x;
+            shoty = y;
+
+            var x1, y1, xm, ym, leftmostX, len;
+            len = 1500*(((hitDamage*100)/maxDamage)/100)
+            x1 = x;
+            y1 = y;
+            x2 = x+lengthdir_x(len, owner.aimDirection);
+            y2 = y+lengthdir_y(len, owner.aimDirection);
+            leftmostX = min(x1, x2);
+
+            gunSetSolids();
+            alarm[6] = alarm[0];
+
+            // We do a hitscan test here to figure out how far the rifle shot actually goes before it hits something.
+            // This works by binary search through collision_line tests on ever smaller segments of our ray.
+            //
+            // Unfortunately, collision_line can only check for collision against either *all* instances, or instances of one
+            // object, or just a single instance. What we need however is to check against *some* instances of *some* objects.
+            // 
+            // We could make a list of all instances that should stop the bullet and check each of them individually, but that
+            // could be slow.
+            // 
+            // So here is how we do this instead: We do several collision_line checks, but only on an object basis.
+            // Those instances which are instances of those objects, but should not stop the bullets are set to an empty
+            // collision mask, and that is reverted after we are done.
+
+            var bulletStoppingObjects, originalMask, hitInstance;
+            bulletStoppingObjects = ds_list_create();
+            originalMask = ds_map_create();
+            hitInstance = noone;
+
+            ds_list_add(bulletStoppingObjects, Obstacle);
+            ds_list_add(bulletStoppingObjects, Generator);
+            ds_list_add(bulletStoppingObjects, Character);
+            ds_list_add(bulletStoppingObjects, Sentry);
+            if(!global.mapchanging)
+                ds_list_add(bulletStoppingObjects, TeamGate);
+            ds_list_add(bulletStoppingObjects, IntelGate);
+            if(areSetupGatesClosed())
+                ds_list_add(bulletStoppingObjects, ControlPointSetupGate);
+            ds_list_add(bulletStoppingObjects, BulletWall);
+
+            // Set the collision mask of all instances which should not collide to an empty one
+            with(Generator) {
+                if(team == other.owner.team) {
+                    ds_map_add(originalMask, id, mask_index);
+                    mask_index = emptyMaskS;
+                }
+            }
+
+            with(Sentry) {
+                if(team == other.owner.team) {
+                    ds_map_add(originalMask, id, mask_index);
+                    mask_index = emptyMaskS;
+                }
+            }
+
+            with(owner) {
+                ds_map_add(originalMask, id, mask_index);
+                mask_index = emptyMaskS;
+            }
+
+            // Find the first instance the ray collides with
+            var hit, i;
+            while(len>1) {
+                xm=(x1+x2)/2;
+                ym=(y1+y2)/2;
+                
+                hit = noone;
+                for(i = 0; (i < ds_list_size(bulletStoppingObjects)) and !hit; i += 1) {
+                    hit = collision_line(x1, y1, xm, ym, ds_list_find_value(bulletStoppingObjects, i), true, true);
+                }
+                
+                if(hit) {
+                    x2=xm;
+                    y2=ym;
+                    hitInstance = hit;
+                    if (variable_local_exists("target")) target = hitInstance;
+                } else {
+                    x1=xm;
+                    y1=ym;
+                }
+                len/=2;
+            }
+
+            // Re-assign the original collision masks
+            var key, origMask;
+            for(key = ds_map_find_first(originalMask); key; key = ds_map_find_next(originalMask, key)) {
+                origMask = ds_map_find_value(originalMask, key);
+                with(key) {
+                    mask_index = origMask;
+                }
+            }
+
+            ds_map_destroy(originalMask);
+            ds_list_destroy(bulletStoppingObjects);
+
+            // Apply dramatic effect
+            with(hitInstance) {
+                if(object_index == Character or object_is_ancestor(object_index, Character)) {
+                    if(!ubered and !radioactive and team != other.owner.team) {
+                        damageCharacter(other.ownerPlayer, id, other.hitDamage);
+                        if (lastDamageDealer != other.ownerPlayer and lastDamageDealer != player)
+                        {
+                            secondToLastDamageDealer = lastDamageDealer;
+                            alarm[4] = alarm[3]
+                        }
+                        alarm[3] = ASSIST_TIME / global.delta_factor;
+                        lastDamageDealer = other.ownerPlayer;
+                        dealFlicker(id);
+                        if(global.gibLevel > 0)
+                        {
+                            blood = instance_create(x, y, Blood);
+                            blood.direction = other.owner.aimDirection - 180;
+                        }
+                        if (!other.owner.zoomed) {
+                            lastDamageSource = DAMAGE_SOURCE_RIFLE;
+                        } else {
+                            lastDamageSource = DAMAGE_SOURCE_RIFLE_CHARGED;
+                        }
+                    }
+                } else if(object_index == Sentry or object_is_ancestor(object_index, Sentry)) {
+                    damageSentry(other.ownerPlayer, id, other.hitDamage);
+                    lastDamageDealer = other.ownerPlayer;
+                    if (!other.owner.zoomed)
+                        lastDamageSource = DAMAGE_SOURCE_RIFLE;
+                    else
+                        lastDamageSource = DAMAGE_SOURCE_RIFLE_CHARGED;
+                } else if(object_index == Generator or object_is_ancestor(object_index, Generator)) {
+                    damageGenerator(other.ownerPlayer, id, other.hitDamage);
+                }
+            }
+
+            gunUnsetSolids();
+            break;
+        case REVOLVER:
+            ammoCount = max(0, ammoCount-1);
+            playsound(x,y,RevolverSnd);
+            var shot;
+
+            shot = createShot(x,y + yoffset + 1,Shot, DAMAGE_SOURCE_REVOLVER, owner.aimDirection, 21);
+            if (shotDamage != -1) shot.hitDamage = shotDamage; else shot.hitDamage = 28;
+            if(golden)
+                shot.sprite_index = ShotGoldS;
+            with(shot)
+                speed += owner.hspeed*hspeed/15;
+
+            // Move shot forward one 30fps step to avoid immediate collision with a wall behind the character
+            // delta_factor is left out intentionally!
+            shot.x += lengthdir_x(shot.speed, shot.direction);
+            shot.y += lengthdir_y(shot.speed, shot.direction);
+                
+            justShot=true;
+            readyToShoot=false;
+            alarm[0] = refireTime / global.delta_factor;
+            alarm[5] = (reloadBuffer + reloadTime) / global.delta_factor;
+            alarm[7] = alarm[5] * 3 / 5;
     }
 ');
+// check loadCode for ev_draw
+
 // Scout
 globalvar WEAPON_SCATTERGUN, WEAPON_FAN, WEAPON_RUNDOWN, WEAPON_SODAPOPPER, WEAPON_FLASHLIGHT, WEAPON_PISTOL, WEAPON_BONK, WEAPON_SANDMAN, WEAPON_MADMILK, WEAPON_ATOMIZER;
 globalvar ForceANature, Rundown, SodaPopper, Lasergun, Pistol, BonkHand, Sandman, MadmilkHand, Atomizer;
@@ -589,10 +919,15 @@ object_event_add(ForceANature,ev_create,0,'
 
     weaponGrade = UNIQUE;
     weaponType = SCATTERGUN;
+
     damSource = DAMAGE_SOURCE_SCATTERGUN;
     shots = 6;
     specialShot = FANShot;
     fullReload = true;
+    shotSpeed[0] = 6+10;
+    shotSpeed[1] = 10;
+    shotDir[0] = 15;
+    shotDir[1] = 7;
 
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\ForceANatureS.png", 2, 1, 0, 8, -2);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\ForceANatureFS.png", 4, 1, 0, 8, -2);
@@ -608,10 +943,6 @@ object_event_add(ForceANature,ev_create,0,'
     reloadImageSpeed = reloadAnimLength/reloadTime;
 ');
 object_event_add(ForceANature,ev_other,ev_user3,'
-    shotSpeed[0] = 6+10;
-    shotSpeed[1] = 10;
-    shotDir[0] = 15;
-    shotDir[1] = 7;
     event_inherited();
     with(owner){
         motion_add(aimDirection, -3);
@@ -635,12 +966,18 @@ object_event_add(Rundown,ev_create,0,'
     reloadTime = 45.6;
     reloadBuffer = 20;
     idle=true;
-    weaponGrade = 1;
-    weaponType = 0;
+    weaponGrade = UNIQUE;
+    weaponType = SCATTERGUN;
     damSouce = DAMAGE_SOURCE_SCATTERGUN;
+    fullReload = true;
+
+    shotSpeed[0] = 2;
+    shotSpeed[1] = 12;
+    shotDir[0] = 9;
+    shotDir[1] = 5;
     shots = 3;
     shotDamage = 14;
-    fullReload = true;
+
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\ShortStopS.png", 2, 1, 0, 8, 7);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\ShortStopFS.png", 4, 1, 0, 8, 7);
     reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\ShortStopFRS.png", 16, 1, 0, 12, 15);
@@ -653,13 +990,6 @@ object_event_add(Rundown,ev_create,0,'
 
     reloadAnimLength = sprite_get_number(reloadSprite)/2;
     reloadImageSpeed = reloadAnimLength/reloadTime;
-');
-object_event_add(Rundown,ev_other,ev_user3,'
-    shotSpeed[0] = 2;
-    shotSpeed[1] = 12;
-    shotDir[0] = 9;
-    shotDir[1] = 5;
-    event_inherited();
 ');
 WEAPON_SODAPOPPER = 3;
 SodaPopper = object_add();
@@ -686,9 +1016,15 @@ object_event_add(SodaPopper,ev_create,0,'
 	
     weaponGrade = UNIQUE;
     weaponType = SCATTERGUN;
+    fullReload = true;
+
+    shotSpeed[0] = 4;
+    shotSpeed[1] = 11;
+    shotDir[0] = 15;
+    shotDir[1] = 7;
     shots = 6;
     shotDamage = 8;
-    fullReload = true;
+    
 
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\SodaPopperS.png", 2, 1, 0, 8, -2);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\SodaPopperFS.png", 4, 1, 0, 8, -2);
@@ -714,13 +1050,6 @@ object_event_add(SodaPopper,ev_step,ev_step_normal, '
 		abilityActive = false;
         if (owner.curMeter == 0) owner.meter[0] = 0; else owner.meter[1] = 0;
     }
-');
-object_event_add(SodaPopper,ev_other,ev_user3,'
-    shotSpeed[0] = 4;
-    shotSpeed[1] = 11;
-    shotDir[0] = 15;
-    shotDir[1] = 7;
-    event_inherited();
 ');
 WEAPON_FLASHLIGHT = 4;
 Lasergun = object_add();
@@ -868,20 +1197,6 @@ object_event_add(Lasergun,ev_other,ev_user3,'
         }
     }
 ');
-object_event_add(Lasergun,ev_draw,0,'
-    event_inherited();
-    {
-        if(shot) {
-            var origdepth;
-            shot=false;
-            draw_set_alpha(0.8);
-            origdepth = depth;
-            depth = -2;
-            for(i=0;i<3;i+=1) draw_line_width_color(x,y,a[i],b[i],2,c_yellow,c_black);
-            depth = origdepth;
-        }
-    }
-');
 WEAPON_PISTOL = 5;
 Pistol = object_add();
 object_set_sprite(Pistol, sprite_add(pluginFilePath + "\randomizer_sprites\PistolS.png", 2, 1, 0, 8, 7));
@@ -897,6 +1212,10 @@ object_event_add(Pistol,ev_create,0,'
     reloadBuffer = 5;
     idle=true;
     
+    weaponGrade = UNIQUE;
+    weaponType = PISTOL;
+    fullReload = true;
+    shotDamage = 8;
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\PistolS.png", 2, 1, 0, 8, 7);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\PistolFS.png", 4, 1, 0, 8, 7);
     reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\PistolFRS.png", 16, 1, 0, 10, 12);
@@ -909,29 +1228,6 @@ object_event_add(Pistol,ev_create,0,'
 
     reloadAnimLength = sprite_get_number(reloadSprite)/2;
     reloadImageSpeed = reloadAnimLength/reloadTime;
-');
-object_event_add(Pistol,ev_other,ev_user3,'
-    ammoCount = max(0, ammoCount-1);
-    playsound(x,y,ShotgunSnd);
-    var shot;
-    shot = createShot(x, y, Shot, DAMAGE_SOURCE_SCATTERGUN, owner.aimDirection, 13);
-    if(golden)
-        shot.sprite_index = ShotGoldS;
-    shot.hspeed += owner.hspeed;
-    shot.speed = 13;
-    shot.direction += random(7)-4;
-    shot.hitDamage = 8;
-    // Move shot forward to avoid immediate collision with a wall behind the character
-    shot.x += lengthdir_x(15, shot.direction);
-    shot.y += lengthdir_y(15, shot.direction);
-    shot.alarm[0] = 35 * ((min(1, abs(cos(degtorad(owner.aimDirection)))*13
-                          /abs(cos(degtorad(owner.aimDirection))*13+owner.hspeed))-1)/2+1)
-                    / global.delta_factor;
-
-    justShot = true;
-    readyToShoot = false;
-    alarm[0] = refireTime / global.delta_factor;
-    alarm[5] = (reloadBuffer + reloadTime) / global.delta_factor;
 ');
 WEAPON_BONK = 6;
 BonkHand = object_add();
@@ -996,6 +1292,7 @@ object_event_add(BonkHand,ev_destroy,0,'
     owner.tauntend=owner.tauntlength * (1 + owner.player.team) - 1;
     owner.tauntspeed = 3;
 ');
+
 object_event_add(BonkHand,ev_step,ev_step_normal,'
     event_inherited();
 
@@ -1027,27 +1324,6 @@ object_event_add(BonkHand,ev_other,ev_user1,'
 		playsound(x,y,PickupSnd);
 		alarm[5] = reloadBuffer + reloadTime;
 		owner.alarm[10] = 150;
-    }
-');
-object_event_add(BonkHand,ev_draw,0,'
-    if (distance_to_point(view_xview + view_wview/2, view_yview + view_hview/2) > 800)
-        exit;
-
-    if (!owner.invisible and !owner.taunting and !owner.player.humiliated)
-    {
-        if (!owner.cloak)
-            image_alpha = power(owner.cloakAlpha, 0.5);
-        else
-            image_alpha = power(owner.cloakAlpha, 2);
-        draw_sprite_ext(sprite_index, image_index, round(x+xoffset*image_xscale), round(y+yoffset) + owner.equipmentOffset, image_xscale, image_yscale, image_angle, c_white, image_alpha);
-        if (owner.ubered)
-        {
-            if (owner.team == TEAM_RED)
-                ubercolour = c_red;
-            else if (owner.team == TEAM_BLUE)
-                ubercolour = c_blue;
-            draw_sprite_ext(sprite_index, image_index, round(x+xoffset*image_xscale), round(y+yoffset) + owner.equipmentOffset, image_xscale, image_yscale, image_angle, ubercolour, 0.7*image_alpha);
-        }
     }
 ');
 
@@ -1094,7 +1370,6 @@ object_event_add(Sandman,ev_create,0,'
     reloadAnimLength = sprite_get_number(reloadSprite)/2;
     reloadImageSpeed = reloadAnimLength/reloadTime;
 ');
-
 object_event_add(Sandman,ev_other,ev_user2,'
     if (readyToStab && !owner.cloak && ammoCount>=1) {
         var oid, newx, newy;
@@ -1137,7 +1412,11 @@ object_event_add(MadmilkHand,ev_create,0,'
 
     weaponGrade = UNIQUE;
     weaponType = THROWABLE;
-    
+    throwProjectile = MadMilk;
+    projectileSpeed = 13;
+    randomDir = true;
+    projectileDir[0] = 7;
+    projectileDir[1] = 4;
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\MadMilkHandS.png", 4, 1, 0, 0, 0);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\MadMilkHandS.png", 4, 1, 0, 0, 0);
     reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\madMilkHandS.png", 4, 1, 0, 0, 0);
@@ -1156,46 +1435,6 @@ object_event_add(MadmilkHand,ev_other,ev_user0,'
     alarm[0]=refireTime;
     if owner.ammo[105] == -1 alarm[5] = reloadBuffer + reloadTime;
     else alarm[5] = reloadBuffer + owner.ammo[105];
-');
-object_event_add(MadmilkHand,ev_other,ev_user1,'
-    if(ammoCount >= 1 && readyToShoot) {
-        ammoCount -= max(0, ammoCount-1); 
-        shot = instance_create(x,y + yoffset + 1,MadMilk);
-        shot.direction=owner.aimDirection+ random(7)-4;
-        shot.speed=13;
-        shot.owner=owner;
-        shot.ownerPlayer=ownerPlayer;
-        shot.team=owner.team;
-        with(shot)
-            hspeed+=owner.hspeed;
-        ammoCount = max(0, ammoCount-1);
-		playsound(x,y,swingSnd);
-		alarm[5] = reloadBuffer + reloadTime;
-        owner.ammo[105] = -1;
-		readyToShoot = false;
-		alarm[0] = refireTime;
-    }
-');
-object_event_add(MadmilkHand,ev_draw,0,'
-    if (distance_to_point(view_xview + view_wview/2, view_yview + view_hview/2) > 800)
-        exit;
-
-    if (!owner.invisible and !owner.taunting and !owner.player.humiliated)
-    {
-        if (!owner.cloak)
-            image_alpha = power(owner.cloakAlpha, 0.5);
-        else
-            image_alpha = power(owner.cloakAlpha, 2);
-        draw_sprite_ext(sprite_index, image_index, round(x+xoffset*image_xscale), round(y+yoffset) + owner.equipmentOffset, image_xscale, image_yscale, image_angle, c_white, image_alpha);
-        if (owner.ubered)
-        {
-            if (owner.team == TEAM_RED)
-                ubercolour = c_red;
-            else if (owner.team == TEAM_BLUE)
-                ubercolour = c_blue;
-            draw_sprite_ext(sprite_index, image_index, round(x+xoffset*image_xscale), round(y+yoffset) + owner.equipmentOffset, image_xscale, image_yscale, image_angle, ubercolour, 0.7*image_alpha);
-        }
-    }
 ');
 WEAPON_ATOMIZER = 9;
 Atomizer = object_add();
@@ -1368,29 +1607,6 @@ object_event_add(CowMangler,ev_other,ev_user2,'
         playsound(x,y,ManglerChargesnd);
     }   
 ');
-object_event_add(CowMangler,ev_other,ev_user3,'
-    ammoCount = max(0, ammoCount-1);    
-    playsound(x,y,RocketSnd);
-    var oid, newx, newy;
-    newx = x+lengthdir_x(20,owner.aimDirection);
-    newy = y+lengthdir_y(20,owner.aimDirection);
-    oid = createShot(newx, newy, Rocket, DAMAGE_SOURCE_ROCKETLAUNCHER, owner.aimDirection, 13);
-    oid.gun=id;
-    with (oid)
-    {
-        if (collision_line_bulletblocking(other.x, other.y, newx, newy))
-        {
-            // Delay explosion to make same-frame rocketjumping work reliably
-            explodeImmediately = true;
-        }
-    }
-    oid.lastknownx = owner.x;
-    oid.lastknowny = owner.y;
-    justShot=true;
-    readyToShoot = false;
-    alarm[0] = refireTime / global.delta_factor;
-    alarm[5] = (reloadBuffer + reloadTime) / global.delta_factor;
-');
 WEAPON_BLACKBOX = 13;
 BlackBox = object_add();
 object_set_parent(BlackBox, Weapon);
@@ -1405,6 +1621,9 @@ object_event_add(BlackBox,ev_create,0,'
     ammoCount = maxAmmo;
     rocketrange=501;
     idle=true;
+
+    weaponGrade = UNIQUE;
+    weaponType = ROCKETLAUNCHER;
 
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\BlackboxS.png", 2, 1, 0, 10, 6);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\BlackboxFS.png", 4, 1, 0, 10, 6);
@@ -1433,6 +1652,9 @@ object_event_add(Airstrike,ev_create,0,'
     ammoCount = maxAmmo;
     rocketrange=501;
     idle=true;
+
+    weaponGrade = UNIQUE;
+    weaponType = ROCKETLAUNCHER;
 
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\AirstrikeS.png", 2, 1, 0, 10, 6);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\AirstrikeFS.png", 4, 1, 0, 10, 6);
@@ -1499,10 +1721,10 @@ object_event_add(BuffBanner,ev_create,0,'
     yoffset=-9;
     refireTime=18;
     event_inherited();
-    maxAmmo = 4; // this dont matter
+    maxAmmo = 1; // this dont matter
 	maxMeter = 4;
 	meterCount = 0;
-    ammoCount = 0;
+    ammoCount = maxAmmo;
     reloadTime = 500;
     reloadBuffer = 18;
     idle=true;
@@ -1532,20 +1754,7 @@ object_event_add(BuffBanner,ev_other,ev_user1,'
 	{
 		meterCount = 0;
 		playsound(x,y,BuffbannerSnd);
-		owner.taunting=true;
-        owner.tauntindex=0;
-        owner.image_speed=owner.tauntspeed;
-	}
-');
-object_event_add(BuffBanner,ev_step,ev_step_normal,'
-    image_index = owner.team;
-
-	if (owner.taunting) {
-		if (owner.tauntindex >= sprite_get_number(owner.tauntsprite)-1 && !owner.buffbanner) {
-			owner.buffbanner = true;
-			playsound(x,y,BuffBannerSnd);
-			
-		}
+        owner.canSwitch = false;
 	}
 ');
 
@@ -1563,6 +1772,9 @@ object_event_add(RBison,ev_create,0,'
     reloadBuffer = 20;
     idle=true;
     
+    weaponGrade = UNIQUE;
+    weaponType = LASERGUN;
+
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\RBisonS.png", 2, 1, 0, 8, 7);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\RBisonFS.png", 4, 1, 0, 8, 7);
     reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\RBisonS.png", 2, 1, 0, 8, 7);
@@ -1623,6 +1835,9 @@ object_event_add(Shovel,ev_create,0,'
     idle=true;
     isMelee = true;
 
+    weaponGrade = UNIQUE;
+    weaponType = MELEE;
+
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\ShovelS.png", 2, 1, 0, 32, 32);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\ShovelFS.png", 8, 1, 0, 32, 32);
     reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\ShovelS.png", 2, 1, 0, 32, 32);
@@ -1678,8 +1893,15 @@ object_event_add(Reserveshooter,ev_create,0,'
     couldSwitch = false;
     readyToShoot=true;
 
+    weaponGrade = UNIQUE;
+    weaponType = SHOTGUN;
+    
     shotDamage = 7;
     shots = 5;
+    shotSpeed[0] = 11;
+    shotSpeed[1] = 4;
+    shotDir[0] = 11;
+    shotDir[1] = 5;
 
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\reserveshooterS.png", 2, 1, 0, 6, 6);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\reserveshooterFS.png", 4, 1, 0, 6, 6);
@@ -1705,13 +1927,6 @@ object_event_add(Reserveshooter,ev_step,ev_step_normal,'
     }else{
         owner.canSwitch = false;
     }
-');
-object_event_add(Reserveshooter,ev_other,ev_user1,'
-    shotSpeed[0] = 11;
-    shotSpeed[1] = 4;
-    shotDir[0] = 11;
-    shotDir[1] = 5;
-    event_inherited();
 ');
 
 global.weapons[WEAPON_ROCKETLAUNCHER] = Rocketlauncher;
@@ -1753,11 +1968,14 @@ object_event_add(BazaarBargain,ev_create,0,'
     maxDamage = 75;
     chargeTime = 105;
     hitDamage=baseDamage;
-    maxAmmo = 0;
+    maxAmmo = 1;
     ammoCount = maxAmmo;
     shot=false;
     t=0;
     bonus = 0;
+
+    weaponGrade = UNIQUE;
+    weaponType = RIFLE;
 
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\BazaarBargainS.png", 2, 1, 0, 4, 4);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\BazaarBargainFS.png", 4, 1, 0, 4, 4);
@@ -1775,249 +1993,6 @@ object_event_add(BazaarBargain,ev_create,0,'
     
     tracerAlpha = 0;
 ');
-object_event_add(BazaarBargain,ev_alarm,7,'
-    if (global.particles == PARTICLES_NORMAL)
-    {
-        var shell;
-        shell = instance_create(x, y, Shell);
-        shell.direction = owner.aimDirection + (100 + random(30)) * image_xscale;
-        shell.hspeed -= 1 * image_xscale;
-        shell.vspeed -= 1;
-        shell.image_index = 2;
-    }
-');
-object_event_add(BazaarBargain,ev_step,ev_step_begin,'
-    if(owner.zoomed and readyToShoot)
-    {
-        t += 1 * global.delta_factor;
-        if (t > chargeTime)
-            t = chargeTime;
-    }
-    else
-        t = 0;
-    if(!owner.zoomed)
-        hitDamage = unscopedDamage;
-    else
-        hitDamage = baseDamage + floor(sqrt(t/chargeTime)*(maxDamage-baseDamage));
-');
-object_event_add(BazaarBargain,ev_step,ev_step_end,'
-    if (justShot)
-    {
-        justShot = false;
-        //Recoil Animation
-        if (owner.zoomed)
-        {
-            if (sprite_index != reloadSprite)
-            {
-                sprite_index = reloadSprite
-                image_index = 0
-                image_speed = reloadImageSpeed;
-            }
-            alarm[6] = longRecoilTime;
-        }
-        else
-        {
-            if (sprite_index != recoilSprite)
-            {
-                sprite_index = recoilSprite
-                image_index = 0
-                image_speed = recoilImageSpeed;
-            }
-            alarm[6] = recoilTime;
-        }
-    }
-');
-object_event_add(BazaarBargain,ev_other,ev_user1,'
-    if(readyToShoot and global.isHost)
-    {
-        var seed;
-        seed = irandom(65535);
-        sendEventFireWeapon(ownerPlayer, seed);
-        doEventFireWeapon(ownerPlayer, seed);
-    }
-');
-object_event_add(BazaarBargain,ev_other,ev_user3,'
-    playsound(x,y,SniperSnd);
-    shot=true;
-    justShot=true;
-    readyToShoot = false;
-    alarm[0] = (reloadTime + 20*owner.zoomed) / global.delta_factor;
-    alarm[7] = (reloadTime/4 + 10*owner.zoomed) / global.delta_factor;  // Eject a shell during the animation
-
-    // for drawing:
-    tracerAlpha = 0.8;
-    shotx = x;
-    shoty = y;
-
-    var x1, y1, xm, ym, leftmostX, len;
-    len = 1500*(((hitDamage*100)/maxDamage)/100)
-    x1 = x;
-    y1 = y;
-    x2 = x+lengthdir_x(len, owner.aimDirection);
-    y2 = y+lengthdir_y(len, owner.aimDirection);
-    leftmostX = min(x1, x2);
-
-    gunSetSolids();
-    alarm[6] = alarm[0];
-
-    // We do a hitscan test here to figure out how far the rifle shot actually goes before it hits something.
-    // This works by binary search through collision_line tests on ever smaller segments of our ray.
-    //
-    // Unfortunately, collision_line can only check for collision against either *all* instances, or instances of one
-    // object, or just a single instance. What we need however is to check against *some* instances of *some* objects.
-    // 
-    // We could make a list of all instances that should stop the bullet and check each of them individually, but that
-    // could be slow.
-    // 
-    // So here is how we do this instead: We do several collision_line checks, but only on an object basis.
-    // Those instances which are instances of those objects, but should not stop the bullets are set to an empty
-    // collision mask, and that is reverted after we are done.
-
-    var bulletStoppingObjects, originalMask, hitInstance;
-    bulletStoppingObjects = ds_list_create();
-    originalMask = ds_map_create();
-    hitInstance = noone;
-
-    ds_list_add(bulletStoppingObjects, Obstacle);
-    ds_list_add(bulletStoppingObjects, Generator);
-    ds_list_add(bulletStoppingObjects, Character);
-    ds_list_add(bulletStoppingObjects, Sentry);
-    if(!global.mapchanging)
-        ds_list_add(bulletStoppingObjects, TeamGate);
-    ds_list_add(bulletStoppingObjects, IntelGate);
-    if(areSetupGatesClosed())
-        ds_list_add(bulletStoppingObjects, ControlPointSetupGate);
-    ds_list_add(bulletStoppingObjects, BulletWall);
-
-    // Set the collision mask of all instances which should not collide to an empty one
-    with(Generator) {
-        if(team == other.owner.team) {
-            ds_map_add(originalMask, id, mask_index);
-            mask_index = emptyMaskS;
-        }
-    }
-
-    with(Sentry) {
-        if(team == other.owner.team) {
-            ds_map_add(originalMask, id, mask_index);
-            mask_index = emptyMaskS;
-        }
-    }
-
-    with(owner) {
-        ds_map_add(originalMask, id, mask_index);
-        mask_index = emptyMaskS;
-    }
-
-    // Find the first instance the ray collides with
-    var hit, i;
-    while(len>1) {
-        xm=(x1+x2)/2;
-        ym=(y1+y2)/2;
-        
-        hit = noone;
-        for(i = 0; (i < ds_list_size(bulletStoppingObjects)) and !hit; i += 1) {
-            hit = collision_line(x1, y1, xm, ym, ds_list_find_value(bulletStoppingObjects, i), true, true);
-        }
-        
-        if(hit) {
-            x2=xm;
-            y2=ym;
-            hitInstance = hit;
-        } else {
-            x1=xm;
-            y1=ym;
-        }
-        len/=2;
-    }
-
-    // Re-assign the original collision masks
-    var key, origMask;
-    for(key = ds_map_find_first(originalMask); key; key = ds_map_find_next(originalMask, key)) {
-        origMask = ds_map_find_value(originalMask, key);
-        with(key) {
-            mask_index = origMask;
-        }
-    }
-
-    ds_map_destroy(originalMask);
-    ds_list_destroy(bulletStoppingObjects);
-
-    // Apply dramatic effect
-    with(hitInstance) {
-        if(object_index == Character or object_is_ancestor(object_index, Character)) {
-            if(!ubered and team != other.owner.team) {
-                damageCharacter(other.ownerPlayer, id, other.hitDamage);
-                if (lastDamageDealer != other.ownerPlayer and lastDamageDealer != player)
-                {
-                    secondToLastDamageDealer = lastDamageDealer;
-                    alarm[4] = alarm[3]
-                }
-                alarm[3] = ASSIST_TIME / global.delta_factor;
-                lastDamageDealer = other.ownerPlayer;
-                dealFlicker(id);
-                if(global.gibLevel > 0 && !object.radioactive)
-                {
-                    blood = instance_create(x, y, Blood);
-                    blood.direction = other.owner.aimDirection - 180;
-                }
-                if (!other.owner.zoomed) {
-                    lastDamageSource = DAMAGE_SOURCE_RIFLE;
-                } else {
-                    lastDamageSource = DAMAGE_SOURCE_RIFLE_CHARGED;
-                }
-            }
-        } else if(object_index == Sentry or object_is_ancestor(object_index, Sentry)) {
-            damageSentry(other.ownerPlayer, id, other.hitDamage);
-            lastDamageDealer = other.ownerPlayer;
-            if (!other.owner.zoomed)
-                lastDamageSource = DAMAGE_SOURCE_RIFLE;
-            else
-                lastDamageSource = DAMAGE_SOURCE_RIFLE_CHARGED;
-        } else if(object_index == Generator or object_is_ancestor(object_index, Generator)) {
-            damageGenerator(other.ownerPlayer, id, other.hitDamage);
-        }
-    }
-
-    gunUnsetSolids();
-');
-object_event_add(BazaarBargain,ev_draw,0,'
-    event_inherited();
-    if (tracerAlpha > 0.05)
-    {
-        shot = false;
-        var origdepth;
-        origdepth = depth;
-        depth = -2;
-        
-        draw_set_alpha(tracerAlpha);
-        if(owner.team == TEAM_RED)
-            draw_line_width_color(shotx,shoty,x2,y2,2,c_red,c_red);
-        else
-            draw_line_width_color(shotx,shoty,x2,y2,2,c_blue,c_blue);
-        if(global.particles != PARTICLES_OFF)
-            tracerAlpha /= delta_mult(1.75);
-        else tracerAlpha = 0;
-            
-        draw_set_alpha(1);
-        depth = origdepth;
-    }
-    else
-        tracerAlpha = 0;
-
-    if (owner.zoomed && owner == global.myself.object)
-    {
-        if (hitDamage < maxDamage)
-        {
-            draw_set_alpha(0.25);
-            draw_sprite_ext(ChargeS, 0, mouse_x + 15*-image_xscale, mouse_y - 10, -image_xscale, 1, 0, c_white, image_alpha);
-            draw_set_alpha(0.8);
-        }
-        else
-            draw_sprite_ext(FullChargeS, 0, mouse_x + 65*-image_xscale, mouse_y, 1, 1, 0, c_white, image_alpha);
-            draw_sprite_part_ext(ChargeS, 1, 0, 0, ceil((hitDamage-baseDamage)*40/(maxDamage-baseDamage)), 20, mouse_x + 15*-image_xscale, mouse_y - 10, -image_xscale, 1, c_white, image_alpha);
-    }
-');
 WEAPON_HUNTSMAN = 22;
 HuntsMan = object_add();
 object_set_parent(HuntsMan, Weapon);
@@ -2032,19 +2007,21 @@ object_event_add(HuntsMan,ev_create,0,'
     maxDamage = 75;
     chargeTime = 105;
     hitDamage=baseDamage;
-    maxAmmo = 0;
+    maxAmmo = 1;
     ammoCount = maxAmmo;
     shot=false;
     t=0;
     
     bonus=0;
-    charging=false;
     //abilityType = CHARGING;
     abilityActive = false;
     abilityVisual = "WEAPON";
     overheat=0;
     burning = false;
     helper = -1;
+
+    weaponGrade = UNIQUE;
+    weaponType = BOW;
 
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\HuntsmanS.png", 2, 1, 0, 9, 15);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\HuntsmanFS.png", 4, 1, 0, 9, 15);
@@ -2058,9 +2035,6 @@ object_event_add(HuntsMan,ev_create,0,'
 
     reloadAnimLength = sprite_get_number(reloadSprite)/2;
     reloadImageSpeed = reloadAnimLength/reloadTime;
-');
-object_event_add(HuntsMan,ev_alarm,1,'
-    abilityActive=false;
 ');
 object_event_add(HuntsMan,ev_step,ev_step_begin,'
     if bonus > 0 && !abilityActive {
@@ -2146,12 +2120,14 @@ object_event_add(Machina,ev_create,0,'
     maxDamage = 75;
     chargeTime = 105;
     hitDamage=baseDamage;
-    maxAmmo = 0;
+    maxAmmo = 1;
     ammoCount = maxAmmo;
     shot=false;
     t=0;
     bonus = 0;
 
+    weaponGrade = UNIQUE;
+    weaponType = RIFLE;
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\MachinaS.png", 2, 1, 0, 10, 6);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\MachinaFS.png", 4, 1, 0, 10, 6);
     reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\MachinaFRS.png", 38, 1, 0, 18, 12);
@@ -2168,249 +2144,6 @@ object_event_add(Machina,ev_create,0,'
     
     tracerAlpha = 0;
 ');
-object_event_add(Machina,ev_alarm,7,'
-    if (global.particles == PARTICLES_NORMAL)
-    {
-        var shell;
-        shell = instance_create(x, y, Shell);
-        shell.direction = owner.aimDirection + (100 + random(30)) * image_xscale;
-        shell.hspeed -= 1 * image_xscale;
-        shell.vspeed -= 1;
-        shell.image_index = 2;
-    }
-');
-object_event_add(Machina,ev_step,ev_step_begin,'
-    if(owner.zoomed and readyToShoot)
-    {
-        t += 1 * global.delta_factor;
-        if (t > chargeTime)
-            t = chargeTime;
-    }
-    else
-        t = 0;
-    if(!owner.zoomed)
-        hitDamage = unscopedDamage;
-    else
-        hitDamage = baseDamage + floor(sqrt(t/chargeTime)*(maxDamage-baseDamage));
-');
-object_event_add(Machina,ev_step,ev_step_end,'
-    if (justShot)
-    {
-        justShot = false;
-        //Recoil Animation
-        if (owner.zoomed)
-        {
-            if (sprite_index != reloadSprite)
-            {
-                sprite_index = reloadSprite
-                image_index = 0
-                image_speed = reloadImageSpeed;
-            }
-            alarm[6] = longRecoilTime;
-        }
-        else
-        {
-            if (sprite_index != recoilSprite)
-            {
-                sprite_index = recoilSprite
-                image_index = 0
-                image_speed = recoilImageSpeed;
-            }
-            alarm[6] = recoilTime;
-        }
-    }
-');
-object_event_add(Machina,ev_other,ev_user1,'
-    if(readyToShoot and global.isHost)
-    {
-        var seed;
-        seed = irandom(65535);
-        sendEventFireWeapon(ownerPlayer, seed);
-        doEventFireWeapon(ownerPlayer, seed);
-    }
-');
-object_event_add(Machina,ev_other,ev_user3,'
-    playsound(x,y,SniperSnd);
-    shot=true;
-    justShot=true;
-    readyToShoot = false;
-    alarm[0] = (reloadTime + 20*owner.zoomed) / global.delta_factor;
-    alarm[7] = (reloadTime/4 + 10*owner.zoomed) / global.delta_factor;  // Eject a shell during the animation
-
-    // for drawing:
-    tracerAlpha = 0.8;
-    shotx = x;
-    shoty = y;
-
-    var x1, y1, xm, ym, leftmostX, len;
-    len = 1500*(((hitDamage*100)/maxDamage)/100)
-    x1 = x;
-    y1 = y;
-    x2 = x+lengthdir_x(len, owner.aimDirection);
-    y2 = y+lengthdir_y(len, owner.aimDirection);
-    leftmostX = min(x1, x2);
-
-    gunSetSolids();
-    alarm[6] = alarm[0];
-
-    // We do a hitscan test here to figure out how far the rifle shot actually goes before it hits something.
-    // This works by binary search through collision_line tests on ever smaller segments of our ray.
-    //
-    // Unfortunately, collision_line can only check for collision against either *all* instances, or instances of one
-    // object, or just a single instance. What we need however is to check against *some* instances of *some* objects.
-    // 
-    // We could make a list of all instances that should stop the bullet and check each of them individually, but that
-    // could be slow.
-    // 
-    // So here is how we do this instead: We do several collision_line checks, but only on an object basis.
-    // Those instances which are instances of those objects, but should not stop the bullets are set to an empty
-    // collision mask, and that is reverted after we are done.
-
-    var bulletStoppingObjects, originalMask, hitInstance;
-    bulletStoppingObjects = ds_list_create();
-    originalMask = ds_map_create();
-    hitInstance = noone;
-
-    ds_list_add(bulletStoppingObjects, Obstacle);
-    ds_list_add(bulletStoppingObjects, Generator);
-    ds_list_add(bulletStoppingObjects, Character);
-    ds_list_add(bulletStoppingObjects, Sentry);
-    if(!global.mapchanging)
-        ds_list_add(bulletStoppingObjects, TeamGate);
-    ds_list_add(bulletStoppingObjects, IntelGate);
-    if(areSetupGatesClosed())
-        ds_list_add(bulletStoppingObjects, ControlPointSetupGate);
-    ds_list_add(bulletStoppingObjects, BulletWall);
-
-    // Set the collision mask of all instances which should not collide to an empty one
-    with(Generator) {
-        if(team == other.owner.team) {
-            ds_map_add(originalMask, id, mask_index);
-            mask_index = emptyMaskS;
-        }
-    }
-
-    with(Sentry) {
-        if(team == other.owner.team) {
-            ds_map_add(originalMask, id, mask_index);
-            mask_index = emptyMaskS;
-        }
-    }
-
-    with(owner) {
-        ds_map_add(originalMask, id, mask_index);
-        mask_index = emptyMaskS;
-    }
-
-    // Find the first instance the ray collides with
-    var hit, i;
-    while(len>1) {
-        xm=(x1+x2)/2;
-        ym=(y1+y2)/2;
-        
-        hit = noone;
-        for(i = 0; (i < ds_list_size(bulletStoppingObjects)) and !hit; i += 1) {
-            hit = collision_line(x1, y1, xm, ym, ds_list_find_value(bulletStoppingObjects, i), true, true);
-        }
-        
-        if(hit) {
-            x2=xm;
-            y2=ym;
-            hitInstance = hit;
-        } else {
-            x1=xm;
-            y1=ym;
-        }
-        len/=2;
-    }
-
-    // Re-assign the original collision masks
-    var key, origMask;
-    for(key = ds_map_find_first(originalMask); key; key = ds_map_find_next(originalMask, key)) {
-        origMask = ds_map_find_value(originalMask, key);
-        with(key) {
-            mask_index = origMask;
-        }
-    }
-
-    ds_map_destroy(originalMask);
-    ds_list_destroy(bulletStoppingObjects);
-
-    // Apply dramatic effect
-    with(hitInstance) {
-        if(object_index == Character or object_is_ancestor(object_index, Character)) {
-            if(!ubered and team != other.owner.team) {
-                damageCharacter(other.ownerPlayer, id, other.hitDamage);
-                if (lastDamageDealer != other.ownerPlayer and lastDamageDealer != player)
-                {
-                    secondToLastDamageDealer = lastDamageDealer;
-                    alarm[4] = alarm[3]
-                }
-                alarm[3] = ASSIST_TIME / global.delta_factor;
-                lastDamageDealer = other.ownerPlayer;
-                dealFlicker(id);
-                if(global.gibLevel > 0 && !object.radioactive)
-                {
-                    blood = instance_create(x, y, Blood);
-                    blood.direction = other.owner.aimDirection - 180;
-                }
-                if (!other.owner.zoomed) {
-                    lastDamageSource = DAMAGE_SOURCE_RIFLE;
-                } else {
-                    lastDamageSource = DAMAGE_SOURCE_RIFLE_CHARGED;
-                }
-            }
-        } else if(object_index == Sentry or object_is_ancestor(object_index, Sentry)) {
-            damageSentry(other.ownerPlayer, id, other.hitDamage);
-            lastDamageDealer = other.ownerPlayer;
-            if (!other.owner.zoomed)
-                lastDamageSource = DAMAGE_SOURCE_RIFLE;
-            else
-                lastDamageSource = DAMAGE_SOURCE_RIFLE_CHARGED;
-        } else if(object_index == Generator or object_is_ancestor(object_index, Generator)) {
-            damageGenerator(other.ownerPlayer, id, other.hitDamage);
-        }
-    }
-
-    gunUnsetSolids();
-');
-object_event_add(Machina,ev_draw,0,'
-    event_inherited();
-    if (tracerAlpha > 0.05)
-    {
-        shot = false;
-        var origdepth;
-        origdepth = depth;
-        depth = -2;
-        
-        draw_set_alpha(tracerAlpha);
-        if(owner.team == TEAM_RED)
-            draw_line_width_color(shotx,shoty,x2,y2,2,c_red,c_red);
-        else
-            draw_line_width_color(shotx,shoty,x2,y2,2,c_blue,c_blue);
-        if(global.particles != PARTICLES_OFF)
-            tracerAlpha /= delta_mult(1.75);
-        else tracerAlpha = 0;
-            
-        draw_set_alpha(1);
-        depth = origdepth;
-    }
-    else
-        tracerAlpha = 0;
-
-    if (owner.zoomed && owner == global.myself.object)
-    {
-        if (hitDamage < maxDamage)
-        {
-            draw_set_alpha(0.25);
-            draw_sprite_ext(ChargeS, 0, mouse_x + 15*-image_xscale, mouse_y - 10, -image_xscale, 1, 0, c_white, image_alpha);
-            draw_set_alpha(0.8);
-        }
-        else
-            draw_sprite_ext(FullChargeS, 0, mouse_x + 65*-image_xscale, mouse_y, 1, 1, 0, c_white, image_alpha);
-            draw_sprite_part_ext(ChargeS, 1, 0, 0, ceil((hitDamage-baseDamage)*40/(maxDamage-baseDamage)), 20, mouse_x + 15*-image_xscale, mouse_y - 10, -image_xscale, 1, c_white, image_alpha);
-    }
-');
 WEAPON_SYDNEYSLEEPER = 24;
 SydneySleeper = object_add();
 object_set_parent(SydneySleeper, Weapon);
@@ -2425,11 +2158,16 @@ object_event_add(SydneySleeper,ev_create,0,'
     maxDamage = 65;
     chargeTime = 105;
     hitDamage=baseDamage;
-    maxAmmo = 0;
+    maxAmmo = 1;
     ammoCount = maxAmmo;
     shot=false;
     t=0;
     bonus = 0;
+
+    target = noone;
+
+    weaponGrade = UNIQUE;
+    weaponType = RIFLE;
 
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\SydneySleeperS.png", 2, 1, 0, 4, 4);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\SydneySleeperFS.png", 4, 1, 0, 4, 4);
@@ -2447,247 +2185,22 @@ object_event_add(SydneySleeper,ev_create,0,'
     
     tracerAlpha = 0;
 ');
-object_event_add(SydneySleeper,ev_alarm,7,'
-    if (global.particles == PARTICLES_NORMAL)
-    {
-        var shell;
-        shell = instance_create(x, y, Shell);
-        shell.direction = owner.aimDirection + (100 + random(30)) * image_xscale;
-        shell.hspeed -= 1 * image_xscale;
-        shell.vspeed -= 1;
-        shell.image_index = 2;
-    }
-');
-object_event_add(SydneySleeper,ev_step,ev_step_begin,'
-    if(owner.zoomed and readyToShoot)
-    {
-        t += 1 * global.delta_factor;
-        if (t > chargeTime)
-            t = chargeTime;
-    }
-    else
-        t = 0;
-    if(!owner.zoomed)
-        hitDamage = unscopedDamage;
-    else
-        hitDamage = baseDamage + floor(sqrt(t/chargeTime)*(maxDamage-baseDamage));
-');
-object_event_add(SydneySleeper,ev_step,ev_step_end,'
-    if (justShot)
-    {
-        justShot = false;
-        //Recoil Animation
-        if (owner.zoomed)
-        {
-            if (sprite_index != reloadSprite)
-            {
-                sprite_index = reloadSprite
-                image_index = 0
-                image_speed = reloadImageSpeed;
-            }
-            alarm[6] = longRecoilTime;
-        }
-        else
-        {
-            if (sprite_index != recoilSprite)
-            {
-                sprite_index = recoilSprite
-                image_index = 0
-                image_speed = recoilImageSpeed;
-            }
-            alarm[6] = recoilTime;
-        }
-    }
-');
-object_event_add(SydneySleeper,ev_other,ev_user1,'
-    if(readyToShoot and global.isHost)
-    {
-        var seed;
-        seed = irandom(65535);
-        sendEventFireWeapon(ownerPlayer, seed);
-        doEventFireWeapon(ownerPlayer, seed);
-    }
-');
 object_event_add(SydneySleeper,ev_other,ev_user3,'
-    playsound(x,y,SniperSnd);
-    shot=true;
-    justShot=true;
-    readyToShoot = false;
-    alarm[0] = (reloadTime + 20*owner.zoomed) / global.delta_factor;
-    alarm[7] = (reloadTime/4 + 10*owner.zoomed) / global.delta_factor;  // Eject a shell during the animation
-
-    // for drawing:
-    tracerAlpha = 0.8;
-    shotx = x;
-    shoty = y;
-
-    var x1, y1, xm, ym, leftmostX, len;
-    len = 1500*(((hitDamage*100)/maxDamage)/100)
-    x1 = x;
-    y1 = y;
-    x2 = x+lengthdir_x(len, owner.aimDirection);
-    y2 = y+lengthdir_y(len, owner.aimDirection);
-    leftmostX = min(x1, x2);
-
-    gunSetSolids();
-    alarm[6] = alarm[0];
-
-    // We do a hitscan test here to figure out how far the rifle shot actually goes before it hits something.
-    // This works by binary search through collision_line tests on ever smaller segments of our ray.
-    //
-    // Unfortunately, collision_line can only check for collision against either *all* instances, or instances of one
-    // object, or just a single instance. What we need however is to check against *some* instances of *some* objects.
-    // 
-    // We could make a list of all instances that should stop the bullet and check each of them individually, but that
-    // could be slow.
-    // 
-    // So here is how we do this instead: We do several collision_line checks, but only on an object basis.
-    // Those instances which are instances of those objects, but should not stop the bullets are set to an empty
-    // collision mask, and that is reverted after we are done.
-
-    var bulletStoppingObjects, originalMask, hitInstance;
-    bulletStoppingObjects = ds_list_create();
-    originalMask = ds_map_create();
-    hitInstance = noone;
-
-    ds_list_add(bulletStoppingObjects, Obstacle);
-    ds_list_add(bulletStoppingObjects, Generator);
-    ds_list_add(bulletStoppingObjects, Character);
-    ds_list_add(bulletStoppingObjects, Sentry);
-    if(!global.mapchanging)
-        ds_list_add(bulletStoppingObjects, TeamGate);
-    ds_list_add(bulletStoppingObjects, IntelGate);
-    if(areSetupGatesClosed())
-        ds_list_add(bulletStoppingObjects, ControlPointSetupGate);
-    ds_list_add(bulletStoppingObjects, BulletWall);
-
-    // Set the collision mask of all instances which should not collide to an empty one
-    with(Generator) {
-        if(team == other.owner.team) {
-            ds_map_add(originalMask, id, mask_index);
-            mask_index = emptyMaskS;
-        }
-    }
-
-    with(Sentry) {
-        if(team == other.owner.team) {
-            ds_map_add(originalMask, id, mask_index);
-            mask_index = emptyMaskS;
-        }
-    }
-
-    with(owner) {
-        ds_map_add(originalMask, id, mask_index);
-        mask_index = emptyMaskS;
-    }
-
-    // Find the first instance the ray collides with
-    var hit, i;
-    while(len>1) {
-        xm=(x1+x2)/2;
-        ym=(y1+y2)/2;
-        
-        hit = noone;
-        for(i = 0; (i < ds_list_size(bulletStoppingObjects)) and !hit; i += 1) {
-            hit = collision_line(x1, y1, xm, ym, ds_list_find_value(bulletStoppingObjects, i), true, true);
-        }
-        
-        if(hit) {
-            x2=xm;
-            y2=ym;
-            hitInstance = hit;
-        } else {
-            x1=xm;
-            y1=ym;
-        }
-        len/=2;
-    }
-
-    // Re-assign the original collision masks
-    var key, origMask;
-    for(key = ds_map_find_first(originalMask); key; key = ds_map_find_next(originalMask, key)) {
-        origMask = ds_map_find_value(originalMask, key);
-        with(key) {
-            mask_index = origMask;
-        }
-    }
-
-    ds_map_destroy(originalMask);
-    ds_list_destroy(bulletStoppingObjects);
-
-    // Apply dramatic effect
-    with(hitInstance) {
+    event_inherited();
+    // Apply Piss.
+    with(target) 
+    {
         if(object_index == Character or object_is_ancestor(object_index, Character)) {
-            if(!ubered and team != other.owner.team) {
-                damageCharacter(other.ownerPlayer, id, other.hitDamage);
-                if (lastDamageDealer != other.ownerPlayer and lastDamageDealer != player)
-                {
-                    secondToLastDamageDealer = lastDamageDealer;
-                    alarm[4] = alarm[3]
-                }
-                alarm[3] = ASSIST_TIME / global.delta_factor;
-                lastDamageDealer = other.ownerPlayer;
-                dealFlicker(id);
-                if(global.gibLevel > 0 && !object.radioactive)
-                {
-                    blood = instance_create(x, y, Blood);
-                    blood.direction = other.owner.aimDirection - 180;
-                }
-                if (!other.owner.zoomed) {
-                    lastDamageSource = DAMAGE_SOURCE_RIFLE;
-                } else {
-                    lastDamageSource = DAMAGE_SOURCE_RIFLE_CHARGED;
+            if(!ubered and !radioactive and team != other.owner.team) {
+                if other.hitDamage == other.maxDamage {
+                    playsound(x,y,PickupSnd);
+                    soaked = true;
+                        for(i=0; i<3; i+=1) {
+                            if (soakType[i] == -1 && soakType[i] != piss) soakType[i] = piss; // Test later
+                        }
                 }
             }
-        } else if(object_index == Sentry or object_is_ancestor(object_index, Sentry)) {
-            damageSentry(other.ownerPlayer, id, other.hitDamage);
-            lastDamageDealer = other.ownerPlayer;
-            if (!other.owner.zoomed)
-                lastDamageSource = DAMAGE_SOURCE_RIFLE;
-            else
-                lastDamageSource = DAMAGE_SOURCE_RIFLE_CHARGED;
-        } else if(object_index == Generator or object_is_ancestor(object_index, Generator)) {
-            damageGenerator(other.ownerPlayer, id, other.hitDamage);
         }
-    }
-
-    gunUnsetSolids();
-');
-object_event_add(SydneySleeper,ev_draw,0,'
-    event_inherited();
-    if (tracerAlpha > 0.05)
-    {
-        shot = false;
-        var origdepth;
-        origdepth = depth;
-        depth = -2;
-        
-        draw_set_alpha(tracerAlpha);
-        if(owner.team == TEAM_RED)
-            draw_line_width_color(shotx,shoty,x2,y2,2,c_red,c_red);
-        else
-            draw_line_width_color(shotx,shoty,x2,y2,2,c_blue,c_blue);
-        if(global.particles != PARTICLES_OFF)
-            tracerAlpha /= delta_mult(1.75);
-        else tracerAlpha = 0;
-            
-        draw_set_alpha(1);
-        depth = origdepth;
-    }
-    else
-        tracerAlpha = 0;
-
-    if (owner.zoomed && owner == global.myself.object)
-    {
-        if (hitDamage < maxDamage)
-        {
-            draw_set_alpha(0.25);
-            draw_sprite_ext(ChargeS, 0, mouse_x + 15*-image_xscale, mouse_y - 10, -image_xscale, 1, 0, c_white, image_alpha);
-            draw_set_alpha(0.8);
-        }
-        else
-            draw_sprite_ext(FullChargeS, 0, mouse_x + 65*-image_xscale, mouse_y, 1, 1, 0, c_white, image_alpha);
-            draw_sprite_part_ext(ChargeS, 1, 0, 0, ceil((hitDamage-baseDamage)*40/(maxDamage-baseDamage)), 20, mouse_x + 15*-image_xscale, mouse_y - 10, -image_xscale, 1, c_white, image_alpha);
     }
 ');
 WEAPON_SMG = 25;
@@ -2705,6 +2218,12 @@ object_event_add(Smg,ev_create,0,'
     idle=true;
     unscopedDamage=0;
 
+    weaponGrade = UNIQUE;
+    weaponType = SMG;
+
+    shotDamage = 5;
+    fullReload = true;
+
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\SmgS.png", 2, 1, 0, 8, 5);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\SmgFS.png", 4, 1, 0, 8, 5);
     reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\SmgFRS.png", 16, 1, 0, 12, 13);
@@ -2717,34 +2236,6 @@ object_event_add(Smg,ev_create,0,'
 
     reloadAnimLength = sprite_get_number(reloadSprite)/2;
     reloadImageSpeed = reloadAnimLength/reloadTime;
-');
-object_event_add(Smg,ev_alarm,5,'
-    ammoCount = maxAmmo;
-');
-object_event_add(Smg,ev_other,ev_user1,'
-    {
-        if(readyToShoot && !owner.cloak && ammoCount > 0) {
-            ammoCount-=1;
-            playsound(x,y,ChaingunSnd);
-            var shot;
-            randomize();
-            
-            shot = instance_create(x,y + yoffset + 1,Shot);
-            shot.direction=owner.aimDirection+ random(7)-4;
-            shot.speed=13;
-            shot.owner=owner;
-            shot.ownerPlayer=ownerPlayer;
-            shot.team=owner.team;
-            shot.hitDamage = 5;
-            shot.weapon=WEAPON_SMG;
-            with(shot)
-                hspeed+=owner.hspeed;
-            justShot=true;
-            readyToShoot=false;
-            alarm[0]=refireTime;
-            alarm[5] = reloadBuffer + reloadTime;
-        }
-    }
 ');
 WEAPON_JARATE = 26;
 JarateHand = object_add();
@@ -2761,8 +2252,13 @@ object_event_add(JarateHand,ev_create,0,'
     idle=true;
     readyToStab=false;
     unscopedDamage=0;
-	owner.ammo[105] = -1;
 	isMelee = true;
+
+    weaponGrade = UNIQUE;
+    weaponType = THROWABLE;
+    throwProjectile = JarOPiss;
+    shotSpeed = 13;
+    randomDir = true;
 
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\JarateHandS.png", 4, 1, 0, 0, 0);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\JarateHandS.png", 4, 1, 0, 0, 0);
@@ -2781,79 +2277,10 @@ object_event_add(JarateHand,ev_create,0,'
 object_event_add(JarateHand,ev_destroy,0,'
     if owner != -1 owner.ammo[105] = alarm[5];
 ');
-object_event_add(JarateHand,ev_alarm,5,'
-    ammoCount = maxAmmo;
-    owner.ammo[105] = -1;
-');
-object_event_add(JarateHand,ev_alarm,6,'
-    if (reloadSprite != -1 && object_index != Rifle && alarm[5] > 0)
-    {
-        sprite_index = reloadSprite;
-        image_index = 0;
-        image_speed = 0;
-    } 
-    else
-    {
-        sprite_index = normalSprite;
-        image_speed = 0;
-    }
-');
-object_event_add(JarateHand,ev_step,ev_step_normal,'
-    image_index = owner.team+2*real(ammoCount);
-
-    if !variable_local_exists("ammoCheck") {
-        ammoCheck = 1;
-        alarm[5] = owner.ammo[105];
-    }
-');
-object_event_add(JarateHand,ev_step,ev_step_end,'
-    if(!instance_exists(AmmoCounter))
-        instance_create(0,0,AmmoCounter);
-');
 object_event_add(JarateHand,ev_other,ev_user0,'
     alarm[0]=refireTime;
     if owner.ammo[105] == -1 alarm[5] = reloadBuffer + reloadTime;
     else alarm[5] = reloadBuffer + owner.ammo[105];
-');
-object_event_add(JarateHand,ev_other,ev_user1,'
-    if(ammoCount >= 1 && readyToShoot) {
-        ammoCount -= max(0, ammoCount-1); 
-        shot = instance_create(x,y + yoffset + 1,JarOPiss);
-        shot.direction=owner.aimDirection+ random(7)-4;
-        shot.speed=13;
-        shot.owner=owner;
-        shot.ownerPlayer=ownerPlayer;
-        shot.team=owner.team;
-        with(shot)
-            hspeed+=owner.hspeed;
-        ammoCount = max(0, ammoCount-1);
-		playsound(x,y,swingSnd);
-		alarm[5] = reloadBuffer + reloadTime;
-        owner.ammo[105] = -1;
-		readyToShoot = false;
-		alarm[0] = refireTime;
-    }
-');
-object_event_add(JarateHand,ev_draw,0,'
-    if (distance_to_point(view_xview + view_wview/2, view_yview + view_hview/2) > 800)
-        exit;
-
-    if (!owner.invisible and !owner.taunting and !owner.player.humiliated)
-    {
-        if (!owner.cloak)
-            image_alpha = power(owner.cloakAlpha, 0.5);
-        else
-            image_alpha = power(owner.cloakAlpha, 2);
-        draw_sprite_ext(sprite_index, image_index, round(x+xoffset*image_xscale), round(y+yoffset) + owner.equipmentOffset, image_xscale, image_yscale, image_angle, c_white, image_alpha);
-        if (owner.ubered)
-        {
-            if (owner.team == TEAM_RED)
-                ubercolour = c_red;
-            else if (owner.team == TEAM_BLUE)
-                ubercolour = c_blue;
-            draw_sprite_ext(sprite_index, image_index, round(x+xoffset*image_xscale), round(y+yoffset) + owner.equipmentOffset, image_xscale, image_yscale, image_angle, ubercolour, 0.7*image_alpha);
-        }
-    }
 ');
 WEAPON_KUKRI = 27;
 Kukri = object_add();
@@ -2876,6 +2303,9 @@ object_event_add(Kukri,ev_create,0,'
     idle=true;
     unscopedDamage=0;
     isMelee = true;
+
+    weaponGrade = UNIQUE;
+    weaponType = MELEE;
 
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\KukriS.png", 2, 1, 0, 32, 32);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\KukriFS.png", 8, 1, 0, 32, 32);
@@ -2911,6 +2341,9 @@ object_event_add(Shiv,ev_create,0,'
     idle=true;
     unscopedDamage=0;
     isMelee = true;
+
+    weaponGrade = UNIQUE;
+    weaponType = MELEE;
 
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\ShivS.png", 2, 1, 0, 32, 32);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\ShivFS.png", 8, 1, 0, 32, 32);
@@ -2973,6 +2406,9 @@ object_event_add(TigerUppercut,ev_create,0,'
     canActivate=true;
     activateTime=7;
     unscopedDamage = 0;
+
+    weaponGrade = UNIQUE;
+    weaponType = MINEGUN;
 ');
 WEAPON_SCOTTISHRESISTANCE = 32;
 ScottishResitance = object_add();
@@ -2990,6 +2426,9 @@ object_event_add(ScottishResitance,ev_create,0,'
     ammoCount = maxAmmo;
     idle=true;
     unscopedDamage = 0;
+
+    weaponGrade = UNIQUE;
+    weaponType = MINEGUN;
 ');
 WEAPON_STICKYJUMPER = 33;
 StickyJumper = object_add();
@@ -3042,6 +2481,9 @@ object_event_add(GrenadeLauncher,ev_create,0,'
     idle=true;
     unscopedDamage = 0;
 	
+    weaponGrade = UNIQUE;
+    weaponType = GRENADELAUNCHER;
+
 	normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\GrenadeLauncherS.png", 1, 1, 0, 10, 6);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\GrenadeLauncherFS.png", 1, 1, 0, 10, 6);
     //reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\GrenadeLauncherFRS.png", 24, 1, 0, 16, 14);
@@ -3106,6 +2548,7 @@ object_event_add(Eyelander,ev_create,0,'
 	
     weaponGrade = UNIQUE;
     weaponType = MELEE;
+
 	normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\EyelanderS.png", 2, 1, 0, 2, 0);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\EyelanderFS.png", 8, 1, 0, 2, 0);
     reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\EyelanderS.png", 2, 1, 0, 2, 0);
@@ -3133,6 +2576,9 @@ object_event_add(Eyelander,ev_alarm,1,'
         shot.ownerPlayer=ownerPlayer;
         shot.team=owner.team;
         if (abilityActive) {
+            shot.splashHit = true;
+            shot.splashAmount = 3;
+            shot.knockBack = true;
 			if (meterCount <= 50 || owner.moveStatus == 4 && meterCount <= 60) { // give grace since youre flying
 				shot.hitDamage = 50; 
 				playsound(x,y,CritSnd);
@@ -3148,6 +2594,7 @@ object_event_add(Eyelander,ev_alarm,1,'
 			shot.hitDamage = 35;
 		}
         shot.weapon=WEAPON_EYELANDER;
+
         //Removed crit thing here
         alarm[2] = 10;
     }
@@ -3220,7 +2667,7 @@ object_event_add(Eyelander,ev_other,ev_user2,'
                 owner.hspeed += 12;
             }
         }
-        playsound(x,y,choose(ChargeSnd1, ChargeSnd2,ChargeSnd3));
+        playsound(x,y,ChargeSnd);
 		if (smashing != 1) readyToStab = true;
 		//alarm[10] = 100;
     }
@@ -3812,6 +3259,9 @@ object_event_add(Tomislav,ev_create,0,'
     isRefilling = false;
     depth = -1;
 
+    weaponGrade = UNIQUE;
+    weaponType = MINIGUN;
+    specialShot = NatachaShot;
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\TomislavS.png", 2, 1, 0, 14, 3);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\TomislavFS.png", 4, 1, 0, 14, 3);
     reloadSprite = -1;
@@ -3879,35 +3329,6 @@ object_event_add(Tomislav,ev_other,ev_user1,'
         }
     }
 ');
-object_event_add(Tomislav,ev_draw,0,'
-    if(owner.taunting or owner.omnomnomnom or owner.player.humiliated)
-        exit;
-    var imageOffset, xdrawpos, ydrawpos;
-    imageOffset = owner.team;
-    xdrawpos = round(x+xoffset*image_xscale);
-    ydrawpos = round(y+yoffset);
-    if (alarm[6] <= 0){
-        //set the sprite to idle
-        imageOffset = owner.team;
-    }else{
-        //We are shooting, loop the shoot animation
-        imageOffset = floor(image_index mod recoilAnimLength) + recoilAnimLength*owner.team
-    }
-        draw_sprite_ext(sprite_index,imageOffset,round(x+xoffset*image_xscale),round(y+yoffset),image_xscale,image_yscale,image_angle,c_white,image_alpha);
-        /*if (sprite_index == normalSprite) {
-             draw_sprite_ext(overlaySprite,imageOffset, xdrawpos, ydrawpos, image_xscale, image_yscale, image_angle, c_red,0.5*(1-(ammoCount/maxAmmo)));
-        }else if (sprite_index == recoilSprite) {
-            draw_sprite_ext(overlayFiringSprite,imageOffset, xdrawpos, ydrawpos, image_xscale, image_yscale, image_angle, c_red,0.5*(1-(ammoCount/maxAmmo)));
-        }*/
-        
-    if (owner.ubered) {
-        if owner.team == TEAM_RED
-            ubercolour = c_red;
-        else if owner.team == TEAM_BLUE
-            ubercolour = c_blue;
-        draw_sprite_ext(sprite_index,imageOffset,round(x+xoffset*image_xscale),round(y+yoffset),image_xscale,image_yscale,image_angle,ubercolour,0.7*image_alpha);
-    }
-');
 WEAPON_NATACHA = 62;
 Natacha = object_add();
 object_set_parent(Natacha, Weapon);
@@ -3923,6 +3344,10 @@ object_event_add(Natacha,ev_create,0,'
     isRefilling = false;
     depth = -1;
     
+    weaponGrade = UNIQUE;
+    weaponType = MINIGUN;
+
+
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\NatachaS.png", 2, 1, 0, 14, 3);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\NatachaFS.png", 4, 1, 0, 14, 3);
     reloadSprite = -1;
@@ -3938,87 +3363,6 @@ object_event_add(Natacha,ev_create,0,'
     overlaySprite = MinigunOverlayS;
     overlayFiringSprite = MinigunOverlayFS;
 ');
-object_event_add(Natacha,ev_other,ev_user1,'
-    {
-        // prevent sputtering
-        if (ammoCount < 2)
-            ammoCount -= 2;
-        if(readyToShoot and ammoCount >= 2)
-        {
-            playsound(x,y,ChaingunSnd);
-            var shot, shotx, shoty;
-            randomize();
-            
-            shotx = x+lengthdir_x(20,owner.aimDirection);
-            shoty = y+12+lengthdir_y(20,owner.aimDirection);
-            if(!collision_line_bulletblocking(x, y, shotx, shoty))
-            {
-                shot = createShot(shotx, shoty, NatachaShot, DAMAGE_SOURCE_MINIGUN, owner.aimDirection+(random(14)-7), 12+random(1));
-                if(golden)
-                    shot.sprite_index = ShotGoldS;
-                shot.hspeed += owner.hspeed;
-                shot.alarm[0] = 30 / global.delta_factor;
-            }
-            else
-            {
-                var imp;
-                imp = instance_create(shotx, shoty, Impact);
-                imp.image_angle = owner.aimDirection;
-            }
-            
-            justShot=true;
-            readyToShoot=false;
-            isRefilling = false;
-            ammoCount -= 3;
-            
-            var reloadBufferFactor;
-            if(ammoCount < 3)
-                reloadBufferFactor = 2.5;
-            else
-                //reloadBufferFactor = 1+(cos((ammoCount+2.2)/maxAmmo*pi)+1)/2; // spline from (full ammo = 1*) to (empty ammo = 2*)
-                reloadBufferFactor = 1;
-            
-            alarm[0] = refireTime / global.delta_factor;
-            alarm[5] = reloadBuffer*reloadBufferFactor / global.delta_factor;
-            
-            if (global.particles == PARTICLES_NORMAL)
-            {
-                var shell;
-                shell = instance_create(x, y+4, Shell);
-                shell.direction = owner.aimDirection + (140 - random(40)) * image_xscale;
-            }
-        }
-    }
-');
-object_event_add(Natacha,ev_draw,0,'
-    if(owner.taunting or owner.omnomnomnom or owner.player.humiliated)
-        exit;
-    var imageOffset, xdrawpos, ydrawpos;
-    imageOffset = owner.team;
-    xdrawpos = round(x+xoffset*image_xscale);
-    ydrawpos = round(y+yoffset);
-    if (alarm[6] <= 0){
-        //set the sprite to idle
-        imageOffset = owner.team;
-    }else{
-        //We are shooting, loop the shoot animation
-        imageOffset = floor(image_index mod recoilAnimLength) + recoilAnimLength*owner.team
-    }
-        draw_sprite_ext(sprite_index,imageOffset,round(x+xoffset*image_xscale),round(y+yoffset),image_xscale,image_yscale,image_angle,c_white,image_alpha);
-        /*if (sprite_index == normalSprite) {
-             draw_sprite_ext(overlaySprite,imageOffset, xdrawpos, ydrawpos, image_xscale, image_yscale, image_angle, c_red,0.5*(1-(ammoCount/maxAmmo)));
-        }else if (sprite_index == recoilSprite) {
-            draw_sprite_ext(overlayFiringSprite,imageOffset, xdrawpos, ydrawpos, image_xscale, image_yscale, image_angle, c_red,0.5*(1-(ammoCount/maxAmmo)));
-        }*/
-        
-    if (owner.ubered) {
-        if owner.team == TEAM_RED
-            ubercolour = c_red;
-        else if owner.team == TEAM_BLUE
-            ubercolour = c_blue;
-        draw_sprite_ext(sprite_index,imageOffset,round(x+xoffset*image_xscale),round(y+yoffset),image_xscale,image_yscale,image_angle,ubercolour,0.7*image_alpha);
-    }
-');
 WEAPON_BRASSBEAST = 63;
 BrassBeast = object_add();
 object_set_parent(BrassBeast, Weapon);
@@ -4033,6 +3377,10 @@ object_event_add(BrassBeast,ev_create,0,'
     reloadBuffer = 15;
     isRefilling = false;
     depth = -1;
+
+    weaponGrade = UNIQUE;
+    weaponType = MINIGUN;
+    shotDamage = 10;
     
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\BrassBeastS.png", 2, 1, 0, 14, 3);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\BrassBeastFS.png", 4, 1, 0, 14, 3);
@@ -4297,6 +3645,9 @@ object_event_add(SandvichHand,ev_create,0,'
     owner.ammo[105] = -1;
     isMelee = true;
 
+    weaponGrade = UNIQUE;
+    weaponType = CONSUMABLE;
+
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\SandvichHandS.png", 4, 1, 0, 0, 11);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\SandvichHandS.png", 4, 1, 0, 0, 11);
     reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\SandvichHandS.png", 4, 1, 0, 0, 11);
@@ -4310,48 +3661,6 @@ object_event_add(SandvichHand,ev_create,0,'
 
     reloadAnimLength = sprite_get_number(reloadSprite)/2;
     reloadImageSpeed = reloadAnimLength/reloadTime;
-');
-object_event_add(SandvichHand,ev_destroy,0,'
-    if owner != -1 owner.ammo[105] = alarm[5];
-');
-object_event_add(SandvichHand,ev_alarm,5,'
-    ammoCount = maxAmmo;
-    owner.ammo[105] = -1;
-');
-object_event_add(SandvichHand,ev_alarm,6,'
-    if (reloadSprite != -1 && object_index != Rifle && alarm[5] > 0)
-    {
-        sprite_index = reloadSprite;
-        image_index = 0;
-        image_speed = 0;
-    } 
-    else
-    {
-        sprite_index = normalSprite;
-        image_speed = 0;
-    }
-');
-object_event_add(SandvichHand,ev_step,ev_step_normal,'
-    //if(ammoCount >= 1){
-    //    owner.canEat = true;
-    //}else{
-    //    owner.canEat = false;
-    //}
-    image_index = owner.team+2*real(owner.canEat);
-
-    if !variable_local_exists("ammoCheck") {
-        ammoCheck = 1;
-        alarm[5] = owner.ammo[105];
-    }
-');
-object_event_add(SandvichHand,ev_step,ev_step_end,'
-    if(!instance_exists(AmmoCounter))
-        instance_create(0,0,AmmoCounter);
-');
-object_event_add(SandvichHand,ev_other,ev_user0,'
-    alarm[0]=refireTime;
-    if owner.ammo[105] == -1 alarm[5] = reloadBuffer + reloadTime;
-    else alarm[5] = reloadBuffer + owner.ammo[105];
 ');
 object_event_add(SandvichHand,ev_other,ev_user1,'
     if(global.isHost){
@@ -4444,7 +3753,14 @@ object_event_add(FamilyBusiness,ev_create,0,'
     
     shots = 5;
     shotDamage = 6;
+    shotSpeed[0] = 4;
+    shotSpeed[1] = 11;
+    shotDir[0] = 11;
+    shotDir[1] = 5;
+
     weaponGrade = UNIQUE;
+    weaponType = SHOTGUN;
+
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\FamilyBusinessS.png", 2, 1, 0, 8, -1);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\FamilyBusinessFS.png", 4, 1, 0, 8, -1);
     reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\FamilyBusinessFRS.png", 16, 1, 0, 20, 11);
@@ -4457,13 +3773,6 @@ object_event_add(FamilyBusiness,ev_create,0,'
 
     reloadAnimLength = sprite_get_number(reloadSprite)/2;
     reloadImageSpeed = reloadAnimLength/reloadTime;
-');
-object_event_add(FamilyBusiness,ev_other,ev_user3,'
-    shotSpeed[0] = 4;
-    shotSpeed[1] = 11;
-    shotDir[0] = 11;
-    shotDir[1] = 5;
-    event_inherited();
 ');
 WEAPON_CHOCOLATE = 68;
 ChocolateHand = object_add();
@@ -4479,7 +3788,6 @@ object_event_add(ChocolateHand,ev_create,0,'
     reloadBuffer = 18;
     idle=true;
     readyToStab=false;
-    unscopedDamage = 0;
 ');
 WEAPON_KGOB = 69;
 KGOB = object_add();
@@ -4500,8 +3808,10 @@ object_event_add(KGOB,ev_create,0,'
     reloadTime = 300;
     reloadBuffer = refireTime;
     idle=true;
-    owner.ammo[105] = -1;
     isMelee = true;
+
+    weaponGrade = UNIQUE;
+    weaponType = MELEE;
 
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\BoxingGlovesS.png", 2, 1, 0, 4, 10);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\BoxingGlovesFS.png", 8, 1, 0, 4, 10);
@@ -4515,30 +3825,6 @@ object_event_add(KGOB,ev_create,0,'
 
     reloadAnimLength = sprite_get_number(reloadSprite)/2;
     reloadImageSpeed = reloadAnimLength/reloadTime;
-');
-object_event_add(KGOB,ev_step,ev_step_normal,'
-    if smashing {
-        image_speed=0.3;
-        if 1 != 1 { //Removed crit here
-            if image_index >= 11{
-                image_speed=0;
-                image_index=8;
-                stabbing = false;
-            } 
-        } else if image_index >= 4*owner.team+3 {
-            image_speed=0;
-            image_index=4*owner.team;
-            stabbing = false;
-        }    
-    } else {
-        if 1 <= 1  image_index=4*owner.team;
-        else image_index = 8;
-    }
-
-    if !variable_local_exists("ammoCheck") {
-        ammoCheck = 1;
-        alarm[5] = owner.ammo[105];
-    }
 ');
 
 global.weapons[WEAPON_MINIGUN] = Minigun;
@@ -4586,6 +3872,10 @@ object_event_add(Etranger,ev_create,0,'
     idle=true;
     unscopedDamage = 0;
     readyToStab=true;
+
+    weaponGrade = UNIQUE;
+    weaponType = REVOLVER;
+    shotDamage = 28;
 
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\EtrangerS.png", 2, 1, 0, -1, 6);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\EtrangerFS.png", 4, 1, 0, -1, 6);
@@ -4637,29 +3927,6 @@ object_event_add(Etranger,ev_other,ev_user1,'
         alarm[1] = StabreloadTime / global.delta_factor;
     }
 ');
-object_event_add(Etranger,ev_other,ev_user3,'
-    ammoCount = max(0, ammoCount-1);
-    playsound(x,y,RevolverSnd);
-    var shot;
-
-    shot = createShot(x,y + yoffset + 1,Shot, DAMAGE_SOURCE_REVOLVER, owner.aimDirection, 21);
-    shot.hitDamage = 28;
-    if(golden)
-        shot.sprite_index = ShotGoldS;
-    with(shot)
-        speed += owner.hspeed*hspeed/15;
-
-    // Move shot forward one 30fps step to avoid immediate collision with a wall behind the character
-    // delta_factor is left out intentionally!
-    shot.x += lengthdir_x(shot.speed, shot.direction);
-    shot.y += lengthdir_y(shot.speed, shot.direction);
-        
-    justShot=true;
-    readyToShoot=false;
-    alarm[0] = refireTime / global.delta_factor;
-    alarm[5] = (reloadBuffer + reloadTime) / global.delta_factor;
-    alarm[7] = alarm[5] * 3 / 5;
-');
 WEAPON_DIAMONDBACK = 72;
 Diamondback = object_add();
 object_set_parent(Diamondback, Weapon);
@@ -4680,6 +3947,10 @@ object_event_add(Diamondback,ev_create,0,'
     idle=true;
     unscopedDamage = 0;
     readyToStab=true;
+
+    weaponGrade = UNIQUE;
+    weaponType = REVOLVER;
+    shotDamage = 24;
 
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\DiamondbackS.png", 2, 1, 0, -1, 6);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\DiamondbackFS.png", 4, 1, 0, -1, 6);
@@ -4731,29 +4002,6 @@ object_event_add(Diamondback,ev_other,ev_user1,'
         alarm[1] = StabreloadTime / global.delta_factor;
     }
 ');
-object_event_add(Diamondback,ev_other,ev_user3,'
-    ammoCount = max(0, ammoCount-1);
-    playsound(x,y,RevolverSnd);
-    var shot;
-
-    shot = createShot(x,y + yoffset + 1,Shot, DAMAGE_SOURCE_REVOLVER, owner.aimDirection, 21);
-    shot.hitDamage = 24;
-    if(golden)
-        shot.sprite_index = ShotGoldS;
-    with(shot)
-        speed += owner.hspeed*hspeed/15;
-
-    // Move shot forward one 30fps step to avoid immediate collision with a wall behind the character
-    // delta_factor is left out intentionally!
-    shot.x += lengthdir_x(shot.speed, shot.direction);
-    shot.y += lengthdir_y(shot.speed, shot.direction);
-        
-    justShot=true;
-    readyToShoot=false;
-    alarm[0] = refireTime / global.delta_factor;
-    alarm[5] = (reloadBuffer + reloadTime) / global.delta_factor;
-    alarm[7] = alarm[5] * 3 / 5;
-');
 WEAPON_DIPLOMAT = 73;
 Diplomat = object_add();
 object_set_parent(Diplomat, Weapon);
@@ -4774,6 +4022,10 @@ object_event_add(Diplomat,ev_create,0,'
     idle=true;
     unscopedDamage = 0;
     readyToStab=true;
+
+    weaponGrade = UNIQUE;
+    weaponType = REVOLVER;
+    shotDamage = 21;
 
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\DiplomatS.png", 2, 1, 0, -1, 6);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\DiplomatFS.png", 4, 1, 0, -1, 6);
@@ -4825,29 +4077,6 @@ object_event_add(Diplomat,ev_other,ev_user1,'
         alarm[1] = StabreloadTime / global.delta_factor;
     }
 ');
-object_event_add(Diplomat,ev_other,ev_user3,'
-    ammoCount = max(0, ammoCount-1);
-    playsound(x,y,RevolverSnd);
-    var shot;
-
-    shot = createShot(x,y + yoffset + 1,Shot, DAMAGE_SOURCE_REVOLVER, owner.aimDirection, 21);
-    shot.hitDamage = 21;
-    if(golden)
-        shot.sprite_index = ShotGoldS;
-    with(shot)
-        speed += owner.hspeed*hspeed/15;
-
-    // Move shot forward one 30fps step to avoid immediate collision with a wall behind the character
-    // delta_factor is left out intentionally!
-    shot.x += lengthdir_x(shot.speed, shot.direction);
-    shot.y += lengthdir_y(shot.speed, shot.direction);
-        
-    justShot=true;
-    readyToShoot=false;
-    alarm[0] = refireTime / global.delta_factor;
-    alarm[5] = (reloadBuffer + reloadTime) / global.delta_factor;
-    alarm[7] = alarm[5] * 3 / 5;
-');
 WEAPON_NORDICGOLD = 74;
 Goldassistant = object_add();
 object_set_parent(Goldassistant, Weapon);
@@ -4868,6 +4097,10 @@ object_event_add(Goldassistant,ev_create,0,'
     idle=true;
     unscopedDamage = 0;
     readyToStab=true;
+
+    weaponGrade = UNIQUE;
+    weaponType = REVOLVER;
+    shotDamage = 25;
 
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\GoldAssistantS.png", 2, 1, 0, -1, 6);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\GoldAssistantFS.png", 4, 1, 0, -1, 6);
@@ -4919,29 +4152,6 @@ object_event_add(Goldassistant,ev_other,ev_user1,'
         alarm[1] = StabreloadTime / global.delta_factor;
     }
 ');
-object_event_add(Goldassistant,ev_other,ev_user3,'
-    ammoCount = max(0, ammoCount-1);
-    playsound(x,y,RevolverSnd);
-    var shot;
-
-    shot = createShot(x,y + yoffset + 1,Shot, DAMAGE_SOURCE_REVOLVER, owner.aimDirection, 21);
-    shot.hitDamage = 25;
-    if(golden)
-        shot.sprite_index = ShotGoldS;
-    with(shot)
-        speed += owner.hspeed*hspeed/15;
-
-    // Move shot forward one 30fps step to avoid immediate collision with a wall behind the character
-    // delta_factor is left out intentionally!
-    shot.x += lengthdir_x(shot.speed, shot.direction);
-    shot.y += lengthdir_y(shot.speed, shot.direction);
-        
-    justShot=true;
-    readyToShoot=false;
-    alarm[0] = refireTime / global.delta_factor;
-    alarm[5] = (reloadBuffer + reloadTime) / global.delta_factor;
-    alarm[7] = alarm[5] * 3 / 5;
-');
 WEAPON_KNIFE = 75;
 Knife = object_add();
 object_set_parent(Knife, Weapon);
@@ -4966,6 +4176,8 @@ object_event_add(Knife,ev_create,0,'
     isMelee = true;
     justShot = false;
 
+    weaponGrade = UNIQUE;
+    weaponType = MELEE;
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\Knife2S.png", 2, 1, 0, 32, 32);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\Knife2FS.png", 8, 1, 0, 32, 32);
     reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\Knife2S.png", 2, 1, 0, 32, 32);
@@ -4980,26 +4192,10 @@ object_event_add(Knife,ev_create,0,'
     reloadImageSpeed = reloadAnimLength/reloadTime;
 ');
 object_event_add(Knife,ev_step,ev_step_normal,'
-    if smashing {
-        image_speed=0.3;
-        if 1 > 1 {
-            if image_index >= 11{
-                image_speed=0;
-                image_index=8;
-                stabbing = false;
-            } 
-        } else if image_index >= 4*owner.team+3 {
-            image_speed=0;
-            image_index=4*owner.team;
-            stabbing = false;
-        }    
-    } else {
-        if 1 <= 1  image_index=4*owner.team;
-        else image_index = 8;
-    }
+    if owner.cloak shotDamage=10;
+    else shotDamage = min(35,damage+0.5);
 
-    if owner.cloak damage=10;
-    else damage = min(35,damage+0.5);
+    event_inherited();
 
 ');
 object_event_add(Knife,ev_other,ev_user1,'
@@ -5059,6 +4255,9 @@ object_event_add(ChainStab,ev_create,0,'
     isMelee = true;
     justShot = false;
 
+    weaponGrade = UNIQUE;
+    weaponType = MELEE;
+
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\Knife2S.png", 2, 1, 0, 32, 32);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\Knife2FS.png", 8, 1, 0, 32, 32);
     reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\Knife2S.png", 2, 1, 0, 32, 32);
@@ -5073,26 +4272,10 @@ object_event_add(ChainStab,ev_create,0,'
     reloadImageSpeed = reloadAnimLength/reloadTime;
 ');
 object_event_add(ChainStab,ev_step,ev_step_normal,'
-    if smashing {
-        image_speed=0.3;
-        if 1 > 1 {
-            if image_index >= 11{
-                image_speed=0;
-                image_index=8;
-                stabbing = false;
-            } 
-        } else if image_index >= 4*owner.team+3 {
-            image_speed=0;
-            image_index=4*owner.team;
-            stabbing = false;
-        }    
-    } else {
-        if 1 <= 1  image_index=4*owner.team;
-        else image_index = 8;
-    }
+    if owner.cloak shotDamage=10;
+    else shotDamage = min(35,damage+0.5);
 
-    if owner.cloak damage=10;
-    else damage = min(35,damage+0.5);
+    event_inherited();
 
 ');
 object_event_add(ChainStab,ev_other,ev_user1,'
@@ -5152,6 +4335,9 @@ object_event_add(BigEarner,ev_create,0,'
     isMelee = true;
     justShot = false;
 
+    weaponGrade = UNIQUE;
+    weaponType = MELEE;
+
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\BigEarnerS.png", 2, 1, 0, 32, 32);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\BigEarnerFS.png", 8, 1, 0, 32, 32);
     reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\BigEarnerS.png", 2, 1, 0, 32, 32);
@@ -5166,26 +4352,10 @@ object_event_add(BigEarner,ev_create,0,'
     reloadImageSpeed = reloadAnimLength/reloadTime;
 ');
 object_event_add(BigEarner,ev_step,ev_step_normal,'
-    if smashing {
-        image_speed=0.3;
-        if 1 > 1 {
-            if image_index >= 11{
-                image_speed=0;
-                image_index=8;
-                stabbing = false;
-            } 
-        } else if image_index >= 4*owner.team+3 {
-            image_speed=0;
-            image_index=4*owner.team;
-            stabbing = false;
-        }    
-    } else {
-        if 1 <= 1  image_index=4*owner.team;
-        else image_index = 8;
-    }
+    if owner.cloak shotDamage=10;
+    else shotDamage = min(35,damage+0.5);
 
-    if owner.cloak damage=10;
-    else damage = min(35,damage+0.5);
+    event_inherited();
 
 ');
 object_event_add(BigEarner,ev_other,ev_user1,'
@@ -5244,7 +4414,9 @@ object_event_add(Spycicle,ev_create,0,'
     damage=10;
     isMelee = true;
     justShot = false;
-    owner.ammo[112] = 15*30;
+
+    weaponGrade = UNIQUE;
+    weaponType = MELEE;
 
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\SpycicleS.png", 2, 1, 0, 32, 32);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\SpycicleFS.png", 8, 1, 0, 32, 32);
@@ -5267,31 +4439,14 @@ object_event_add(Spycicle,ev_alarm,10,'
     owner.fireproof = false;
 ');
 object_event_add(Spycicle,ev_step,ev_step_normal,'
-    if smashing {
-        image_speed=0.3;
-        if 1 > 1 {
-            if image_index >= 11{
-                image_speed=0;
-                image_index=8;
-                stabbing = false;
-            } 
-        } else if image_index >= 4*owner.team+3 {
-            image_speed=0;
-            image_index=4*owner.team;
-            stabbing = false;
-        }    
-    } else {
-        if 1 <= 1  image_index=4*owner.team;
-        else image_index = 8;
-    }
+    if owner.cloak shotDamage=10;
+    else shotDamage = min(35,damage+0.5);
 
-    if owner.cloak damage=10;
-    else damage = min(35,damage+0.5);
+    event_inherited();
 
     if owner.burnDuration > 0 or owner.burnIntensity > 0 && owner.ammo[112] >= 30*15 {
         playsound(x,y,CompressionBlastSnd);
         owner.fireproof = true;
-        owner.ammo[112] = 0;
         alarm[10] = 60;
     }
 ');
@@ -5353,6 +4508,9 @@ object_event_add(Zapper,ev_create,0,'
     isMelee = true;
     justShot = false;
 
+    weaponGrade = UNIQUE;
+    weaponType = MELEE;
+
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\ZapperS.png", 2, 1, 0, 32, 32);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\ZapperFS.png", 8, 1, 0, 32, 32);
     reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\ZapperS.png", 2, 1, 0, 32, 32);
@@ -5367,26 +4525,10 @@ object_event_add(Zapper,ev_create,0,'
     reloadImageSpeed = reloadAnimLength/reloadTime;
 ');
 object_event_add(Zapper,ev_step,ev_step_normal,'
-    if smashing {
-        image_speed=0.3;
-        if 1 > 1 {
-            if image_index >= 11{
-                image_speed=0;
-                image_index=8;
-                stabbing = false;
-            } 
-        } else if image_index >= 4*owner.team+3 {
-            image_speed=0;
-            image_index=4*owner.team;
-            stabbing = false;
-        }    
-    } else {
-        if 1 <= 1  image_index=4*owner.team;
-        else image_index = 8;
-    }
+    if owner.cloak shotDamage=10;
+    else shotDamage = min(35,damage+0.5);
 
-    if owner.cloak damage=10;
-    else damage = min(11,damage+0.5);
+    event_inherited();
 ');
 object_event_add(Zapper,ev_other,ev_user1,'
     if(readyToStab && !owner.cloak){
@@ -5485,6 +4627,8 @@ object_event_add(Phlog,ev_create,0,'
     isRefilling = false;
     unscopedDamage = 0;
 
+    weaponGrade = UNIQUE;
+    weaponType = FLAMETHROWER;
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\PhlogS.png", 2, 1, 0, 8, 2);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\PhlogFS.png", 2, 1, 0, 8, 2);
     blastSprite = sprite_add(pluginFilePath + "\randomizer_sprites\PhlogS.png", 2, 1, 0, 8, 2);
@@ -5504,19 +4648,6 @@ object_event_add(Phlog,ev_create,0,'
     dropTime = 4;
     dropAnimLength = sprite_get_number(dropSprite)/2;
     dropImageSpeed = dropAnimLength/dropTime;
-');
-object_event_add(Phlog,ev_step,ev_step_end,'
-    event_inherited();
-    if (justBlast)
-    {
-        justBlast = false;
-        //Airblast Recoil Animation
-        sprite_index = blastSprite;
-        image_index = 0;
-        image_speed = blastImageSpeed * global.delta_factor;
-        alarm[7] = blastNoFlameTime / global.delta_factor;
-        alarm[6] = 0;
-    }
 ');
 object_event_add(Phlog,ev_other,ev_user1,'
     {
@@ -5756,19 +4887,6 @@ object_event_add(Transmutator,ev_create,0,'
     dropTime = 4;
     dropAnimLength = sprite_get_number(dropSprite)/2;
     dropImageSpeed = dropAnimLength/dropTime;
-');
-object_event_add(Transmutator,ev_step,ev_step_end,'
-    event_inherited();
-    if (justBlast)
-    {
-        justBlast = false;
-        //Airblast Recoil Animation
-        sprite_index = blastSprite;
-        image_index = 0;
-        image_speed = blastImageSpeed * global.delta_factor;
-        alarm[7] = blastNoFlameTime / global.delta_factor;
-        alarm[6] = 0;
-    }
 ');
 object_event_add(Transmutator,ev_other,ev_user1,'
     {
@@ -6053,6 +5171,9 @@ object_event_add(Frostbite,ev_create,0,'
     isRefilling = false;
     unscopedDamage = 0;
 
+    weaponGrade = UNIQUE;
+    weaponType = FLAMETHROWER;
+
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\FrostbiteS.png", 2, 1, 0, 8, 2);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\FrostbiteFS.png", 2, 1, 0, 8, 2);
     blastSprite = sprite_add(pluginFilePath + "\randomizer_sprites\FrostbiteS.png", 2, 1, 0, 8, 2);
@@ -6072,19 +5193,6 @@ object_event_add(Frostbite,ev_create,0,'
     dropTime = 4;
     dropAnimLength = sprite_get_number(dropSprite)/2;
     dropImageSpeed = dropAnimLength/dropTime;
-');
-object_event_add(Frostbite,ev_step,ev_step_end,'
-    event_inherited();
-    if (justBlast)
-    {
-        justBlast = false;
-        //Airblast Recoil Animation
-        sprite_index = blastSprite;
-        image_index = 0;
-        image_speed = blastImageSpeed * global.delta_factor;
-        alarm[7] = blastNoFlameTime / global.delta_factor;
-        alarm[6] = 0;
-    }
 ');
 object_event_add(Frostbite,ev_other,ev_user1,'
     {
@@ -6308,6 +5416,9 @@ object_event_add(Backburner,ev_create,0,'
     isRefilling = false;
     unscopedDamage = 0;
 
+    weaponGrade = UNIQUE;
+    weaponType = FLAMETHROWER;
+
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\BackburnerS.png", 2, 1, 0, 8, 2);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\BackburnerFS.png", 2, 1, 0, 8, 2);
     blastSprite = sprite_add(pluginFilePath + "\randomizer_sprites\BackburnerS.png", 2, 1, 0, 8, 2);
@@ -6327,19 +5438,6 @@ object_event_add(Backburner,ev_create,0,'
     dropTime = 4;
     dropAnimLength = sprite_get_number(dropSprite)/2;
     dropImageSpeed = dropAnimLength/dropTime;
-');
-object_event_add(Backburner,ev_step,ev_step_end,'
-    event_inherited();
-    if (justBlast)
-    {
-        justBlast = false;
-        //Airblast Recoil Animation
-        sprite_index = blastSprite;
-        image_index = 0;
-        image_speed = blastImageSpeed * global.delta_factor;
-        alarm[7] = blastNoFlameTime / global.delta_factor;
-        alarm[6] = 0;
-    }
 ');
 object_event_add(Backburner,ev_other,ev_user1,'
     {
@@ -6630,6 +5728,11 @@ object_event_add(PyroShotgun,ev_create,0,'
     idle=true;
     readyToFlare = false;
     
+    shotSpeed[0] = 4;
+    shotSpeed[1] = 11;
+    shotDir[0] = 11;
+    shotDir[1] = 5;
+
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\PyroShotgunS.png", 2, 1, 0, 8, -1);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\PyroShotgunFS.png", 4, 1, 0, 8, -1);
     reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\PyroShotgunFRS.png", 16, 1, 0, 20, 11);
@@ -6642,13 +5745,6 @@ object_event_add(PyroShotgun,ev_create,0,'
 
     reloadAnimLength = sprite_get_number(reloadSprite)/2;
     reloadImageSpeed = reloadAnimLength/reloadTime;
-');
-object_event_add(PyroShotgun,ev_other,ev_user3,'
-    shotSpeed[0] = 4;
-    shotSpeed[1] = 11;
-    shotDir[0] = 11;
-    shotDir[1] = 5;
-    event_inherited();
 ');
 WEAPON_FLAREGUN = 86;
 Flaregun = object_add();
@@ -6665,6 +5761,9 @@ object_event_add(Flaregun,ev_create,0,'
     idle=true;
     readyToFlare = false;
 
+    weaponGrade = UNIQUE;
+    weaponType = FLAREGUN;
+
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\FlareGunS.png", 2, 1, 0, 8, -1);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\FlareGunFS.png", 4, 1, 0, 8, -1);
     reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\FlareGunFRS.png", 18, 1, 0, 14, 7);
@@ -6677,27 +5776,6 @@ object_event_add(Flaregun,ev_create,0,'
 
     reloadAnimLength = sprite_get_number(reloadSprite)/2;
     reloadImageSpeed = reloadAnimLength/reloadTime;
-');
-object_event_add(Flaregun,ev_other,ev_user1,'
-    if(readyToShoot && ammoCount >0 && !owner.cloak) {
-        ammoCount-=1;
-            playsound(x,y,FlaregunSnd);
-            var shot;
-            if !collision_line(x,y,x+lengthdir_x(15,owner.aimDirection),y+lengthdir_y(15,owner.aimDirection),Obstacle,1,0) and !place_meeting(x+lengthdir_x(15,owner.aimDirection),y+lengthdir_y(15,owner.aimDirection),TeamGate) {
-                shot = instance_create(x+lengthdir_x(13,owner.aimDirection),y+lengthdir_y(13,owner.aimDirection),Flare);
-                shot.direction=owner.aimDirection;
-                shot.speed=15;
-                //shot.crit=crit;
-                shot.owner=owner;
-                shot.ownerPlayer=ownerPlayer;
-                shot.team=owner.team;
-                shot.weapon=WEAPON_FLAREGUN;
-            }
-        justShot = true;
-        readyToShoot = false;
-        alarm[0] = refireTime;
-        alarm[5] = reloadBuffer + reloadTime;
-    }
 ');
 WEAPON_DETONATOR = 87;
 Detonator = object_add();
@@ -6714,6 +5792,9 @@ object_event_add(Detonator,ev_create,0,'
     idle=true;
     readyToFlare = false;
 
+    weaponGrade = UNIQUE;
+    weaponType = FLAREGUN;
+
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\DetonatorS.png", 2, 1, 0, 8, -1);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\DetonatorFS.png", 4, 1, 0, 8, -1);
     reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\DetonatorFRS.png", 18, 1, 0, 14, 6);
@@ -6727,38 +5808,6 @@ object_event_add(Detonator,ev_create,0,'
     reloadAnimLength = sprite_get_number(reloadSprite)/2;
     reloadImageSpeed = reloadAnimLength/reloadTime;
 ');
-object_event_add(Detonator,ev_other,ev_user1,'
-    if(readyToShoot && ammoCount >0 && !owner.cloak) {
-        ammoCount-=1;
-			playsound(x,y,FlaregunSnd);
-            var shot;
-            if !collision_line(x,y,x+lengthdir_x(15,owner.aimDirection),y+lengthdir_y(15,owner.aimDirection),Obstacle,1,0) and !place_meeting(x+lengthdir_x(15,owner.aimDirection),y+lengthdir_y(15,owner.aimDirection),TeamGate) {
-                shot = instance_create(x+lengthdir_x(13,owner.aimDirection),y+lengthdir_y(13,owner.aimDirection),DetonationFlare);
-                shot.direction=owner.aimDirection;
-                shot.speed=15;
-                //shot.crit=crit;
-                shot.owner=owner;
-                shot.ownerPlayer=ownerPlayer;
-                shot.team=owner.team;
-                shot.weapon=WEAPON_DETONATOR;
-            }
-        justShot = true;
-        readyToShoot = false;
-        alarm[0] = refireTime;
-        alarm[5] = reloadBuffer + reloadTime;
-    }
-');
-object_event_add(Detonator,ev_other,ev_user1,'
-    /*
-    with(DetonationFlare) {
-        if ownerPlayer == other.ownerPlayer {
-            show_error("bruh", false);
-            event_user(5);
-            //explosionDamage = 13;
-        }
-    }
-    */
-');
 object_event_add(Detonator,ev_other,ev_user2,'
     with(DetonationFlare) {
 		if ownerPlayer == other.ownerPlayer {
@@ -6766,7 +5815,6 @@ object_event_add(Detonator,ev_other,ev_user2,'
 		}
     }
 ');
-
 WEAPON_NAPALM = 88;
 NapalmHand = object_add();
 object_set_parent(NapalmHand, Weapon);
@@ -6779,11 +5827,18 @@ object_event_add(NapalmHand,ev_create,0,' //do this later
     ammoCount = maxAmmo;
     reloadTime = 240;
     reloadBuffer = 18;
-    owner.ammo[114] = -1;
     idle=true;
     readyToFlare = false;
     readyToStab=false;
     isMelee = true;
+
+    isMetered = true;
+    
+    weaponGrade = UNIQUE;
+    weaponType = THROWABLE;
+    throwProjectile = NapalmGrenade;
+    shotSpeed = 12.5;
+    randomDir = false;
 
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\NapalmHandS.png", 4, 1, 0, -2, -2);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\NapalmHandS.png", 4, 1, 0, -2, -2);
@@ -6799,72 +5854,6 @@ object_event_add(NapalmHand,ev_create,0,' //do this later
 
     reloadAnimLength = sprite_get_number(reloadSprite)/2;
     reloadImageSpeed = reloadAnimLength/reloadTime;
-');
-object_event_add(NapalmHand,ev_destroy,0,'
-    if owner != -1 owner.ammo[114] = alarm[5];
-');
-object_event_add(NapalmHand,ev_alarm,5,'
-    ammoCount = maxAmmo;
-    owner.ammo[114] = -1;
-');
-object_event_add(NapalmHand,ev_step,ev_step_normal,'
-    if 1 == 1 image_index = owner.team+2*ammoCount;
-    else image_index = 4+ammoCount;
-
-    if !variable_local_exists("ammoCheck") {
-        ammoCheck = 1;
-        alarm[5] = owner.ammo[114];
-    }
-');
-object_event_add(NapalmHand,ev_other,ev_user0,'
-    alarm[0]=refireTime;
-    if owner.ammo[114] == -1 alarm[5] = reloadBuffer + reloadTime;
-    else alarm[5] = reloadBuffer + owner.ammo[114];
-');
-object_event_add(NapalmHand,ev_other,ev_user1,'
-    if(readyToShoot && !owner.cloak && ammoCount > 0) {
-        //with(NapalmGrenade) {
-            //if ownerPlayer == other.ownerPlayer instance_destroy(); //Lorgan. Why.
-			// so that you cant throw 2 napalm grenades that would be bs
-        //}
-        ammoCount -= 1;  
-        shot = instance_create(x,y + yoffset + 1,NapalmGrenade);
-        shot.direction=owner.aimDirection+0 //random(7)-4;
-        shot.speed=12.5;
-        shot.owner=owner;
-        shot.ownerPlayer=ownerPlayer;
-        shot.team=owner.team;
-        with(shot) {
-            hspeed+=owner.hspeed;
-            vspeed+=owner.vspeed;
-        }
-        justShot=true;
-        readyToShoot=false;
-        alarm[5] = reloadBuffer + reloadTime;
-        alarm[0] = refireTime;
-        owner.ammo[114] = -1;
-    }
-');
-object_event_add(NapalmHand,ev_draw,0,'
-    if (distance_to_point(view_xview + view_wview/2, view_yview + view_hview/2) > 800)
-        exit;
-
-    if (!owner.invisible and !owner.taunting and !owner.player.humiliated)
-    {
-        if (!owner.cloak)
-            image_alpha = power(owner.cloakAlpha, 0.5);
-        else
-            image_alpha = power(owner.cloakAlpha, 2);
-        draw_sprite_ext(sprite_index, image_index, round(x+xoffset*image_xscale), round(y+yoffset) + owner.equipmentOffset, image_xscale, image_yscale, image_angle, c_white, image_alpha);
-        if (owner.ubered)
-        {
-            if (owner.team == TEAM_RED)
-                ubercolour = c_red;
-            else if (owner.team == TEAM_BLUE)
-                ubercolour = c_blue;
-            draw_sprite_ext(sprite_index, image_index, round(x+xoffset*image_xscale), round(y+yoffset) + owner.equipmentOffset, image_xscale, image_yscale, image_angle, ubercolour, 0.7*image_alpha);
-        }
-    }
 ');
 
 WEAPON_WRECKER = 89;
@@ -6889,6 +5878,9 @@ object_event_add(Axe,ev_create,0,'
     readyToFlare = false;
     owner.ammo[107] = -1;
     isMelee = true;
+
+    weaponGrade = UNIQUE;
+    weaponType = MELEE;
 
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\AxeS.png", 2, 1, 0, 32, 32);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\AxeFS.png", 8, 1, 0, 32, 32);
@@ -6953,6 +5945,9 @@ object_event_add(Machinegun,ev_create,0,'
     bladeLife = 15;
     maxBlades = 1;
     bladeDamage = 12;
+
+    weaponGrade = UNIQUE;
+    weaponType = MACHINEGUN;
 
 	normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\MachinegunS.png", 2, 1, 0, 0, 0);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\MachinegunFS.png", 4, 1, 0, 0, 0);

@@ -207,6 +207,9 @@ object_event_add(MeleeMask,ev_create,0,'
         visible = false;
         splashHit = false;
         splashAmount = 0;
+        pierced = 1;
+        knockBack = false;
+        knockBackForce = 3.2;
     }
 ');
 object_event_add(MeleeMask,ev_destroy,0,'
@@ -249,7 +252,13 @@ object_event_add(MeleeMask,ev_collision,Character,'
 			//other.hp -= hitDamage*(1+0*0.35)*1;
             //if weapon == WEAPON_WRENCH && other.hp <= 0 && instance_exists(owner) owner.nutsNBolts = min(100,owner.nutsNBolts+25);
 
-            with(other) {motion_add(other.owner.aimDirection,3);}
+            with(other) {
+                if (!other.knockBack) { motion_add(other.owner.aimDirection,3); } else {
+                    motion_add(other.owner.aimDirection,3 * other.knockBackForce+random(5));
+                    //if (onground) vspeed -= other.knockBackForce;
+                    moveStatus = 4;
+                }
+            }
 
             if(!object_is_ancestor(other.object_index, Pyro) && true && weapon = WEAPON_AXE) { //Removed thing here
                 with(other) {
@@ -321,7 +330,8 @@ object_event_add(MeleeMask,ev_collision,Character,'
                 instance_destroy(); 
             } else {
                 splashAmount -= 1;
-                hitDamage -= 13 * splashAmount;
+                hitDamage -= 13 * pierced;
+                pierced += 1;
                 if (splashAmount <= 0)
                 {
                     splashHit = false;
@@ -1199,7 +1209,7 @@ object_event_add(FANShot,ev_collision,Character,'
     }
     gunUnsetSolids();
 
-    if(other.id != ownerPlayer.object and other.team != team  && other.hp > 0 && other.ubered == 0)
+    if(other.id != ownerPlayer.object and other.team != team  && other.hp > 0 && other.ubered == 0 && !other.radioactive)
     {
         damageCharacter(ownerPlayer, other.id, hitDamage);
         if (other.lastDamageDealer != ownerPlayer and other.lastDamageDealer != other.player)
@@ -1212,7 +1222,7 @@ object_event_add(FANShot,ev_collision,Character,'
         other.lastDamageSource = weapon;
         
         var blood;
-        if(global.gibLevel > 0 && !object.radioactive)
+        if(global.gibLevel > 0)
         {
             blood = instance_create(x,y,Blood);
             blood.direction = direction-180;
@@ -2025,7 +2035,7 @@ object_event_add(Piss,ev_alarm,0,'
     instance_destroy();
 ');
 
-globalvar NatachaShot;
+globalvar Natachaf;
 NatachaShot = object_add();
 object_set_sprite(NatachaShot, ShotS);
 object_set_parent(NatachaShot, Shot);
@@ -2253,8 +2263,18 @@ object_event_add(Shot,ev_collision,Character,'
     }
     gunUnsetSolids();
 
-    if(other.id != ownerPlayer.object and other.team != team  && other.hp > 0 && other.ubered == 0)
+    if(other.id != ownerPlayer.object and other.team != team  && other.hp > 0 && other.ubered == 0 && !other.radioactive)
     {
+        switch(other.weapon.object_index){
+            case Reserveshooter:
+                if (other.onground) {
+                    hitDamage += 15;
+                    var text;
+                    text=instance_create(x,y,Text);
+                    text.sprite_index=MiniCritS;
+                }
+            break;
+        }
         damageCharacter(ownerPlayer, other.id, hitDamage);
         if (other.lastDamageDealer != ownerPlayer and other.lastDamageDealer != other.player)
         {
@@ -2266,7 +2286,7 @@ object_event_add(Shot,ev_collision,Character,'
         other.lastDamageSource = weapon;
         
         var blood;
-        if(global.gibLevel > 0 && !other.radioactive)
+        if(global.gibLevel > 0)
         {
             blood = instance_create(x,y,Blood);
             blood.direction = direction-180;

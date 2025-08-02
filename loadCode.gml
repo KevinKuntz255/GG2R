@@ -556,6 +556,14 @@ object_event_add(InGameMenuController,ev_create,0,'
 //');
 
 globalvar piss, milk, bleed;
+piss = 0;
+milk = 1;
+bleed = 2;
+global.soakTypes = ds_map_create();
+
+ds_map_add(global.soakTypes, piss, piss);
+ds_map_add(global.weaponTypes, milk, milk);
+ds_map_add(global.weaponTypes, bleed, bleed);
 object_event_add(Character,ev_create,0,'
 	accel = 0;
 	blurs = 0;
@@ -658,7 +666,7 @@ object_event_add(Character,ev_destroy,0,'
             instance_destroy();
         }
 	}
-	loopsoundstop(DetoFlySnd);
+	//loopsoundstop(DetoFlySnd);
 ');
 
 object_event_add(Character,ev_alarm,8,'
@@ -669,7 +677,7 @@ object_event_add(Character,ev_alarm,8,'
 
 object_event_add(Character,ev_alarm,11,'
 	{
-    loopsoundstop(DetoFlySnd);
+    //loopsoundstop(DetoFlySnd);
     }
 ');
 object_event_add(Character,ev_alarm,10,'
@@ -737,9 +745,8 @@ object_event_add(Character,ev_step,ev_step_end,'
 	
 	if (weapons[0] != -1) {
 		if(currentWeapon.abilityActive and weapons[1] == Eyelander) {
-			// the hspeed mod is a light buff to detect more slopes	
-			if(!place_free(x + sign(hspeed*0.5), y)) { // we hit a wall on the left or right
-				if(place_free(x + sign(hspeed*0.5), y - 6)) // if we could just walk up the step
+			if(!place_free(x + sign(hspeed), y)) { // we hit a wall on the left or right
+				if(place_free(x + sign(hspeed), y - 6)) // if we could just walk up the step
 				{
 					playsound(x,y,DetoTrimpSnd);
 					if (keyState & $80) {
@@ -773,11 +780,11 @@ object_event_add(Character,ev_step,ev_step_end,'
 			}
 			if (moveStatus == 4 && !flight)
 			{
-				if(alarm[11] <= 0)
+				/*if(alarm[11] <= 0)
 					loopsoundstart(x,y,DetoFlySnd);
 				else
 					loopsoundmaintain(x,y,DetoFlySnd);
-				alarm[11] = 2 / global.delta_factor;
+				started to get annoying for me*/alarm[11] = 2 / global.delta_factor;
 			}
 			if (keyState & $80) {
 				if (accel > 1.3 && !onground) {
@@ -867,9 +874,6 @@ object_event_add(Character,ev_step,ev_step_end,'
 	    y = map_height();
 	}
 	
-	// or pissed or milked or bleeding thats 3 variables in one place
-	// ykno that could be simplified into a single one
-	// like soaked and a soakType
 	if !invisibeam
 		if /*!(weapon_index > WEAPON_REVOLVER && weapon_index <= WEAPON_ZAPPER or weapon_index == WEAPON_PREDATOR) or*/ soaked cloak = false;
 	    
@@ -992,56 +996,136 @@ globalvar Spark2S;
 Spark2S = sprite_add(pluginFilePath + "\randomizer_sprites\Spark2S.png", 4, 1, 0, 10, 10);
 object_event_clear(Weapon,ev_draw,0);
 object_event_add(Weapon,ev_draw,0,'
-	if (distance_to_point(view_xview + view_wview/2, view_yview + view_hview/2) > 800)
-	    exit;
-	    
-	var imageOffset;
-
-	//var abilityVisual = string(currentWeapon.abilityVisual);
-
-	if ((alarm[6] <= 0 and alarm[5] <= 0) or object_index == Blade) {
-	    //if we are not shooting or recoiling
+	if (weaponType == MINIGUN) { // minigun completely overrides, lets work with that
+		if(owner.taunting or owner.omnomnomnom or owner.player.humiliated)
+        exit;
+	    var imageOffset, xdrawpos, ydrawpos;
 	    imageOffset = owner.team;
-	} else {
-	    //Play the current animation normally
-	    var animLength;
-	    if (object_index != Rifle && object_index != BazaarBargain && object_index != Machina && alarm[5] <= 0)
-	        animLength = recoilAnimLength;
-	    else if (sprite_index == recoilSprite)
-	        animLength = recoilAnimLength;
-	    else
-	        animLength = reloadAnimLength;
-	        
-	    imageOffset = floor(image_index mod animLength) + animLength*owner.team;
-	}
-	if (!owner.invisible and !owner.taunting and !owner.omnomnomnom and !owner.player.humiliated)
-	{
-	    if (!owner.cloak)
-	        image_alpha = power(owner.cloakAlpha, 0.5);
-	    else
-	        image_alpha = power(owner.cloakAlpha, 2);
-	    draw_sprite_ext(sprite_index, imageOffset, round(x+xoffset*image_xscale), round(y+yoffset) + owner.equipmentOffset, image_xscale, image_yscale, image_angle, c_white, image_alpha);
-	    if (abilityActive && string_count("WEAPON", abilityVisual) > 0) 
-	    {
-				if (owner.team == TEAM_RED)
-					ubercolour = c_orange;
-				else if (owner.team == TEAM_BLUE)
-					ubercolour = c_aqua;
-				//draw_sprite_ext(sprite_index, imageOffset, round(x+xoffset*image_xscale), round(y+yoffset) + owner.equipmentOffset, image_xscale, image_yscale, image_angle, ubercolour, 0.7*image_alpha);
-				draw_sprite_ext(sprite_index,4+imageOffset/2,round(x+xoffset*image_xscale),round(y+yoffset),image_xscale,image_yscale,image_angle,ubercolour,0.7);
-				if (!isMelee) 
-					draw_sprite_ext(Spark2S,spark,round(x+xoffset*image_xscale),round(y+yoffset) + owner.equipmentOffset ,image_xscale,image_yscale,image_angle,ubercolour,0.3);
-				else
-					draw_sprite_ext(Spark2S,spark,round(x+xoffset*image_xscale),round(y+yoffset+40) + owner.equipmentOffset ,image_xscale,image_yscale,image_angle,ubercolour,0.3);
-	
+	    xdrawpos = round(x+xoffset*image_xscale);
+	    ydrawpos = round(y+yoffset);
+	    if (alarm[6] <= 0){
+	        //set the sprite to idle
+	        imageOffset = owner.team;
+	    }else{
+	        //We are shooting, loop the shoot animation
+	        imageOffset = floor(image_index mod recoilAnimLength) + recoilAnimLength*owner.team
 	    }
-	    if (owner.ubered)
-	    {
-	        if (owner.team == TEAM_RED)
+	        draw_sprite_ext(sprite_index,imageOffset,round(x+xoffset*image_xscale),round(y+yoffset),image_xscale,image_yscale,image_angle,c_white,image_alpha);
+	        /*if (sprite_index == normalSprite) {
+	             draw_sprite_ext(overlaySprite,imageOffset, xdrawpos, ydrawpos, image_xscale, image_yscale, image_angle, c_red,0.5*(1-(ammoCount/maxAmmo)));
+	        }else if (sprite_index == recoilSprite) {
+	            draw_sprite_ext(overlayFiringSprite,imageOffset, xdrawpos, ydrawpos, image_xscale, image_yscale, image_angle, c_red,0.5*(1-(ammoCount/maxAmmo)));
+	        }*/
+	        
+	    if (owner.ubered) {
+	        if owner.team == TEAM_RED
 	            ubercolour = c_red;
-	        else if (owner.team == TEAM_BLUE)
+	        else if owner.team == TEAM_BLUE
 	            ubercolour = c_blue;
-	        draw_sprite_ext(sprite_index, imageOffset, round(x+xoffset*image_xscale), round(y+yoffset) + owner.equipmentOffset, image_xscale, image_yscale, image_angle, ubercolour, 0.7*image_alpha);
+	        draw_sprite_ext(sprite_index,imageOffset,round(x+xoffset*image_xscale),round(y+yoffset),image_xscale,image_yscale,image_angle,ubercolour,0.7*image_alpha);
+	    }
+	} else {
+		if (distance_to_point(view_xview + view_wview/2, view_yview + view_hview/2) > 800)
+		    exit;
+		    
+		var imageOffset;
+
+		//var abilityVisual = string(currentWeapon.abilityVisual);
+
+		if ((alarm[6] <= 0 and alarm[5] <= 0) or object_index == Blade) {
+		    //if we are not shooting or recoiling
+		    imageOffset = owner.team;
+		} else {
+		    //Play the current animation normally
+		    var animLength;
+		    if (object_index != Rifle && object_index != BazaarBargain && object_index != Machina && alarm[5] <= 0)
+		        animLength = recoilAnimLength;
+		    else if (sprite_index == recoilSprite)
+		        animLength = recoilAnimLength;
+		    else
+		        animLength = reloadAnimLength;
+		        
+		    imageOffset = floor(image_index mod animLength) + animLength*owner.team;
+		}
+		if (!owner.invisible and !owner.taunting and !owner.omnomnomnom and !owner.player.humiliated)
+		{
+		    if (!owner.cloak)
+		        image_alpha = power(owner.cloakAlpha, 0.5);
+		    else
+		        image_alpha = power(owner.cloakAlpha, 2);
+		    draw_sprite_ext(sprite_index, imageOffset, round(x+xoffset*image_xscale), round(y+yoffset) + owner.equipmentOffset, image_xscale, image_yscale, image_angle, c_white, image_alpha);
+		    if (abilityActive && string_count("WEAPON", abilityVisual) > 0) 
+		    {
+					if (owner.team == TEAM_RED)
+						ubercolour = c_orange;
+					else if (owner.team == TEAM_BLUE)
+						ubercolour = c_aqua;
+					//draw_sprite_ext(sprite_index, imageOffset, round(x+xoffset*image_xscale), round(y+yoffset) + owner.equipmentOffset, image_xscale, image_yscale, image_angle, ubercolour, 0.7*image_alpha);
+					draw_sprite_ext(sprite_index,4+imageOffset/2,round(x+xoffset*image_xscale),round(y+yoffset),image_xscale,image_yscale,image_angle,ubercolour,0.7);
+					if (!isMelee) 
+						draw_sprite_ext(Spark2S,spark,round(x+xoffset*image_xscale),round(y+yoffset) + owner.equipmentOffset ,image_xscale,image_yscale,image_angle,ubercolour,0.3);
+					else
+						draw_sprite_ext(Spark2S,spark,round(x+xoffset*image_xscale),round(y+yoffset+40) + owner.equipmentOffset ,image_xscale,image_yscale,image_angle,ubercolour,0.3);
+		
+		    }
+		    if (owner.ubered)
+		    {
+		        if (owner.team == TEAM_RED)
+		            ubercolour = c_red;
+		        else if (owner.team == TEAM_BLUE)
+		            ubercolour = c_blue;
+		        draw_sprite_ext(sprite_index, imageOffset, round(x+xoffset*image_xscale), round(y+yoffset) + owner.equipmentOffset, image_xscale, image_yscale, image_angle, ubercolour, 0.7*image_alpha);
+		    }
+		}
+		switch(weaponType)
+	    {
+	        case RIFLE:
+	            if (tracerAlpha > 0.05)
+	            {
+	                shot = false;
+	                var origdepth;
+	                origdepth = depth;
+	                depth = -2;
+	                
+	                draw_set_alpha(tracerAlpha);
+	                if(owner.team == TEAM_RED)
+	                    draw_line_width_color(shotx,shoty,x2,y2,2,c_red,c_red);
+	                else
+	                    draw_line_width_color(shotx,shoty,x2,y2,2,c_blue,c_blue);
+	                if(global.particles != PARTICLES_OFF)
+	                    tracerAlpha /= delta_mult(1.75);
+	                else tracerAlpha = 0;
+	                    
+	                draw_set_alpha(1);
+	                depth = origdepth;
+	            }
+	            else
+	                tracerAlpha = 0;
+
+	            if (owner.zoomed && owner == global.myself.object)
+	            {
+	                if (hitDamage < maxDamage)
+	                {
+	                    draw_set_alpha(0.25);
+	                    draw_sprite_ext(ChargeS, 0, mouse_x + 15*-image_xscale, mouse_y - 10, -image_xscale, 1, 0, c_white, image_alpha);
+	                    draw_set_alpha(0.8);
+	                }
+	                else
+	                    draw_sprite_ext(FullChargeS, 0, mouse_x + 65*-image_xscale, mouse_y, 1, 1, 0, c_white, image_alpha);
+	                    draw_sprite_part_ext(ChargeS, 1, 0, 0, ceil((hitDamage-baseDamage)*40/(maxDamage-baseDamage)), 20, mouse_x + 15*-image_xscale, mouse_y - 10, -image_xscale, 1, c_white, image_alpha);
+	            }
+	       	break;
+	        case FLASHLIGHT:
+		        if(shot) {
+		            var origdepth;
+		            shot=false;
+		            draw_set_alpha(0.8);
+		            origdepth = depth;
+		            depth = -2;
+		            for(i=0;i<3;i+=1) draw_line_width_color(x,y,a[i],b[i],2,c_yellow,c_black);
+		            depth = origdepth;
+		        }
+	        break;
 	    }
 	}
 ');
@@ -1463,8 +1547,8 @@ object_event_add(PlayerControl,ev_step,ev_step_end,'
 	//Changes the number telling randomizer what weapon should be shown
 	if (keyboard_check_pressed(global.switchWeapon)) {
 		if(global.myself.object != -1){
-			canSwitch = !global.myself.object.taunting or global.myself.object.weapons[1] == WEAPON_BOOTS or global.myself.object.canSwitch;
-			if (!canSwitch) break;
+			//canSwitch = !global.myself.object.taunting or global.myself.object.weapons[1] == WEAPON_BOOTS or global.myself.object.canSwitch;
+			if (global.myself.object.taunting or global.myself.object.weapons[1] == WEAPON_BOOTS or !global.myself.object.canSwitch) break;
 			if(global.myself.activeWeapon == 0){
 				global.myself.activeWeapon = 1;
 				if (global.myself.object.zoomed) {

@@ -1,32 +1,28 @@
-
-High amount of Refactoring (3 days worth) due to all the new variables in weapon_init and projectile_init
-send_ubyte/deserialization buffers in Character events to keep meter/ammo consistent
-Meters syncing throughout weapon switch
-RadioBlur just disappearing seems too abrupt, my last attempt to make RadioBlur fade out without an owner did not work.
-SoldierLoadout does not get called properly, reverts to FAN/Scattergun, This was due to "player.playerLoadout" being -1, setting it to 0 breaks scout, commenting until later.
+Meters syncing throughout weapon switch (WIP)
+as a reminder SoldierLoadout does not get called properly, reverts to FAN/Scattergun, This was due to "player.playerLoadout" being -1, setting it to 0 breaks scout, commenting until later.
 Fix detonator unknown var error
 Fix SEVERE loadout menu degradation that occurs when used continuously
+
 Refactor, Cleanup or Organize:
 Merge Crit-based variables Into one type instead of using multiple variables (as seen on SodaPopper's hyve call)
-add global.delta_factor checks on ALL ALARMS/meters
-High Prio:
-remove 'charging' and 'hype', instead, use ability detection with abilityType, abilityVisual and abilityCharged
-add weaponType and weaponGrade
-High amount of Refactoring (3 days worth) due to all the new variables in weapon_init and projectile_init, build for weaponType/weaponGrade (In progress)
+add global.delta_factor checks on ALL ALARMS/meters (WIP)
 
+Kevin's High Priority:
+remove 'charging' and 'hype', instead, use ability detection with abilityType, abilityVisual and abilityCharged (Done)
+make CONSUMABLES (only BonkHand so far) piggyback owner.canEat as a detector
+add weaponType and weaponGrade (75%)
+High amount of Refactoring due to all the new variables in weapon_init and projectile_init, build for weaponType/weaponGrade (75%)
+send and read_ubyte(variable, deserializationBuffer) for many projectiles and some weapons
+send and read_ubyte(variable, deserializationBuffer) in Character events to keep meter/ammo consistent throughout weapon switches
 
 TESTING REQUIRED:
 Soak an enemy with both milk, piss, and make em bleed
 
 All:
-send_ubyte/deserialization buffers in Character events to keep meter/ammo consistent
 add global.delta_factor checks on ALL ALARMS/meters
 Merge Crit-based variables Into one type instead of using multiple variables (as seen on SodaPopper's hyve call)
-Refactor, Cleanup or Organize:
-
-
-Add Taunts
-replace loaded1 or loaded2 calls with weapons[0] and weapons[1] calls
+Add Taunts (WIP)
+replace loaded1 or loaded2 calls with weapons[0] and weapons[1] calls (check projectile_init)
 
 Implement:
 Weapons:
@@ -35,14 +31,15 @@ Atomizer (95%) Add Tauntkill
 Rundown (optional, weapon works akin to Baby Face's Blaster)
 Pyro:
 Phlog (90%) Add Afterburn
+Snowbite (90%) Add ev_draw override for Snow
 Napalm Grenade (70%)
 Soldier:
 Buff Banner (90%)
 Cow Mangler (50%)
-Reserve Shooter (90%)
 Heavy:
 Iron Maiden
 Dalokhos Bar (Implement overheal)
+
 Detonator:
 Entire Kit
 Medic:
