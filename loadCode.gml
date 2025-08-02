@@ -623,8 +623,8 @@ object_event_add(PlayerControl,ev_step,ev_step_end,'
 	//Changes the number telling randomizer what weapon should be shown
 	if (keyboard_check_pressed(global.switchWeapon)) {
 		if(global.myself.object != -1){
-			canSwitch = !global.myself.object.taunting or !global.myself.object.abilityActive or global.myself.class != CLASS_QUOTE; // prevent switching when taunting or eyelander charging or quote
-			if (!canSwitch) break;
+			//canSwitch = !global.myself.object.taunting or !global.myself.object.canSwitch or global.myself.class != CLASS_QUOTE; // prevent switching when taunting or eyelander charging or quote
+			if (global.myself.object.taunting or !global.myself.object.canSwitch or global.myself.class == CLASS_QUOTE) break;
 			if(global.myself.activeWeapon == 0){
 				global.myself.activeWeapon = 1;
 				if (global.myself.object.zoomed) {

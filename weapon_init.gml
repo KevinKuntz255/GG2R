@@ -523,6 +523,7 @@ object_event_add(Eyelander,ev_step,ev_step_normal,'
         if meterCount <= 0 {
             owner.jumpStrength = 8+(0.6/2);
             abilityActive = false;
+            owner.canSwitch = true;
         }
         if (owner.moveStatus != 4) {
             if (owner.image_xscale == -1) {
@@ -567,6 +568,7 @@ object_event_add(Eyelander,ev_other,ev_user2,'
         abilityActive = true;
         owner.accel = 0;
         owner.moveStatus = 0;
+        owner.canSwitch = false;
         // jerry-rigging consistency in charging by makin u slightly jumped
         if (owner.onground) owner.vspeed -= 0.15; else owner.vspeed += 0.5; 
         // as suggested by Cat Al Ghul, start off FAST.

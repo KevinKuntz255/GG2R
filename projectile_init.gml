@@ -213,6 +213,7 @@ object_event_add(MeleeMask,ev_create,0,'
 object_event_add(MeleeMask,ev_destroy,0,'
     event_inherited();
     owner.currentWeapon.smashing = false;
+    if (!owner.canSwitch) owner.canSwitch = true;
 ');
 object_event_add(MeleeMask,ev_collision,Obstacle,'
     if hit == 0 {
@@ -321,6 +322,8 @@ object_event_add(MeleeMask,ev_collision,Character,'
                     blood.direction = direction-180;
                 }
             }
+
+
             if (!splashHit) {
                 instance_destroy(); 
             } else {
