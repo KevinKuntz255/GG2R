@@ -2035,7 +2035,7 @@ object_event_add(Piss,ev_alarm,0,'
     instance_destroy();
 ');
 
-globalvar Natachaf;
+globalvar NatachaShot;
 NatachaShot = object_add();
 object_set_sprite(NatachaShot, ShotS);
 object_set_parent(NatachaShot, Shot);

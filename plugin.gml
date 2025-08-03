@@ -11,10 +11,10 @@ execute_file(pluginFilePath + "\projectile_init.gml");	//Creates projectile obje
 execute_file(pluginFilePath + "\weapons\shared\scattergun.gml");
 //execute_file(pluginFilePath + "\weapons\shared\flamethrower.gml");
 execute_file(pluginFilePath + "\weapons\shared\rocketlauncher.gml");
-//execute_file(pluginFilePath + "\weapons\shared\minigun.gml");
+execute_file(pluginFilePath + "\weapons\shared\minigun.gml");
 //execute_file(pluginFilePath + "\weapons\shared\minegun.gml");
 execute_file(pluginFilePath + "\weapons\shared\shotgun.gml");
-//execute_file(pluginFilePath + "\weapons\shared\revolver.gml");
+execute_file(pluginFilePath + "\weapons\shared\revolver.gml");
 //execute_file(pluginFilePath + "\weapons\shared\rifle.gml");
 //execute_file(pluginFilePath + "\weapons\shared\pistol.gml");
 //execute_file(pluginFilePath + "\weapons\shared\grenadelauncher.gml");
