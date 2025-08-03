@@ -3,7 +3,7 @@ WEAPON_FAMILYBUSINESS = 67;
 
 globalvar FamilyBusiness;
 FamilyBusiness = object_add();
-object_set_parent(FamilyBusiness, Weapon);
+object_set_parent(FamilyBusiness, ShotgunWeapon);
 
 object_event_add(FamilyBusiness,ev_create,0,'
     xoffset=3;

@@ -3,7 +3,7 @@ WEAPON_RESERVESHOOTER = 19;
 
 globalvar Reserveshooter;
 Reserveshooter = object_add();
-object_set_parent(Reserveshooter, Weapon);
+object_set_parent(Reserveshooter, ShotgunWeapon);
 
 object_event_add(Reserveshooter,ev_create,0,'
     xoffset=1;

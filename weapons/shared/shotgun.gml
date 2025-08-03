@@ -3,7 +3,7 @@ ShotgunWeapon = object_add();
 object_set_parent(ShotgunWeapon, Weapon);
 
 object_event_add(ShotgunWeapon, ev_create, 0, '
-    if (!variable_local_exists("refireTime") refireTime = 20;
+    if (!variable_local_exists("refireTime")) refireTime = 20;
     event_inherited();
     maxAmmo = 6;
     ammoCount = maxAmmo;
