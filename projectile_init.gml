@@ -2267,8 +2267,8 @@ object_event_add(Shot,ev_collision,Character,'
     {
         switch(weapon.object_index) {
             case Reserveshooter:
-                if (!other.onground && other.moveStatus == 1) { // If you've successfully sent an enemy up
-                    hitDamage += 15;
+                if (!other.onground && other.moveStatus == 1) {
+                    hitDamage += 6;
                     var text;
                     text=instance_create(x,y,Text);
                     text.sprite_index=MiniCritS;
