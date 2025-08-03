@@ -10,7 +10,7 @@ execute_file(pluginFilePath + "\projectile_init.gml");	//Creates projectile obje
 // TODO: make a method that goes over each file in the weapons dir and adds them automatically
 execute_file(pluginFilePath + "\weapons\shared\scattergun.gml");
 //execute_file(pluginFilePath + "\weapons\shared\flamethrower.gml");
-//execute_file(pluginFilePath + "\weapons\shared\rocketlauncher.gml");
+execute_file(pluginFilePath + "\weapons\shared\rocketlauncher.gml");
 //execute_file(pluginFilePath + "\weapons\shared\minigun.gml");
 //execute_file(pluginFilePath + "\weapons\shared\minegun.gml");
 execute_file(pluginFilePath + "\weapons\shared\shotgun.gml");

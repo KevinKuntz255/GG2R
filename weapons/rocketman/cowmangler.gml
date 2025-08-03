@@ -3,19 +3,15 @@ WEAPON_COWMANGLER = 12;
 
 globalvar CowMangler;
 CowMangler = object_add();
-object_set_parent(CowMangler, Weapon);
+object_set_parent(CowMangler, RocketWeapon);
 
 object_event_add(CowMangler,ev_create,0,'
     xoffset = -5;
     yoffset = -4;
     refireTime = 30;
     event_inherited();
-    reloadTime = 25;
-    reloadBuffer = 30;
     maxAmmo = 100;
     ammoCount = maxAmmo;
-    rocketrange=501;
-    idle=true;
 
     weaponGrade = UNIQUE;
     weaponType = ROCKETLAUNCHER;
