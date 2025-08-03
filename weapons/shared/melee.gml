@@ -3,11 +3,38 @@ MeleeWeapon = object_add();
 object_set_parent(MeleeWeapon, Weapon);
 
 object_event_add(MeleeWeapon, ev_create, 0, '
+    refireTime=18;
     event_inherited();
 
+    StabreloadTime = 5;
+    if (alarm[2] <= 0) alarm[2] = 15;
+    smashing = false;
     isMelee = true;
 
+    ammoCount = 1;
+    maxAmmo = 1;
+    // todo: replace user_event(12) call with readyToStab call for consistent melee swings between client and host
+    stabdirection=0;
+    weaponGrade = UNIQUE;
     weaponType = MELEE;
+
+    reloadTime = 300;
+    reloadBuffer = refireTime;
+
+    if (!variable_local_exists("spriteBase")) spriteBase = "Knife2";
+
+    normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\" + spriteBase + "S.png", 2, 1, 0, 0, 0);
+    recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\" + spriteBase + "FS.png", 8, 1, 0, 0, 0);
+    reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\" + spriteBase + "S.png", 2, 1, 0, 0, 0);
+
+    sprite_index = normalSprite;
+
+    recoilTime = refireTime;
+    recoilAnimLength = sprite_get_number(recoilSprite)/2;
+    recoilImageSpeed = recoilAnimLength/recoilTime;
+
+    reloadAnimLength = sprite_get_number(reloadSprite)/2;
+    reloadImageSpeed = reloadAnimLength/reloadTime;
 ');
 
 object_event_add(MeleeWeapon, ev_destroy, 0, '

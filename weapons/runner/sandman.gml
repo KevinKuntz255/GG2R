@@ -3,47 +3,14 @@ WEAPON_SANDMAN = 7;
 
 globalvar Sandman;
 Sandman = object_add();
-object_set_parent(Sandman, Weapon);
+object_set_parent(Sandman, MeleeWeapon);
 
 object_event_add(Sandman,ev_create,0,'
-    xoffset=6;
-    yoffset=0;
-    refireTime=18;
+    xoffset=-15;
+    yoffset=-25;
+    spriteBase = "Sandman";
     event_inherited();
-
-    maxAmmo = 1;
-    ammoCount = maxAmmo;
-    reloadTime = 300;
-    reloadBuffer = refireTime;
-    idle=true;
-
-    weaponGrade = UNIQUE;
-    weaponType = MELEE;
-    shotDamage = 25;
-
-    StabreloadTime = 5; 
-    readyToStab = false;
-    alarm[2] = 15;
-    smashing = false;
-
-    stabdirection=0;
-    
-    owner.ammo[107] = -1;
     depth = 1;
-    isMelee = true;
-    
-    normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\SandmanS.png", 2, 1, 0, 21, 25);
-    recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\SandmanFS.png", 8, 1, 0, 21, 25);
-    reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\SandmanS.png", 2, 1, 0, 21, 25);
-
-    sprite_index = normalSprite;
-
-    recoilTime = refireTime;
-    recoilAnimLength = sprite_get_number(recoilSprite)/2;
-    recoilImageSpeed = recoilAnimLength/recoilTime;
-
-    reloadAnimLength = sprite_get_number(reloadSprite)/2;
-    reloadImageSpeed = reloadAnimLength/reloadTime;
 ');
 
 object_event_add(Sandman,ev_other,ev_user2,'

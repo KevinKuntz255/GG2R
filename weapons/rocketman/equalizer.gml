@@ -6,40 +6,10 @@ Shovel = object_add();
 object_set_parent(Shovel, MeleeWeapon);
 
 object_event_add(Shovel,ev_create,0,'
-    xoffset=1;
-    yoffset=-8;
-    refireTime=18;
+    xoffset=1 - 32;
+    yoffset=-8 - 32;
+    spriteBase = "Shovel";
     event_inherited();
-    StabreloadTime = 5;
-    //readyToStab = false;
-    alarm[2] = 15;
-    smashing = false;
-
-    stabdirection=0;
-    maxAmmo = 1;
-    ammoCount = maxAmmo;
-    reloadTime = 300;
-    reloadBuffer = refireTime;
-    idle=true;
-    isMelee = true;
-
-    weaponGrade = UNIQUE;
-    weaponType = MELEE;
-
-    normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\ShovelS.png", 2, 1, 0, 32, 32);
-    recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\ShovelFS.png", 8, 1, 0, 32, 32);
-    reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\ShovelS.png", 2, 1, 0, 32, 32);
-
-    sprite_index = normalSprite;
-
-    recoilTime = refireTime;
-    recoilAnimLength = sprite_get_number(recoilSprite)/2;
-    recoilImageSpeed = recoilAnimLength/recoilTime;
-
-    reloadAnimLength = sprite_get_number(reloadSprite)/2;
-    reloadImageSpeed = reloadAnimLength/reloadTime;
-	
-	//owner.runPower = 5;
 ');
 
 object_event_add(Shovel,ev_destroy,0,'

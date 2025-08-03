@@ -3,51 +3,22 @@ WEAPON_EYELANDER = 37;
 
 globalvar Eyelander;
 Eyelander = object_add();
-object_set_parent(Eyelander, Weapon);
+object_set_parent(Eyelander, MeleeWeapon);
 
 object_event_add(Eyelander,ev_create,0,'
     xoffset=-15;
     yoffset=-40;
-    refireTime=18;
+    spriteBase = "Eyelander";
 	event_inherited();
 	maxMines = 8;
     lobbed = 0;
-	unscopedDamage = 0;
-    StabreloadTime = 5;
-    //readyToStab = false;
-    alarm[2] = 15;
-    smashing = false;
+
     abilityVisual = "WEAPON BLUR";
-    
-    stabdirection=0;
-    maxAmmo = 100;
-    ammoCount = maxAmmo;
-    reloadTime = 300;
-    reloadBuffer = 26;
-    idle=true;
-    smashing=false;
-	isMelee = true;
-	
+
 	hasMeter = true;
 	meterName = "CHARGE";
 	meterCount = 100;
 	maxMeter = 100;
-	
-    weaponGrade = UNIQUE;
-    weaponType = MELEE;
-
-	normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\EyelanderS.png", 2, 1, 0, 2, 0);
-    recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\EyelanderFS.png", 8, 1, 0, 2, 0);
-    reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\EyelanderS.png", 2, 1, 0, 2, 0);
-
-    sprite_index = normalSprite;
-
-    recoilTime = refireTime;
-    recoilAnimLength = sprite_get_number(recoilSprite)/2;
-    recoilImageSpeed = recoilAnimLength/recoilTime;
-
-    reloadAnimLength = sprite_get_number(reloadSprite)/2;
-    reloadImageSpeed = reloadAnimLength/reloadTime;
 ');
 
 object_event_add(Eyelander,ev_destroy,0,'
@@ -87,15 +58,6 @@ object_event_add(Eyelander,ev_alarm,1,'
         //Removed crit thing here
         alarm[2] = 10;
     }
-');
-
-object_event_add(Eyelander,ev_alarm,5,'
-    //ammoCount = 100;
-    meterCount = 100;
-');
-
-object_event_add(Eyelander,ev_alarm,10,'
-    charging = 0;
 ');
 
 object_event_add(Eyelander,ev_step,ev_step_normal,'
@@ -161,7 +123,6 @@ object_event_add(Eyelander,ev_other,ev_user2,'
         }
         playsound(x,y,ChargeSnd);
 		if (smashing != 1) readyToStab = true;
-		//alarm[10] = 100;
     }
 ');
 
