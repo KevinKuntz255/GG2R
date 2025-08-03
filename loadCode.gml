@@ -1267,6 +1267,7 @@ object_event_add(Spy,ev_create,0,'
 	weapons[1] = global.weapons[real(string_copy(string(global.spyLoadout), 4, 2))];
 	haxxyStatue = SpyHaxxyStatueS;
 
+
 	if (global.paramPlayer.team == TEAM_RED)
 	{
 	    sprite_index = SpyRedS;
@@ -1291,6 +1292,12 @@ object_event_add(Sniper,ev_create,0,'
 	weapons[0] = global.weapons[real(string_copy(string(global.sniperLoadout), 2, 2))];
 	weapons[1] = global.weapons[real(string_copy(string(global.sniperLoadout), 4, 2))];
 	haxxyStatue = SniperHaxxyStatueS;
+
+	// boots. add to every class once randomizerMode is implemented
+
+	checkWeapon = instance_create(object.x,object.y,object.weapons[1]);
+	if (checkWeapon.weaponType == WEAR) canSwitch = false;
+	with(checkWeapon) instance_destroy();
 
 	if (global.paramPlayer.team == TEAM_RED)
 	{
@@ -1548,7 +1555,7 @@ object_event_add(PlayerControl,ev_step,ev_step_end,'
 	if (keyboard_check_pressed(global.switchWeapon)) {
 		if(global.myself.object != -1){
 			//canSwitch = !global.myself.object.taunting or global.myself.object.weapons[1] == WEAPON_BOOTS or global.myself.object.canSwitch;
-			if (global.myself.object.taunting or global.myself.object.weapons[1] == WEAPON_BOOTS or !global.myself.object.canSwitch) break;
+			if (global.myself.object.taunting or !global.myself.object.canSwitch) break;
 			if(global.myself.activeWeapon == 0){
 				global.myself.activeWeapon = 1;
 				if (global.myself.object.zoomed) {

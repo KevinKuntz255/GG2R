@@ -3,23 +3,23 @@ WEAPON_RUNDOWN = 2;
 
 globalvar Rundown;
 Rundown = object_add();
-object_set_parent(Rundown, Weapon);
+object_set_parent(Rundown, ScattergunWeapon);
 
 object_set_sprite(Rundown, sprite_add(pluginFilePath + "\randomizer_sprites\ShortStopS.png", 2, 1, 0, 8, 7));
 
 object_event_add(Rundown,ev_create,0,'
     xoffset=-3;
-    yoffset=-6;
+    yoffset=-12;
     refireTime=13;
+    spriteBase = "ShortStop"; // should really rename this once I add actual rundown
     event_inherited();
     maxAmmo = 4;
     ammoCount = maxAmmo;
     reloadTime = 45.6;
     reloadBuffer = 20;
-    idle=true;
     weaponGrade = UNIQUE;
     weaponType = SCATTERGUN;
-    damSouce = DAMAGE_SOURCE_SCATTERGUN;
+    //damSouce = DAMAGE_SOURCE_ShortStop;
     fullReload = true;
 
     shotSpeed[0] = 2;
@@ -29,9 +29,7 @@ object_event_add(Rundown,ev_create,0,'
     shots = 3;
     shotDamage = 14;
 
-    normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\ShortStopS.png", 2, 1, 0, 8, 7);
-    recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\ShortStopFS.png", 4, 1, 0, 8, 7);
-    reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\ShortStopFRS.png", 16, 1, 0, 12, 15);
+    reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\" + spriteBase + "FRS.png", 16, 1, 0, 12, 5);
 
     sprite_index = normalSprite;
 

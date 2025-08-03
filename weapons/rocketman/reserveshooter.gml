@@ -7,7 +7,7 @@ object_set_parent(Reserveshooter, ShotgunWeapon);
 
 object_event_add(Reserveshooter,ev_create,0,'
     xoffset=1;
-    yoffset=4;
+    yoffset=-4;
     spriteBase = "reserveshooter";
     event_inherited();
     maxAmmo = 4;

@@ -25,7 +25,7 @@ object_event_add(ScattergunWeapon, ev_create, 0, '
 
     fullReload = false;
 
-    spriteBase = "Scattergun";
+    if (!variable_local_exists("spriteBase")) spriteBase = "Scattergun";
 
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\" + spriteBase + "S.png", 2, 1, 0, 8, -1);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\" + spriteBase + "FS.png", 4, 1, 0, 8, -1);
