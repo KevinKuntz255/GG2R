@@ -3,6 +3,8 @@ A port of Lorgan's Randomizer into live gg2 through Server Plugins
 
 Kevin Kuntz - Weapons Implementation
 
+Soumeh - Optimization
+
 router - SFX
 
 Zee Scott - Reload Animations
