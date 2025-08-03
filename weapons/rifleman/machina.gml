@@ -6,8 +6,6 @@ Machina = object_add();
 object_set_parent(Machina, RifleWeapon);
 
 object_event_add(Machina,ev_create,0,'
-    xoffset = -1;
-    yoffset = -4;
     spriteBase="Machina";
     event_inherited();
     reloadTime = 70;

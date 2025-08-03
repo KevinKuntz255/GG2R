@@ -6,7 +6,7 @@ Axe = object_add();
 object_set_parent(Axe, MeleeWeapon);
 
 object_event_add(Axe,ev_create,0,'
-    xoffset=-34;
+    xoffset=-32;
     yoffset=-36;
     spriteBase = "Axe";
     event_inherited();

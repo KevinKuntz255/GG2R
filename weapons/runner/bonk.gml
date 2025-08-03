@@ -3,7 +3,7 @@ WEAPON_BONK = 6;
 
 globalvar BonkHand;
 BonkHand = object_add();
-object_set_parent(BonkHand, Weapon);
+object_set_parent(BonkHand, ConsumableWeapon);
 object_set_sprite(BonkHand, sprite_add(pluginFilePath + "\randomizer_sprites\BonkHandS.png", 4, 0, 1, 21, 25));
 
 globalvar ScoutBuffS; 
@@ -12,17 +12,7 @@ ScoutBuffS = sprite_add(pluginFilePath + "\randomizer_sprites\ScoutBuffS.png", 2
 object_event_add(BonkHand,ev_create,0,'
     xoffset=-3;
     yoffset=-2;
-    refireTime=18;
     event_inherited();
-    maxAmmo = 1
-    ammoCount = maxAmmo;
-    reloadTime = 500;
-    reloadBuffer = 18;
-    idle=true;
-    readyToStab=false;
-    unscopedDamage = 0;
-	isMelee = true;
-
     isMetered = true;
 
 	maxMeter = 1;
@@ -31,9 +21,6 @@ object_event_add(BonkHand,ev_create,0,'
     abilityActive = false;
     abilityVisual = "BLUR";
     //owner.inheritAbility = true; // so that radioactive is called for alarm[10]
-    
-    weaponType = CONSUMABLE;
-    weaponGrade = UNIQUE;
 
 	normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\BonkHandS.png", 4, 0, 0, 21, 25);
 	recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\BonkHandS.png", 4, 0, 1, 21, 25);
