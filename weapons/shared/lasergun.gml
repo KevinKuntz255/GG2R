@@ -3,9 +3,9 @@ laserWeapon = object_add();
 object_set_parent(laserWeapon, Weapon);
 
 object_event_add(laserWeapon, ev_create, 0, '
-    xoffset=5;
-    yoffset=1;
-    refireTime=20;
+    xoffset = 5;
+    yoffset = 1;
+    refireTime = 20;
     event_inherited();
     maxAmmo = 25;
     ammoCount = maxAmmo;
@@ -37,14 +37,14 @@ object_event_add(laserWeapon, ev_create, 0, '
     sprite_index = normalSprite;
 
     recoilTime = refireTime;
-    recoilAnimLength = sprite_get_number(recoilSprite)/2;
-    recoilImageSpeed = recoilAnimLength/recoilTime;
+    recoilAnimLength = sprite_get_number(recoilSprite) / 2;
+    recoilImageSpeed = recoilAnimLength / recoilTime;
 
-    reloadAnimLength = sprite_get_number(reloadSprite)/2;
-    reloadImageSpeed = reloadAnimLength/reloadTime;
+    reloadAnimLength = sprite_get_number(reloadSprite) / 2;
+    reloadImageSpeed = reloadAnimLength / reloadTime;
 ');
 
-object_event_add(laserWeapon, ev_alarm, 5,'
+object_event_add(laserWeapon, ev_alarm, 5, '
     event_inherited();
 
     if (ammoCount < maxAmmo)
@@ -61,14 +61,14 @@ object_event_add(laserWeapon, ev_alarm, 5,'
     }
 ');
 
-object_event_add(laserWeapon, ev_other, ev_user1,'
+object_event_add(laserWeapon, ev_other, ev_user1, '
      if(readyToShoot && ammoCount >0 && !owner.cloak) {
-        ammoCount-=1;
-        playsound(x,y,LaserShotSnd);
+        ammoCount -= 1;
+        playsound(x, y, LaserShotSnd);
         var shot;
         randomize();
-        shot = instance_create(x,y,LaserShot);
-        shot.direction=owner.aimDirection+ random(3)-1;
+        shot = instance_create(x, y, LaserShot);
+        shot.direction = owner.aimDirection + random(3)-1;
         shot.image_angle = direction;
         shot.speed = 22;
         shot.owner = owner;
@@ -78,7 +78,7 @@ object_event_add(laserWeapon, ev_other, ev_user1,'
         with(shot) {   
             hspeed += owner.hspeed;
         
-            alarm[0] = 35 * ((min(1, abs(cos(degtorad(other.owner.aimDirection)))*13 / abs(cos(degtorad(other.owner.aimDirection))*13+owner.hspeed))-1)/2+1)
+            alarm[0] = 35 * ((min(1, abs(cos(degtorad(other.owner.aimDirection))) * 13 / abs(cos(degtorad(other.owner.aimDirection))*13+owner.hspeed))-1)/2+1)
            // motion_add(owner.direction, owner.speed);
         }
         justShot = true;

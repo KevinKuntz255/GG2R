@@ -15,8 +15,8 @@ object_event_add(RifleWeapon, ev_create, 0, '
     hitDamage=baseDamage;
     maxAmmo = 0;
     ammoCount = maxAmmo;
-    shot=false;
-    t=0;
+    shot = false;
+    t = 0;
 
     weaponGrade = UNIQUE;
     weaponType = SMG;
@@ -32,13 +32,13 @@ object_event_add(RifleWeapon, ev_create, 0, '
     sprite_index = normalSprite;
 
     recoilTime = 15;
-    recoilAnimLength = sprite_get_number(recoilSprite)/2;
-    recoilImageSpeed = recoilAnimLength/recoilTime;
+    recoilAnimLength = sprite_get_number(recoilSprite) / 2;
+    recoilImageSpeed = recoilAnimLength / recoilTime;
 
     longRecoilTime = 60;
 
-    reloadAnimLength = sprite_get_number(reloadSprite)/2;
-    reloadImageSpeed = reloadAnimLength/reloadTime;
+    reloadAnimLength = sprite_get_number(reloadSprite) / 2;
+    reloadImageSpeed = reloadAnimLength / reloadTime;
 
     tracerAlpha = 0;
 ');
@@ -66,7 +66,7 @@ object_event_add(RifleWeapon, ev_step, ev_step_begin, '
     if(!owner.zoomed)
         hitDamage = unscopedDamage;
     else
-        hitDamage = baseDamage + floor(sqrt(t/chargeTime)*(maxDamage-baseDamage));
+        hitDamage = baseDamage + floor(sqrt(t / chargeTime) * (maxDamage - baseDamage));
 ');
 
 object_event_add(RifleWeapon, ev_step, ev_step_end, '
@@ -108,12 +108,12 @@ object_event_add(RifleWeapon, ev_other, ev_user1, '
 ');
 
 object_event_add(RifleWeapon, ev_other, ev_user3, '
-    playsound(x,y,SniperSnd);
-    shot=true;
-    justShot=true;
+    playsound(x, y, SniperSnd);
+    shot = true;
+    justShot = true;
     readyToShoot = false;
-    alarm[0] = (reloadTime + 20*owner.zoomed) / global.delta_factor;
-    alarm[7] = (reloadTime/4 + 10*owner.zoomed) / global.delta_factor;  // Eject a shell during the animation
+    alarm[0] = (reloadTime + 20 * owner.zoomed) / global.delta_factor;
+    alarm[7] = (reloadTime / 4 + 10 * owner.zoomed) / global.delta_factor;  // Eject a shell during the animation
 
     // for drawing:
     tracerAlpha = 0.8;

@@ -3,9 +3,9 @@ PistolWeapon = object_add();
 object_set_parent(PistolWeapon, Weapon);
 
 object_event_add(PistolWeapon, ev_create, 0, '
-    xoffset=0;
-    yoffset=2;
-    refireTime=5;
+    xoffset = 0;
+    yoffset = 2;
+    refireTime = 5;
     event_inherited();
     maxAmmo = 12;
     ammoCount = maxAmmo;
@@ -13,7 +13,7 @@ object_event_add(PistolWeapon, ev_create, 0, '
     reloadBuffer = 5;
     weaponGrade = UNIQUE;
     weaponType = PISTOL;
-    idle=true;
+    idle = true;
 
     damSource = DAMAGE_SOURCE_SHOTGUN;
 
@@ -36,14 +36,14 @@ object_event_add(PistolWeapon, ev_create, 0, '
     sprite_index = normalSprite;
 
     recoilTime = refireTime;
-    recoilAnimLength = sprite_get_number(recoilSprite)/2;
-    recoilImageSpeed = recoilAnimLength/recoilTime;
+    recoilAnimLength = sprite_get_number(recoilSprite) / 2;
+    recoilImageSpeed = recoilAnimLength / recoilTime;
 
-    reloadAnimLength = sprite_get_number(reloadSprite)/2;
+    reloadAnimLength = sprite_get_number(reloadSprite) / 2;
     reloadImageSpeed = reloadAnimLength / reloadTime;
 ');
 
-object_event_add(PistolWeapon, ev_alarm, 5,'
+object_event_add(PistolWeapon, ev_alarm, 5, '
     event_inherited();
 
     if (ammoCount < maxAmmo)
@@ -67,7 +67,7 @@ object_event_add(PistolWeapon, ev_alarm, 5,'
     }
 ');
 
-object_event_add(PistolWeapon, ev_other, ev_user1,'
+object_event_add(PistolWeapon, ev_other, ev_user1, '
     if(readyToShoot and ammoCount > 0 and global.isHost)
     {
         var seed;
@@ -79,7 +79,7 @@ object_event_add(PistolWeapon, ev_other, ev_user1,'
 
 object_event_add(PistolWeapon, ev_other, ev_user3, '
     ammoCount = max(0, ammoCount-1);
-    playsound(x,y,pistolSnd);
+    playsound(x, y, pistolSnd);
     var shot;
 
         if (specialShot != -1) shot = createShot(x, y, specialShot, damSource, owner.aimDirection, 13); else shot = createShot(x, y, Shot, damSource, owner.aimDirection, 13);
@@ -94,8 +94,8 @@ object_event_add(PistolWeapon, ev_other, ev_user3, '
                           /abs(cos(degtorad(owner.aimDirection))*13+owner.hspeed))-1)/2+1)
                     / global.delta_factor;
         shot.weapon = id;
-    justShot=true;
-    readyToShoot=false;
+    justShot = true;
+    readyToShoot = false;
     alarm[0] = refireTime / global.delta_factor;
     alarm[5] = (reloadBuffer + reloadTime) / global.delta_factor;
     alarm[7] = alarm[0] / 2;

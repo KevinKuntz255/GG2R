@@ -26,6 +26,8 @@ object_event_add(BannerWeapon, ev_create, 0, '
     randomDir = false;
     projectileDir[0] = 7;
     projectileDir[1] = 4;
+    
+    specialSnd = BuffbannerSnd;
 
     if (!variable_local_exists("spriteBase")) spriteBase = "JarateHand";
 
@@ -46,14 +48,14 @@ object_event_add(BannerWeapon, ev_create, 0, '
 ');
 
 
-object_event_add(BannerWeapon, ev_alarm, 5,'
+object_event_add(BannerWeapon, ev_alarm, 5, '
     event_inherited();
 
     ammoCount = maxAmmo;
     if meterCount != -1 meterCount = maxMeter;
 ');
 
-object_event_add(BannerWeapon,ev_alarm,6,'
+object_event_add(BannerWeapon,ev_alarm,6, '
     if (reloadSprite != -1 && object_index != Rifle && alarm[5] > 0)
     {
         sprite_index = reloadSprite;
@@ -67,28 +69,39 @@ object_event_add(BannerWeapon,ev_alarm,6,'
     }
 ');
 
-object_event_add(BannerWeapon,ev_step,ev_step_normal,'
+object_event_add(BannerWeapon,ev_step,ev_step_normal, '
     image_index = owner.team+2*real(ammoCount);
 ');
 
-object_Event_add(BannerWeapon, ev_other, ev_user1,'
-    if(ammoCount >= 1 && readyToShoot) {
-        playsound(x,y,swingSnd);
-        ammoCount -= max(0, ammoCount-1); 
-        shot = instance_create(x,y + yoffset + 1,thrownProjectile);
-        if (randomDir) shot.direction=owner.aimDirection+ random(projectileDir[0])-projectileDir[1]; else shot.direction=owner.aimDirection;
-        shot.speed=projectileSpeed;
-        shot.owner=owner;
-        shot.ownerPlayer=ownerPlayer;
-        shot.team=owner.team;
-        with(shot)
-            hspeed+=owner.hspeed;
-        ammoCount = max(0, ammoCount-1);
-        
-        alarm[5] = reloadBuffer + reloadTime;
-        owner.ammo[105] = -1;
-        readyToShoot = false;
-        alarm[0] = refireTime;
+object_Event_add(BannerWeapon, ev_other, ev_user1, '
+    if (!owner.cloak && meterCount >= maxMeter)
+    {
+        meterCount = 0;
+        playsound(x,y,SpecialSnd);
+        owner.canSwitch = false;
     }
 ');
+
+object_event_add(BannerWeapon, ev_draw, 0, '
+    if (distance_to_point(view_xview + view_wview/2, view_yview + view_hview/2) > 800)
+        exit;
+
+    if (!owner.invisible and !owner.taunting and !owner.omnomnomnom and !owner.player.humiliated)
+    {
+        if (!owner.cloak)
+            image_alpha = power(owner.cloakAlpha, 0.5);
+        else
+            image_alpha = power(owner.cloakAlpha, 2);
+        draw_sprite_ext(sprite_index, image_index, round(x+xoffset*image_xscale), round(y+yoffset) + owner.equipmentOffset, image_xscale, image_yscale, image_angle, c_white, image_alpha);
+        if (owner.ubered)
+        {
+            if (owner.team == TEAM_RED)
+                ubercolour = c_red;
+            else if (owner.team == TEAM_BLUE)
+                ubercolour = c_blue;
+            draw_sprite_ext(sprite_index, image_index, round(x+xoffset*image_xscale), round(y+yoffset) + owner.equipmentOffset, image_xscale, image_yscale, image_angle, ubercolour, 0.7*image_alpha);
+        }
+    }
+');
+
 // todo: move couple events around and globalize em

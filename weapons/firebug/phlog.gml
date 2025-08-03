@@ -3,63 +3,24 @@ WEAPON_PHLOG = 84; //kinda weird
 
 globalvar Phlog;
 Phlog = object_add();
-object_set_parent(Phlog, Weapon);
+object_set_parent(Phlog, FlameWeapon);
 
 object_event_add(Phlog,ev_create,0,'
-    xoffset = -11;
-    yoffset = -2;
-    refireTime = 1;
+    xoffset = -5;
+    yoffset = 3;
+    spriteBase = "Phlog";
     event_inherited();
-    blastDistance = 150;
-    blastAngle = 75;
-    blastStrength = 28;
-    characterBlastStrength = 15;
-    blastNoFlameTime = 15;
-    blastReloadTime = 35;
-    flareReloadTime = 55;
-    alarm[1] = blastReloadTime;
-    alarm[2] = flareReloadTime / global.delta_factor;
-    readyToBlast = false;
-    readyToFlare = false;
-    justBlast = false;
 
-    hitDamage = 2.4;
-    durationIncrease = 30;
+    flameDamage = 2.4;
     burnIncrease=1;
     shot = false;
     index = 0;
-    
-    maxAmmo = 200
-    ammoCount = maxAmmo;
-    soundLoopTime = 30;
-    currentTime = 0;
-    
-    reloadBuffer = 15;
-    isRefilling = false;
-    unscopedDamage = 0;
 
-    weaponGrade = UNIQUE;
-    weaponType = FLAMETHROWER;
-    normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\PhlogS.png", 2, 1, 0, 8, 2);
-    recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\PhlogFS.png", 2, 1, 0, 8, 2);
-    blastSprite = sprite_add(pluginFilePath + "\randomizer_sprites\PhlogS.png", 2, 1, 0, 8, 2);
-    dropSprite = sprite_add(pluginFilePath + "\randomizer_sprites\PhlogS.png", 2, 1, 0, 8, 2);
-    reloadSprite = -1;
-
-    sprite_index = normalSprite;
-    
-    //play at least 2 frames
-    recoilTime = 3;
-    recoilAnimLength = sprite_get_number(recoilSprite)/2;
-    recoilImageSpeed = recoilAnimLength/recoilTime;
-    
-    blastAnimLength = sprite_get_number(blastSprite)/2;
-    blastImageSpeed = blastAnimLength/blastNoFlameTime;
-
-    dropTime = 4;
-    dropAnimLength = sprite_get_number(dropSprite)/2;
-    dropImageSpeed = dropAnimLength/dropTime;
+    abilityActive = false;
+    //ability = CRIT; 
+    //owner.overhealMax = 40;
 ');
+// TODO: Implement mmph + crit
 
 object_event_add(Phlog,ev_other,ev_user1,'
     {
@@ -203,6 +164,8 @@ object_event_add(Phlog,ev_other,ev_user1,'
         }
     }
 ');
+
+object_event_clear(Phlog,ev_other, ev_user2);
 
 globalvar PhlogBeamS;
 PhlogBeamS = sprite_add(pluginFilePath + "\randomizer_sprites\PhlogBeamS.png", 4, 1, 0, 0, 20);

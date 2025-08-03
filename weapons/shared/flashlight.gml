@@ -2,10 +2,10 @@ globalvar FlashlightWeapon;
 FlashlightWeapon = object_add();
 object_set_parent(FlashlightWeapon, Weapon);
 
-object_event_add(FlashlightWeapon,ev_create,0,'
-    xoffset=3;
-    yoffset=-6;
-    refireTime=10;
+object_event_add(FlashlightWeapon,ev_create,0, '
+    xoffset = 3;
+    yoffset = -6;
+    refireTime= 10;
     event_inherited();
     maxAmmo = 4;
     ammoCount = maxAmmo;
@@ -29,14 +29,14 @@ object_event_add(FlashlightWeapon,ev_create,0,'
     sprite_index = normalSprite;
     
     recoilTime = refireTime;
-    recoilAnimLength = sprite_get_number(recoilSprite)/2;
-    recoilImageSpeed = recoilAnimLength/recoilTime;
+    recoilAnimLength = sprite_get_number(recoilSprite) / 2;
+    recoilImageSpeed = recoilAnimLength / recoilTime;
     
-    reloadAnimLength = sprite_get_number(reloadSprite)/2;
-    reloadImageSpeed = reloadAnimLength/reloadTime;
+    reloadAnimLength = sprite_get_number(reloadSprite) / 2;
+    reloadImageSpeed = reloadAnimLength / reloadTime;
 ');
 
-object_event_add(FlashlightWeapon, ev_alarm, 5,'
+object_event_add(FlashlightWeapon, ev_alarm, 5, '
     event_inherited();
 
     if (ammoCount < maxAmmo)
@@ -52,7 +52,7 @@ object_event_add(FlashlightWeapon, ev_alarm, 5,'
     }
 ');
 
-object_event_add(FlashlightWeapon, ev_other, ev_user1,'
+object_event_add(FlashlightWeapon, ev_other, ev_user1, '
     if(readyToShoot and ammoCount > 0 and global.isHost)
     {
         var seed;
@@ -62,10 +62,10 @@ object_event_add(FlashlightWeapon, ev_other, ev_user1,'
     }
 ');
 
-object_event_add(FlashlightWeapon,ev_other,ev_user3,'
+object_event_add(FlashlightWeapon,ev_other,ev_user3, '
     playsound(x,y,FlashlightSnd);
-    shot=true;
-    justShot=true;        
+    shot = true;
+    justShot = true;        
     readyToShoot = false;
     alarm[0] = refireTime / global.delta_factor;
     alarm[5] = (reloadBuffer + reloadTime) / global.delta_factor;
@@ -177,12 +177,12 @@ object_event_add(FlashlightWeapon,ev_other,ev_user3,'
     }
 ');
 
-object_event_add(FlashlightWeapon, ev_draw, 0,'
+object_event_add(FlashlightWeapon, ev_draw, 0, '
     event_inherited();
     {
         if(shot) {
             var origdepth;
-            shot=false;
+            shot = false;
             draw_set_alpha(0.8);
             origdepth = depth;
             depth = -2;

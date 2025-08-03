@@ -3,7 +3,7 @@ MeleeWeapon = object_add();
 object_set_parent(MeleeWeapon, Weapon);
 
 object_event_add(MeleeWeapon, ev_create, 0, '
-    refireTime=18;
+    refireTime = 18;
     event_inherited();
 
     StabreloadTime = 5;
@@ -14,9 +14,11 @@ object_event_add(MeleeWeapon, ev_create, 0, '
     ammoCount = 1;
     maxAmmo = 1;
     // todo: replace user_event(12) call with readyToStab call for consistent melee swings between client and host
-    stabdirection=0;
+    stabdirection = 0;
     weaponGrade = UNIQUE;
     weaponType = MELEE;
+
+    shotDamage = 35; // default damage
 
     reloadTime = 300;
     reloadBuffer = refireTime;
@@ -46,42 +48,45 @@ object_event_add(MeleeWeapon, ev_destroy, 0, '
 object_event_add(MeleeWeapon, ev_alarm, 1, '
 
     shot = instance_create(x,y,MeleeMask);
-    shot.direction=owner.aimDirection;
-    shot.speed=owner.speed;
-    shot.owner=owner;
-    shot.ownerPlayer=ownerPlayer;
-    shot.team=owner.team;
-    if (shotDamage != -1) shot.hitDamage = shotDamage; else shot.hitDamage = 35; // default dmg
-    shot.weapon=id;
+    shot.direction = owner.aimDirection;
+    shot.speed = owner.speed;
+    shot.owner = owner;
+    shot.ownerPlayer = ownerPlayer;
+    shot.team = owner.team;
+    shot.hitDamage = shotDamage;
+    shot.weapon = id;
 
     alarm[2] = 10;
 ');
 
-object_event_add(MeleeWeapon,ev_alarm,2,'
+object_event_add(MeleeWeapon, ev_alarm, 2, '
     readyToStab = true;
 ');
 
-object_event_add(MeleeWeapon,ev_alarm,3,'
+object_event_add(MeleeWeapon, ev_alarm, 3, '
     shot = instance_create(x,y,StabMask);
-    shot.direction=stabdirection;
-    shot.speed=0;
-    shot.owner=owner;
-    shot.ownerPlayer=ownerPlayer;
-    shot.team=owner.team;
+    shot.direction = stabdirection;
+    shot.speed = 0;
+    shot.owner = owner;
+    shot.ownerPlayer = ownerPlayer;
+    shot.team = owner.team;
     shot.hitDamage = 200;
     shot.weapon=DAMAGE_SOURCE_KNIFE;
 
     alarm[2] = 18;
 ');
 
-object_event_add(MeleeWeapon, ev_alarm, 5,'
+object_event_add(MeleeWeapon, ev_alarm, 5, '
     event_inherited();
 
     ammoCount = maxAmmo;
     if meterCount != -1 meterCount = maxMeter;
 ');
 
-object_event_add(MeleeWeapon,ev_step,ev_step_normal,'
+object_event_add(MeleeWeapon, ev_step, ev_step_normal, '
+    if owner.cloak shotDamage = 10;
+    else shotDamage = min(35, shotDamage + 0.5);
+
     if smashing {
         image_speed=0.3;
         if 1 != 1 { //Removed crit here
@@ -101,8 +106,8 @@ object_event_add(MeleeWeapon,ev_step,ev_step_normal,'
     }
 ');
 
-object_event_add(MeleeWeapon, ev_other,ev_user1,'
-    if(readyToStab && !owner.cloak){
+object_event_add(MeleeWeapon, ev_other, ev_user1, '
+    if(readyToStab && !owner.cloak) {
         //owner.runPower = 0;
         //owner.jumpStrength = 0;
         smashing = 1;
@@ -110,6 +115,27 @@ object_event_add(MeleeWeapon, ev_other,ev_user1,'
         justShot=true;
         readyToStab = false;
         alarm[1] = StabreloadTime / global.delta_factor;
-        playsound(x,y,swingSnd);
+        playsound(x, y, swingSnd);
+    } else if (readyToStab && owner.cloak){
+        owner.runPower = 0;
+        owner.jumpStrength = 0;
+        owner.stabbing = 1;
+        
+        stabdirection = owner.aimDirection;
+        stab = instance_create(x,y,StabAnim);
+        stab.direction = owner.aimDirection;
+        stab.speed = 0;
+        stab.owner = owner;
+        stab.ownerPlayer = ownerPlayer;
+        stab.team = owner.team;
+        stab.hitDamage = 0;
+        stab.weapon = WEAPON_KNIFE;
+        stab.golden = golden;
+        if owner.stabspeed > 0 {
+            owner.stabspeed -= 1;
+            stab.animationspeed*=2;
+            alarm[3] = 32/2;
+        } else alarm[3] = 32;
+        readyToStab = false;
     }
 ');

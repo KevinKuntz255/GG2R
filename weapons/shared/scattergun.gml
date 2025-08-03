@@ -10,7 +10,7 @@ object_event_add(ScattergunWeapon, ev_create, 0, '
     reloadBuffer = 20;
     weaponGrade = UNIQUE;
     weaponType = SCATTERGUN;
-    idle=true;
+    idle = true;
     
     damSource = DAMAGE_SOURCE_SCATTERGUN;
 
@@ -34,14 +34,14 @@ object_event_add(ScattergunWeapon, ev_create, 0, '
     sprite_index = normalSprite;
 
     recoilTime = refireTime;
-    recoilAnimLength = sprite_get_number(recoilSprite)/2;
-    recoilImageSpeed = recoilAnimLength/recoilTime;
+    recoilAnimLength = sprite_get_number(recoilSprite) / 2;
+    recoilImageSpeed = recoilAnimLength / recoilTime;
 
-    reloadAnimLength = sprite_get_number(reloadSprite)/2;
-    reloadImageSpeed = reloadAnimLength/reloadTime;
+    reloadAnimLength = sprite_get_number(reloadSprite) / 2;
+    reloadImageSpeed = reloadAnimLength / reloadTime;
 ');
 
-object_event_add(ScattergunWeapon, ev_alarm, 5,'
+object_event_add(ScattergunWeapon, ev_alarm, 5, '
     event_inherited();
 
     if (ammoCount < maxAmmo)
@@ -63,7 +63,7 @@ object_event_add(ScattergunWeapon, ev_alarm, 5,'
     }
 ');
 
-object_event_add(ScattergunWeapon, ev_other, ev_user1,'
+object_event_add(ScattergunWeapon, ev_other, ev_user1, '
     if(readyToShoot and ammoCount > 0 and global.isHost)
     {
         var seed;
@@ -74,7 +74,7 @@ object_event_add(ScattergunWeapon, ev_other, ev_user1,'
 ');
 
 object_event_add(ScattergunWeapon, ev_other, ev_user3, '
-    playsound(x,y,ShotgunSnd);
+    playsound(x, y, ShotgunSnd);
     ammoCount = max(0, ammoCount-1);
     var shot;
     repeat(shots) {
@@ -83,12 +83,12 @@ object_event_add(ScattergunWeapon, ev_other, ev_user3, '
         if(golden)
             shot.sprite_index = ShotGoldS;
         shot.hspeed += owner.hspeed;
-        shot.speed += random(shotSpeed[0])-shotSpeed[1];
-        shot.direction += random(shotDir[0])-shotDir[1];
+        shot.speed += random(shotSpeed[0]) - shotSpeed[1];
+        shot.direction += random(shotDir[0]) - shotDir[1];
         // Move shot forward to avoid immediate collision with a wall behind the character
         shot.x += lengthdir_x(15, shot.direction);
         shot.y += lengthdir_y(15, shot.direction);
-        shot.alarm[0] = 35 * ((min(1, abs(cos(degtorad(owner.aimDirection)))*13/abs(cos(degtorad(owner.aimDirection))*13+owner.hspeed))-1)/2+1) / global.delta_factor;
+        shot.alarm[0] = 35 * ((min(1, abs(cos(degtorad(owner.aimDirection))) *13 /abs(cos(degtorad(owner.aimDirection)) *13 + owner.hspeed)) - 1) / 2+1) / global.delta_factor;
         shot.weapon = id;
     }
     justShot = true;

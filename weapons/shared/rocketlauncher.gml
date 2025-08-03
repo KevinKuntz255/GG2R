@@ -2,7 +2,7 @@ globalvar RocketWeapon;
 RocketWeapon = object_add();
 object_set_parent(RocketWeapon, Weapon);
 
-object_event_add(RocketWeapon,ev_create,0,'
+object_event_add(RocketWeapon, ev_create, 0, '
     xoffset = -5;
     yoffset = -4;
     refireTime = 30;
@@ -13,13 +13,15 @@ object_event_add(RocketWeapon,ev_create,0,'
     maxAmmo = 4;
     ammoCount = maxAmmo;
     rocketrange = 501;
-    idle=true;
+    idle = true;
+
+    damSource = DAMAGE_SOURCE_ROCKETLAUNCHER;
 
     weaponGrade = UNIQUE;
     weaponType = ROCKETLAUNCHER;
     rocketSound = RocketSnd; // direct hit specific
     rocketSpeed = 13;
-    specialProjectile = -1; // cow mangler specific;
+    specialProjectile = Rocket; // cow mangler specific;
 
     if (!variable_local_exists("spriteBase")) spriteBase = "Rocketlauncher";
 
@@ -30,14 +32,14 @@ object_event_add(RocketWeapon,ev_create,0,'
     sprite_index = normalSprite;
 
     recoilTime = refireTime;
-    recoilAnimLength = sprite_get_number(recoilSprite)/2;
-    recoilImageSpeed = recoilAnimLength/recoilTime;
+    recoilAnimLength = sprite_get_number(recoilSprite) / 2;
+    recoilImageSpeed = recoilAnimLength / recoilTime;
 
-    reloadAnimLength = sprite_get_number(reloadSprite)/2;
-    reloadImageSpeed = reloadAnimLength/reloadTime;
+    reloadAnimLength = sprite_get_number(reloadSprite) / 2;
+    reloadImageSpeed = reloadAnimLength / reloadTime;
 ');
 
-object_event_add(RocketWeapon, ev_alarm, 5,'
+object_event_add(RocketWeapon, ev_alarm, 5, '
     event_inherited();
 
     if (ammoCount < maxAmmo)
@@ -52,7 +54,7 @@ object_event_add(RocketWeapon, ev_alarm, 5,'
     }
 ');
 
-object_event_add(RocketWeapon, ev_other, ev_user1,'
+object_event_add(RocketWeapon, ev_other, ev_user1, '
     if(readyToShoot and ammoCount > 0 and global.isHost)
     {
         var seed;
@@ -62,13 +64,13 @@ object_event_add(RocketWeapon, ev_other, ev_user1,'
     }
 ');
 
-object_event_add(RocketWeapon, ev_other, ev_user3,'
+object_event_add(RocketWeapon, ev_other, ev_user3, '
     ammoCount = max(0, ammoCount-1);    
-    playsound(x,y,rocketSound);
+    playsound(x, y, rocketSound);
     var oid, newx, newy;
     newx = x+lengthdir_x(20,owner.aimDirection);
     newy = y+lengthdir_y(20,owner.aimDirection);
-    if (rocketSpeed != -1) oid = createShot(newx, newy, Rocket, DAMAGE_SOURCE_ROCKETLAUNCHER, owner.aimDirection, rocketSpeed); else oid = createShot(newx, newy, Rocket, DAMAGE_SOURCE_ROCKETLAUNCHER, owner.aimDirection, 13);
+    if (rocketSpeed != -1) oid = createShot(newx, newy, specialProjectile, DAMAGE_SOURCE_ROCKETLAUNCHER, owner.aimDirection, rocketSpeed); else oid = createShot(newx, newy, specialProjectile, DAMAGE_SOURCE_ROCKETLAUNCHER, owner.aimDirection, 13);
     oid.gun=id;
     with (oid)
     {

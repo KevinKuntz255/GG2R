@@ -3,15 +3,15 @@ smgWeapon = object_add();
 object_set_parent(smgWeapon, Weapon);
 
 object_event_add(smgWeapon, ev_create, 0, '
-    xoffset=5;
-    yoffset=-1;
-    refireTime=3;
+    xoffset = 5;
+    yoffset = -1;
+    refireTime = 3;
     event_inherited();
     maxAmmo = 25;
     ammoCount = maxAmmo;
     reloadTime = 45;
     reloadBuffer = 16;
-    idle=true;
+    idle = true;
 
     weaponGrade = UNIQUE;
     weaponType = SMG;
@@ -37,14 +37,14 @@ object_event_add(smgWeapon, ev_create, 0, '
     sprite_index = normalSprite;
 
     recoilTime = refireTime;
-    recoilAnimLength = sprite_get_number(recoilSprite)/2;
-    recoilImageSpeed = recoilAnimLength/recoilTime;
+    recoilAnimLength = sprite_get_number(recoilSprite) / 2;
+    recoilImageSpeed = recoilAnimLength / recoilTime;
 
-    reloadAnimLength = sprite_get_number(reloadSprite)/2;
-    reloadImageSpeed = reloadAnimLength/reloadTime;
+    reloadAnimLength = sprite_get_number(reloadSprite) / 2;
+    reloadImageSpeed = reloadAnimLength / reloadTime;
 ');
 
-object_event_add(smgWeapon, ev_alarm, 5,'
+object_event_add(smgWeapon, ev_alarm, 5, '
     event_inherited();
 
     if (ammoCount < maxAmmo)
@@ -68,26 +68,26 @@ object_event_add(smgWeapon, ev_alarm, 5,'
     }
 ');
 
-object_event_add(smgWeapon, ev_other, ev_user1,'
+object_event_add(smgWeapon, ev_other, ev_user1, '
     if(readyToShoot && !owner.cloak && ammoCount > 0) {
-        ammoCount-=1;
-        playsound(x,y, chaingunSnd);
+        ammoCount -= 1;
+        playsound(x, y, chaingunSnd);
         var shot;
         randomize();
         
         shot = instance_create(x,y + yoffset + 1,Shot);
-        shot.direction=owner.aimDirection+ random(shotDir[0])-shotDir[1];
-        shot.speed=shotSpeed[0];
-        shot.owner=owner;
-        shot.ownerPlayer=ownerPlayer;
-        shot.team=owner.team;
+        shot.direction = owner.aimDirection + random(shotDir[0]) - shotDir[1];
+        shot.speed = shotSpeed[0];
+        shot.owner = owner;
+        shot.ownerPlayer = ownerPlayer;
+        shot.team = owner.team;
         shot.hitDamage = shotDamage;
-        shot.weapon= id;
+        shot.weapon = id;
         with(shot)
-            hspeed+=owner.hspeed;
-        justShot=true;
-        readyToShoot=false;
-        alarm[0]=refireTime;
+            hspeed += owner.hspeed;
+        justShot = true;
+        readyToShoot = false;
+        alarm[0] = refireTime;
         alarm[5] = reloadBuffer + reloadTime;
     }
 ');

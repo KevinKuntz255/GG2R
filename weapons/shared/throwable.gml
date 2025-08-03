@@ -4,7 +4,6 @@ object_set_parent(ThrowableWeapon, Weapon);
 
 object_event_add(ThrowableWeapon, ev_create, 0, '
     refireTime=18;
-    spriteBase = "NapalmHand";
     event_inherited();
 
     isMelee = true;
@@ -37,37 +36,37 @@ object_event_add(ThrowableWeapon, ev_create, 0, '
     image_speed = 0;
 
     recoilTime = refireTime;
-    recoilAnimLength = sprite_get_number(recoilSprite)/2;
-    recoilImageSpeed = recoilAnimLength/recoilTime;
+    recoilAnimLength = sprite_get_number(recoilSprite) / 2;
+    recoilImageSpeed = recoilAnimLength / recoilTime;
 
-    reloadAnimLength = sprite_get_number(reloadSprite)/2;
-    reloadImageSpeed = reloadAnimLength/reloadTime;
+    reloadAnimLength = sprite_get_number(reloadSprite) / 2;
+    reloadImageSpeed = reloadAnimLength / reloadTime;
 ');
 
 
-object_event_add(ThrowableWeapon, ev_alarm, 5,'
+object_event_add(ThrowableWeapon, ev_alarm, 5, '
     event_inherited();
 
     ammoCount = maxAmmo;
     if meterCount != -1 meterCount = maxMeter;
 ');
 
-object_event_add(ThrowableWeapon,ev_step,ev_step_normal,'
-    image_index = owner.team+2*real(ammoCount);
+object_event_add(ThrowableWeapon, ev_step, ev_step_normal, '
+    image_index = owner.team+2 * real(ammoCount);
 ');
 
-object_event_add(ThrowableWeapon, ev_other, ev_user1,'
+object_event_add(ThrowableWeapon, ev_other, ev_user1, '
     if(ammoCount >= 1 && readyToShoot) {
-        playsound(x,y,swingSnd);
+        playsound(x, y, swingSnd);
         ammoCount -= max(0, ammoCount-1); 
         shot = instance_create(x,y + yoffset + 1,throwProjectile);
-        if (randomDir) shot.direction=owner.aimDirection+ random(projectileDir[0])-projectileDir[1]; else shot.direction=owner.aimDirection;
-        shot.speed=projectileSpeed;
-        shot.owner=owner;
+        if (randomDir) shot.direction = owner.aimDirection + random(projectileDir[0]) - projectileDir[1]; else shot.direction = owner.aimDirection;
+        shot.speed = projectileSpeed;
+        shot.owner = owner;
         shot.ownerPlayer=ownerPlayer;
-        shot.team=owner.team;
+        shot.team = owner.team;
         with(shot)
-            hspeed+=owner.hspeed;
+            hspeed += owner.hspeed;
         ammoCount = max(0, ammoCount-1);
         
         alarm[5] = reloadBuffer + reloadTime;
@@ -76,7 +75,7 @@ object_event_add(ThrowableWeapon, ev_other, ev_user1,'
     }
 ');
 
-object_event_add(ThrowableWeapon,ev_draw,0,'
+object_event_add(ThrowableWeapon, ev_draw, 0, '
     if (distance_to_point(view_xview + view_wview/2, view_yview + view_hview/2) > 800)
         exit;
 

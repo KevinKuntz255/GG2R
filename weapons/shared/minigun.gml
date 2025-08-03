@@ -11,7 +11,7 @@ object_event_add(MinigunWeapon, ev_create, 0, '
     reloadBuffer = 15;
     weaponGrade = UNIQUE;
     weaponType = MINIGUN;
-    idle=true;
+    idle = true;
     depth = -1;
 
     damSource = DAMAGE_SOURCE_MINIGUN;
@@ -36,15 +36,15 @@ object_event_add(MinigunWeapon, ev_create, 0, '
 
     //play at least 2 frames
     recoilTime = 3;
-    recoilAnimLength = sprite_get_number(recoilSprite)/2;
-    recoilImageSpeed = recoilAnimLength/recoilTime;
+    recoilAnimLength = sprite_get_number(recoilSprite) / 2;
+    recoilImageSpeed = recoilAnimLength / recoilTime;
 ');
 
-object_event_add(MinigunWeapon, ev_alarm, 5,'
+object_event_add(MinigunWeapon, ev_alarm, 5, '
     isRefilling = true;
 ');
 
-object_event_add(MinigunWeapon, ev_alarm, 6,'
+object_event_add(MinigunWeapon, ev_alarm, 6, '
     //Reset the sprite
     sprite_index = normalSprite;
     image_speed = 0;

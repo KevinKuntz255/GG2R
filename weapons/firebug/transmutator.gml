@@ -3,93 +3,14 @@ WEAPON_TRANSMUTATOR = 82;
 
 globalvar Transmutator;
 Transmutator = object_add();
-object_set_parent(Transmutator, Weapon);
+object_set_parent(Transmutator, FlameWeapon);
 
 object_event_add(Transmutator,ev_create,0,'
     xoffset = -3;
     yoffset = 6;
-    refireTime = 1;
+    spriteBase = "Transmutator";
     event_inherited();
-    blastDistance = 150;
-    blastAngle = 75;
-    blastStrength = 28;
-    characterBlastStrength = 15;
-    blastNoFlameTime = 15;
-    blastReloadTime = 35;
-    flareReloadTime = 55;
-    alarm[1] = blastReloadTime;
-    alarm[2] = flareReloadTime / global.delta_factor;
-    readyToBlast = false;
-    readyToFlare = false;
-    justBlast = false;
-    
-    maxAmmo = 200
-    ammoCount = maxAmmo;
-    soundLoopTime = 30;
-    currentTime = 0;
-    
-    reloadBuffer = 15;
-    isRefilling = false;
-    unscopedDamage = 0;
-
-    normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\TransmutatorS.png", 2, 1, 0, 8, 2);
-    recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\TransmutatorFS.png", 2, 1, 0, 8, 2);
-    blastSprite = sprite_add(pluginFilePath + "\randomizer_sprites\TransmutatorS.png", 2, 1, 0, 8, 2);
-    dropSprite = sprite_add(pluginFilePath + "\randomizer_sprites\TransmutatorS.png", 2, 1, 0, 8, 2);
-    reloadSprite = -1;
-
-    sprite_index = normalSprite;
-    
-    //play at least 2 frames
-    recoilTime = 3;
-    recoilAnimLength = sprite_get_number(recoilSprite)/2;
-    recoilImageSpeed = recoilAnimLength/recoilTime;
-    
-    blastAnimLength = sprite_get_number(blastSprite)/2;
-    blastImageSpeed = blastAnimLength/blastNoFlameTime;
-
-    dropTime = 4;
-    dropAnimLength = sprite_get_number(dropSprite)/2;
-    dropImageSpeed = dropAnimLength/dropTime;
-');
-
-object_event_add(Transmutator,ev_other,ev_user1,'
-    {
-        var newx, newy;
-        newx = x+lengthdir_x(25,owner.aimDirection);
-        newy = y+lengthdir_y(25,owner.aimDirection) + owner.equipmentOffset;
-        // prevent sputtering
-        if (ammoCount < 1.8)
-            ammoCount -= 1.8;
-        if (readyToShoot and ammoCount >= 1.8
-            and !collision_line_bulletblocking(x,y,newx,newy))
-        {
-            if(alarm[3] <= 0)
-                loopsoundstart(x,y,FlamethrowerSnd);
-            else
-                loopsoundmaintain(x,y,FlamethrowerSnd);
-            alarm[3] = 2 / global.delta_factor;
-            
-            var shot, calculatedspread;
-            randomize();
-            calculatedspread = sign(random(2)-1)*power(random(3), 1.8);
-            calculatedspread *= 1 - hspeed/owner.basemaxspeed;
-            shot = createShot(newx, newy, Flame, DAMAGE_SOURCE_FLAMETHROWER, owner.aimDirection+calculatedspread,6.5+random(3.5));
-            with(shot)
-                motion_add(owner.direction, owner.speed);
-            
-            justShot=true;
-            readyToShoot=false;
-            isRefilling = false;
-            ammoCount -= 1.8;
-            
-            if (ammoCount > 0)
-                alarm[0] = refireTime / global.delta_factor;
-            else
-                alarm[0] = reloadBuffer*2 / global.delta_factor;
-            alarm[5] = reloadBuffer / global.delta_factor;
-        }
-    }
+    durationIncrease = 10.2;
 ');
 
 object_event_add(Transmutator,ev_other,ev_user2,'
@@ -270,42 +191,6 @@ object_event_add(Transmutator,ev_other,ev_user2,'
             alarm[0]=blastNoFlameTime / global.delta_factor;
             ammoCount -= 40;
         }
-    }
-');
-
-object_event_add(Transmutator,ev_draw,0,'
-    if(owner.taunting)
-        exit;
-        
-    var imageOffset, xdrawpos, ydrawpos;
-    imageOffset = owner.team;
-    xdrawpos = round(x+xoffset*image_xscale);
-    ydrawpos = round(y+yoffset) + owner.equipmentOffset;
-    if (alarm[6] <= 0){
-        if (alarm[7] > 0) {
-            //if we are not shooting but airblasting/dropping
-            if (sprite_index == dropSprite) {
-                imageOffset = floor(image_index mod dropAnimLength) + dropAnimLength*owner.team
-            }else if (sprite_index == blastSprite){
-                imageOffset = floor(image_index mod blastAnimLength) + blastAnimLength*owner.team
-            }
-        }else{
-            //set the sprite to idle
-            imageOffset = owner.team;
-        }
-    }else{
-        //We are shooting loop the shoot animation
-        imageOffset = floor(image_index mod recoilAnimLength) + recoilAnimLength*owner.team
-    }
-
-
-    if !owner.player.humiliated draw_sprite_ext(sprite_index,imageOffset, xdrawpos, ydrawpos, image_xscale, image_yscale, image_angle, c_white, 1);
-    if (owner.ubered) {
-        if owner.team == TEAM_RED
-            ubercolour = c_red;
-        else if owner.team == TEAM_BLUE
-            ubercolour = c_blue;
-        draw_sprite_ext(sprite_index,imageOffset,round(x+xoffset*image_xscale),round(y+yoffset),image_xscale,image_yscale,image_angle,ubercolour,0.7*image_alpha);
     }
 ');
 

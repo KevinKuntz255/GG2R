@@ -9,24 +9,23 @@ execute_file(pluginFilePath + "\projectile_init.gml");	//Creates projectile obje
 
 // TODO: make a method that goes over each file in the weapons dir and adds them automatically
 execute_file(pluginFilePath + "\weapons\shared\scattergun.gml");
-//execute_file(pluginFilePath + "\weapons\shared\flamethrower.gml");
+execute_file(pluginFilePath + "\weapons\shared\flamethrower.gml");
 execute_file(pluginFilePath + "\weapons\shared\rocketlauncher.gml");
 execute_file(pluginFilePath + "\weapons\shared\minigun.gml");
 //execute_file(pluginFilePath + "\weapons\shared\minegun.gml");
 execute_file(pluginFilePath + "\weapons\shared\shotgun.gml");
-//execute_file(pluginFilePath + "\weapons\shared\revolver.gml");
+execute_file(pluginFilePath + "\weapons\shared\revolver.gml");
 execute_file(pluginFilePath + "\weapons\shared\rifle.gml");
 execute_file(pluginFilePath + "\weapons\shared\pistol.gml");
 //execute_file(pluginFilePath + "\weapons\shared\grenadelauncher.gml");
 //execute_file(pluginFilePath + "\weapons\shared\needlegun.gml");
 //execute_file(pluginFilePath + "\weapons\shared\healbeam.gml");
 //execute_file(pluginFilePath + "\weapons\shared\nailgun.gml");
-//execute_file(pluginFilePath + "\weapons\shared\knife.gml");
 execute_file(pluginFilePath + "\weapons\shared\smg.gml");
 execute_file(pluginFilePath + "\weapons\shared\melee.gml");
 execute_file(pluginFilePath + "\weapons\shared\throwable.gml");
 execute_file(pluginFilePath + "\weapons\shared\flashlight.gml");
-//execute_file(pluginFilePath + "\weapons\shared\flaregun.gml");
+execute_file(pluginFilePath + "\weapons\shared\flaregun.gml");
 execute_file(pluginFilePath + "\weapons\shared\lasergun.gml");
 //execute_file(pluginFilePath + "\weapons\shared\banner.gml");
 execute_file(pluginFilePath + "\weapons\shared\consumable.gml");

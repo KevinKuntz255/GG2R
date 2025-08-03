@@ -3,9 +3,9 @@ ConsumableWeapon = object_add();
 object_set_parent(ConsumableWeapon, Weapon);
 
 object_event_add(ConsumableWeapon, ev_create, 0, '
-    xoffset=-12;
-    yoffset=3;
-    refireTime=18;
+    xoffset = -12;
+    yoffset = 3;
+    refireTime = 18;
     event_inherited();
     //owner.expectedWeaponBytes = 3; risky
 
@@ -33,27 +33,27 @@ object_event_add(ConsumableWeapon, ev_create, 0, '
     image_speed = 0;
 
     recoilTime = refireTime;
-    recoilAnimLength = sprite_get_number(recoilSprite)/2;
-    recoilImageSpeed = recoilAnimLength/recoilTime;
+    recoilAnimLength = sprite_get_number(recoilSprite) / 2;
+    recoilImageSpeed = recoilAnimLength / recoilTime;
 
-    reloadAnimLength = sprite_get_number(reloadSprite)/2;
-    reloadImageSpeed = reloadAnimLength/reloadTime;
+    reloadAnimLength = sprite_get_number(reloadSprite) / 2;
+    reloadImageSpeed = reloadAnimLength / reloadTime;
 ');
 
 
-object_event_add(ConsumableWeapon, ev_alarm, 5,'
+object_event_add(ConsumableWeapon, ev_alarm, 5, '
     event_inherited();
 
     ammoCount = maxAmmo;
     if meterCount != -1 meterCount = maxMeter;
 ');
 
-object_event_add(ConsumableWeapon,ev_step,ev_step_normal,'
+object_event_add(ConsumableWeapon, ev_step, ev_step_normal, '
     image_index = owner.team+2*real(owner.canEat);
 ');
 
 
-object_event_add(ConsumableWeapon,ev_draw,0,'
+object_event_add(ConsumableWeapon, ev_draw, 0, '
     if (distance_to_point(view_xview + view_wview/2, view_yview + view_hview/2) > 800)
         exit;
 

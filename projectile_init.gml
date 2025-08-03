@@ -21,7 +21,7 @@ object_event_add(RadioBlur,ev_draw,0,'
 		a = 0
 		while a < 12 {
 			old_pos[a,0] = x;
-			old_pos[a,1] = y;  
+			old_pos[a,1] = y;
 			a += 1;
 		}
 	}
@@ -493,13 +493,13 @@ object_event_add(DetonationFlare,ev_other,ev_user5,'
                 rdir = point_direction(other.x,other.y,x,y);
                 vectorfactor = point_distance(0, 0, power(sin(degtorad(rdir)), 2), power(cos(degtorad(rdir)), 2));
                 motion_add(rdir, min(15, other.knockback-other.knockback*(distance_to_object(other)/other.blastRadius)) * vectorfactor);
-                if(other.team != team or id==other.ownerPlayer.object) && !ubered and hp > 0 && true
+                if(other.team != team or id==other.ownerPlayer.object) && !ubered and hp > 0
                 {
                     bonus = 1;
                     if burnDuration > 0 {
                         //if other.crit == 1 bonus = MINICRIT_FACTOR;
                     }
-                    if(!object_is_ancestor(object_index, Pyro) && true) {
+                    if(!object_is_ancestor(object_index, Pyro) && !radioactive) {
                         if (burnDuration < maxDuration) {
                             burnDuration += other.durationIncrease; 
                             burnDuration = min(burnDuration, maxDuration);
@@ -512,10 +512,11 @@ object_event_add(DetonationFlare,ev_other,ev_user5,'
                         afterburnSource = WEAPON_DETONATOR;
                         alarm[0] = decayDelay;
                     }
-					if (player != other.ownerPlayer) damageCharacter(ownerPlayer.object, other.id, other.explosionDamage*sqr((1-(distance_to_object(other)/other.blastRadius)))*(1+0*0.35)*1*bonus);
+					if (player != other.ownerPlayer) damageCharacter(other.ownerPlayer, id, other.explosionDamage*sqr((1-(distance_to_object(other)/other.blastRadius)))*(1+0*0.35)*1*bonus);
 					else if (player == other.ownerPlayer)
-						damageCharacter(ownerPlayer.object, other.id, 10*sqr((1-(distance_to_object(other)/other.blastRadius)))*(1+0*0.35)*1);
-                    
+						damageCharacter(other.ownerPlayer, other.ownerPlayer.object, 10*sqr((1-(distance_to_object(other)/other.blastRadius)))*(1+0*0.35)*1);
+                    // todo: ownerPlayer gets afterburn for a lil while, fix that
+
 					//if true hp -= other.explosionDamage*sqr((1-(distance_to_object(other)/other.blastRadius)))*(1+0*0.35)*1*bonus;
                     //if player == other.ownerPlayer hp-= 10*sqr((1-(distance_to_object(other)/other.blastRadius)))*(1+0*0.35)*1;
                     
@@ -542,7 +543,7 @@ object_event_add(DetonationFlare,ev_other,ev_user5,'
                             lastDamageSource = WEAPON_REFLECTED_FLARE;
                         }
                     }
-                    if(global.gibLevel > 0 && !other.radioactive)
+                    if(global.gibLevel > 0 && !radioactive)
                     {
                         repeat(3)
                         {
@@ -1951,23 +1952,22 @@ object_event_add(JarOPiss,ev_other,ev_user2,'
 
 	with (Character) {
 		if (distance_to_object(other) < other.blastRadius and !(team == other.team and id != other.ownerPlayer.object and place_meeting(x, y+1, Obstacle))){
-			if(other.team != team) && !ubered and hp > 0 && !radioactive {
-                    soaked = true;
-                    for(i=0; i<3; i+=1) {
-                        if (soakType[i] == -1 && soakType[i] != piss) soakType[i] = piss; // Test later
-                    }
-					pissed=1; // in modern context this variable name is making me laugh
-					alarm[8]=250-distance_to_object(other);
-					cloak=false; 
-					if instance_exists(other.ownerPlayer) {
-						other.ownerPlayer.object.hp = min(other.ownerPlayer.object.maxHp, other.ownerPlayer.object.hp+20);
-					}       
+			if(other.team != team) && !ubered and hp > 0 {
+                if radioactive {
+                    var text;
+                    text=instance_create(x,y,Text);
+                    text.sprite_index=MissS;
+                    exit;
+                }
+                soaked = true;
+                for(i=0; i<3; i+=1) {
+                    if (soakType[i] == -1 && soakType[i] != piss) soakType[i] = piss; // Test later
+                }
+				pissed=1; // in modern context this variable name is making me laugh
+				alarm[8]=250-distance_to_object(other);
+				cloak=false;    
 			}
-			if radioactive {
-				var text;
-				text=instance_create(x,y,Text);
-				text.sprite_index=MissS;
-			}
+
 			lastDamageDealer = other.ownerPlayer;
 			lastDamageSource = -1;
 			//lastDamageCrit = other.crit;
