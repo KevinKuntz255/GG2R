@@ -1293,12 +1293,6 @@ object_event_add(Sniper,ev_create,0,'
 	weapons[1] = global.weapons[real(string_copy(string(global.sniperLoadout), 4, 2))];
 	haxxyStatue = SniperHaxxyStatueS;
 
-	// boots. add to every class once randomizerMode is implemented
-
-	checkWeapon = instance_create(object.x,object.y,object.weapons[1]);
-	if (checkWeapon.weaponType == WEAR) canSwitch = false;
-	with(checkWeapon) instance_destroy();
-
 	if (global.paramPlayer.team == TEAM_RED)
 	{
 	    sprite_index = SniperRedS;
@@ -1594,7 +1588,14 @@ object_event_add(PlayerControl,ev_step,ev_step_end,'
 
 	                    global.paramOwner = object;
 	                    object.currentWeapon = instance_create(object.x,object.y,object.weapons[0]);
-	                    global.paramOwner = noone;
+	                    // check for rocket boots
+						var checkWeapon;
+						checkWeapon = instance_create(0,0,weapons[1]);
+						if (checkWeapon.weaponType == WEAR) object.canSwitch = false;
+						with(checkWeapon) instance_destroy();
+
+	                    global.paramOwner = noone
+
 	                }
 	                if(object.weapons[1] != global.weapons[real(string_copy(string(playerLoadout), 4, 2))]){
 	                    object.weapons[1] = global.weapons[real(string_copy(string(playerLoadout), 4, 2))];

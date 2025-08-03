@@ -6,6 +6,8 @@ Shiv = object_add();
 object_set_parent(Shiv, MeleeWeapon);
 
 object_event_add(Shiv,ev_create,0,'
+    xoffset=6 - 32;
+    yoffset=-8 - 32;
     spriteBase = "Shiv";
     event_inherited();
 ');

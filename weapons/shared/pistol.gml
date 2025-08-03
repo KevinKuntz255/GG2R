@@ -1,35 +1,37 @@
-globalvar ShotgunWeapon;
-ShotgunWeapon = object_add();
-object_set_parent(ShotgunWeapon, Weapon);
+globalvar PistolWeapon;
+PistolWeapon = object_add();
+object_set_parent(PistolWeapon, Weapon);
 
-object_event_add(ShotgunWeapon, ev_create, 0, '
-    if (!variable_local_exists("refireTime")) refireTime = 20;
+object_event_add(PistolWeapon, ev_create, 0, '
+    xoffset=0;
+    yoffset=2;
+    refireTime=5;
     event_inherited();
-    maxAmmo = 6;
+    maxAmmo = 12;
     ammoCount = maxAmmo;
-    reloadTime = 15;
-    reloadBuffer = 20;
+    reloadTime = 20;
+    reloadBuffer = 5;
     weaponGrade = UNIQUE;
-    weaponType = SHOTGUN;
+    weaponType = PISTOL;
     idle=true;
 
     damSource = DAMAGE_SOURCE_SHOTGUN;
 
     specialShot = -1;
     shots = 5;
-    shotSpeed[0] = 4;
-    shotSpeed[1] = 2;
-    shotDir[0] = 11;
-    shotDir[1] = 5;
+    shotSpeed[0] = 7;
+    shotSpeed[1] = 4;
+    shotDir[0] = 7;
+    shotDir[1] = 4;
 
     shotDamage = 7;
-    fullReload = false;
+    fullReload = true;
 
-    if (!variable_local_exists("spriteBase")) spriteBase = "Shotgun";
+    if (!variable_local_exists("spriteBase")) spriteBase = "Pistol";
 
-    normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\" + spriteBase + "S.png", 2, 1, 0, 8, -1);
-    recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\" + spriteBase + "FS.png", 4, 1, 0, 8, -1);
-    reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\" + spriteBase + "FRS.png", 16, 1, 0, 20, 11);
+    normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\" + spriteBase + "S.png", 2, 1, 0, 8, 7);
+    recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\" + spriteBase + "FS.png", 4, 1, 0, 8, 7);
+    reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\" + spriteBase + "FRS.png", 16, 1, 0, 10, 12);
 
     sprite_index = normalSprite;
 
@@ -38,15 +40,23 @@ object_event_add(ShotgunWeapon, ev_create, 0, '
     recoilImageSpeed = recoilAnimLength/recoilTime;
 
     reloadAnimLength = sprite_get_number(reloadSprite)/2;
-    reloadImageSpeed = reloadAnimLength/reloadTime;
+    reloadImageSpeed = reloadAnimLength / reloadTime;
 ');
 
-object_event_add(ShotgunWeapon, ev_alarm, 5,'
+object_event_add(PistolWeapon, ev_alarm, 5,'
     event_inherited();
 
     if (ammoCount < maxAmmo)
     {
         if fullReload ammoCount = maxAmmo; else ammoCount += 1;
+
+        if (global.particles == PARTICLES_NORMAL)
+        {
+            var shell;
+            shell = instance_create(x, y, Shell);
+            shell.direction = owner.aimDirection + (140 - random(40)) * image_xscale;
+            shell.image_index = 1;
+        }
     }
     if (ammoCount < maxAmmo)
     {
@@ -57,16 +67,7 @@ object_event_add(ShotgunWeapon, ev_alarm, 5,'
     }
 ');
 
-object_event_add(ShotgunWeapon, ev_alarm, 7,'
-    if (global.particles == PARTICLES_NORMAL) {
-        var shell;
-        shell = instance_create(x, y, Shell);
-        shell.direction = owner.aimDirection + (140 - random(40)) * image_xscale;
-        shell.image_index = 1;
-    }
-');
-
-object_event_add(ShotgunWeapon, ev_other, ev_user1,'
+object_event_add(PistolWeapon, ev_other, ev_user1,'
     if(readyToShoot and ammoCount > 0 and global.isHost)
     {
         var seed;
@@ -76,23 +77,23 @@ object_event_add(ShotgunWeapon, ev_other, ev_user1,'
     }
 ');
 
-object_event_add(ShotgunWeapon, ev_other, ev_user3, '
+object_event_add(PistolWeapon, ev_other, ev_user3, '
     ammoCount = max(0, ammoCount-1);
-    playsound(x,y,ShotgunSnd);
+    playsound(x,y,pistolSnd);
     var shot;
-    repeat(shots) {
+
         if (specialShot != -1) shot = createShot(x, y, specialShot, damSource, owner.aimDirection, 13); else shot = createShot(x, y, Shot, damSource, owner.aimDirection, 13);
         shot.hitDamage = shotDamage;
-        if(golden)
-            shot.sprite_index = ShotGoldS;
         shot.hspeed += owner.hspeed;
-        shot.speed += random(shotSpeed[0])-shotSpeed[1];
+        shot.speed = 13;
         shot.direction += random(shotDir[0])-shotDir[1];
         // Move shot forward to avoid immediate collision with a wall behind the character
         shot.x += lengthdir_x(15, shot.direction);
         shot.y += lengthdir_y(15, shot.direction);
+        shot.alarm[0] = 35 * ((min(1, abs(cos(degtorad(owner.aimDirection)))*13
+                          /abs(cos(degtorad(owner.aimDirection))*13+owner.hspeed))-1)/2+1)
+                    / global.delta_factor;
         shot.weapon = id;
-    }
     justShot=true;
     readyToShoot=false;
     alarm[0] = refireTime / global.delta_factor;

@@ -22,7 +22,7 @@ execute_file(pluginFilePath + "\weapons\shared\pistol.gml");
 //execute_file(pluginFilePath + "\weapons\shared\healbeam.gml");
 //execute_file(pluginFilePath + "\weapons\shared\nailgun.gml");
 //execute_file(pluginFilePath + "\weapons\shared\knife.gml");
-//execute_file(pluginFilePath + "\weapons\shared\smg.gml");
+execute_file(pluginFilePath + "\weapons\shared\smg.gml");
 execute_file(pluginFilePath + "\weapons\shared\melee.gml");
 //execute_file(pluginFilePath + "\weapons\shared\throwable.gml");
 //execute_file(pluginFilePath + "\weapons\shared\flashlight.gml");

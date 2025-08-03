@@ -2265,9 +2265,9 @@ object_event_add(Shot,ev_collision,Character,'
 
     if(other.id != ownerPlayer.object and other.team != team  && other.hp > 0 && other.ubered == 0 && !other.radioactive)
     {
-        switch(other.weapon.object_index){
+        switch(weapon.object_index) {
             case Reserveshooter:
-                if (other.onground) {
+                if (!other.onground && other.moveStatus == 1) { // If you've successfully sent an enemy up
                     hitDamage += 15;
                     var text;
                     text=instance_create(x,y,Text);

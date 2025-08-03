@@ -25,7 +25,7 @@ object_event_add(ScattergunWeapon, ev_create, 0, '
 
     fullReload = false;
 
-    if (!variable_local_exists("spriteBase")) spriteBase = "Scattergun";
+    if (spriteBase = -1) spriteBase = "Scattergun";
 
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\" + spriteBase + "S.png", 2, 1, 0, 8, -1);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\" + spriteBase + "FS.png", 4, 1, 0, 8, -1);
@@ -89,6 +89,7 @@ object_event_add(ScattergunWeapon, ev_other, ev_user3, '
         shot.x += lengthdir_x(15, shot.direction);
         shot.y += lengthdir_y(15, shot.direction);
         shot.alarm[0] = 35 * ((min(1, abs(cos(degtorad(owner.aimDirection)))*13/abs(cos(degtorad(owner.aimDirection))*13+owner.hspeed))-1)/2+1) / global.delta_factor;
+        shot.weapon = id;
     }
     justShot = true;
     readyToShoot = false;

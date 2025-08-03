@@ -3,11 +3,11 @@ WEAPON_KUKRI = 27;
 
 globalvar Kukri;
 Kukri = object_add();
-object_set_parent(Kukri, Weapon);
+object_set_parent(Kukri, MeleeWeapon);
 
 object_event_add(Kukri,ev_create,0,'
-    xoffset=6;
-    yoffset=-8;
+    xoffset=6 - 32;
+    yoffset=-8 - 32;
     spriteBase = "Kukri";
     event_inherited();
 ');
