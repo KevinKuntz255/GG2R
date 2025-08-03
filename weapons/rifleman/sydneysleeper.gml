@@ -3,45 +3,21 @@ WEAPON_SYDNEYSLEEPER = 24;
 
 globalvar SydneySleeper;
 SydneySleeper = object_add();
-object_set_parent(SydneySleeper, Weapon);
+object_set_parent(SydneySleeper, RifleWeapon);
 
 object_event_add(SydneySleeper,ev_create,0,'
-    xoffset = -1;
-    yoffset = -4;
-    refireTime = 40;
+    spriteBase = "SydneySleeper";
     event_inherited();
-    reloadTime = 40;
     unscopedDamage = 30;
     baseDamage = 40;
     maxDamage = 65;
-    chargeTime = 105;
-    hitDamage=baseDamage;
-    maxAmmo = 1;
-    ammoCount = maxAmmo;
-    shot=false;
-    t=0;
-    bonus = 0;
 
     target = noone;
 
-    weaponGrade = UNIQUE;
-    weaponType = RIFLE;
-
-    normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\SydneySleeperS.png", 2, 1, 0, 4, 4);
-    recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\SydneySleeperFS.png", 4, 1, 0, 4, 4);
     reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\SydneySleeperS.png", 2, 1, 0, 4, 4);
 
-    sprite_index = normalSprite;
-
-    recoilTime = 15;
-    recoilAnimLength = sprite_get_number(recoilSprite)/2
-    recoilImageSpeed = recoilAnimLength/recoilTime
-
-    longRecoilTime = 60;
     reloadAnimLength = sprite_get_number(reloadSprite)/2
     reloadImageSpeed = reloadAnimLength/(longRecoilTime);
-    
-    tracerAlpha = 0;
 ');
 
 object_event_add(SydneySleeper,ev_other,ev_user3,'

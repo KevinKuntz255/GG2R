@@ -1542,7 +1542,7 @@ object_event_add(SpecialHud,ev_draw,0,'
     }
 ');
 
-checkedWeapon = false;
+global.checkedWeapon = false;
 //Handles swapping out loadout weapons and the active weapon shown
 object_event_clear(PlayerControl,ev_step,ev_step_end);
 object_event_add(PlayerControl,ev_step,ev_step_end,'
@@ -1590,12 +1590,12 @@ object_event_add(PlayerControl,ev_step,ev_step_end,'
 	                    global.paramOwner = object;
 	                    object.currentWeapon = instance_create(object.x,object.y,object.weapons[0]);
 	                    // check for rocket boots
-	                    if (!checkedWeapon) {
+	                    if (!global.checkedWeapon) {
 						var checkWeapon;
 						checkWeapon = instance_create(0,0,weapons[1]);
 						if (checkWeapon.weaponType == WEAR) object.canSwitch = false;
 						with(checkWeapon) instance_destroy();
-						checkedWeapon = false;
+						global.checkedWeapon = false;
 						}
 	                    global.paramOwner = noone
 

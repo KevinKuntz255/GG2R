@@ -77,6 +77,7 @@ ds_map_add(global.weaponTypes, MACHINEGUN, MACHINEGUN);
 
 // Sounds
 globalvar SwitchSnd, FlashlightSnd, swingSnd, BallSnd, DirecthitSnd, ManglerChargesnd, LaserShotSnd, BowSnd, ChargeSnd, FlaregunSnd, BuffbannerSnd, CritSnd, ShotSnd;
+globalvar chaingunSnd, pistolSnd; // had to move due to undebuggable errors, also in lowercase due to the same problem, soom you figure it out.
 SwitchSnd = sound_add(directory + '/randomizer_sounds/switchSnd.wav', 0, 1);
 FlashlightSnd = sound_add(directory + '/randomizer_sounds/FlashlightSnd.wav', 0, 1);
 swingSnd = sound_add(directory + '/randomizer_sounds/swingSnd.wav', 0, 1);
@@ -90,8 +91,11 @@ FlaregunSnd = sound_add(directory + '/randomizer_sounds/FlaregunSnd.wav', 0, 1);
 BuffbannerSnd = sound_add(directory + '/randomizer_sounds/BuffbannerSnd.wav', 0, 1);
 CritSnd = sound_add(directory + '/randomizer_sounds/CritSnd.wav', 0, 1);
 ShotSnd = sound_add(directory + '/randomizer_sounds/ShotSnd.wav', 0, 1);
+chaingunSnd = sound_add(directory + '/randomizer_sounds/ChaingunSnd.wav', 0, 1);
+pistolSnd = sound_add(directory + '/randomizer_sounds/PistolSnd.wav', 0, 1);
 object_event_add(Weapon,ev_create,0,'
     owner.expectedWeaponBytes = 2;
+
     // necessary variables for weapons not to crash
 	//wrangled = false;
 	readyToStab=false;
@@ -102,6 +106,7 @@ object_event_add(Weapon,ev_create,0,'
     //speedboost=0;
     lobbed = 0;
 	baseDamage=-1; // stops crashing when youre zooming in
+    unscopedDamage = -1; // this too
 
     abilityActive = false;
     abilityVisual = "";
