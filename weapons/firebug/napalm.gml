@@ -8,6 +8,7 @@ object_set_parent(NapalmHand, ThrowableWeapon);
 object_event_add(NapalmHand,ev_create,0,' //do this later
     xoffset=2;
     yoffset=-2;
+    spriteBase = "napalmHand";
     event_inherited();
     reloadTime = 240;
 

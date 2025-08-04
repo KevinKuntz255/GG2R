@@ -1718,6 +1718,7 @@ object_event_add(NapalmGrenade,ev_create,0,'
 		image_speed=0;
 		crit = 1;
 		used=0;
+        vis_angle = 0;
 		sprite_index = sprite_add(pluginFilePath + "\randomizer_sprites\NapalmS.png", 1, 1, 0, 3, 3);
         mask_index = sprite_index;
     }
@@ -1730,6 +1731,7 @@ object_event_add(NapalmGrenade,ev_alarm,2,'
 		//sendNapalm(ds_list_find_index(global.players,ownerPlayer),x,y);
 		//doNapalm(ownerPlayer,x,y);
 		// implement later
+        instance_destroy();
 	} else alarm[3] = 60 //the server has 2 seconds to send the detonation event. if it didnt happen after that just destroy the grenade
 ');
 object_event_add(NapalmGrenade,ev_alarm,3,'
@@ -1737,29 +1739,34 @@ object_event_add(NapalmGrenade,ev_alarm,3,'
 ');
 object_event_add(NapalmGrenade,ev_step,ev_step_normal,'
     wallSetSolid();
-	if(abs(vspeed)<0.2) {
-		vspeed=0;
-	}
-	if(abs(rotspeed) < 0.2) {
-		rotspeed=0
-	}
+    if(abs(vspeed)<0.2) {
+        vspeed=0;
+    }
 
-	image_angle += rotspeed;
-
-	if(place_free(x,y+1)) {
-		vspeed += 0.7 * global.delta_factor;
-    } else {
+    if (place_free(x, y+1))
+        vspeed += 0.7 * global.delta_factor;
+    else
+    {
         vspeed = min(vspeed, 0);
         hspeed = hspeed * delta_mult(0.9);
     }
     if (vspeed > 11)
         vspeed = 11;
-	image_angle-=hspeed*2.5
-	
-	if(!place_free(x+hspeed, y+vspeed)){
-        hspeed*=hfric;
-        rotspeed*=rotfric;
-        collided=true;
+        
+    if (speed < 0.2)
+        speed = 0;
+    if (abs(rotspeed) < 0.2)
+        rotspeed = 0;
+    
+    //rotspeed *= power(0.97, global.delta_factor);
+    
+    vis_angle += rotspeed * global.delta_factor;
+    //image_angle = vis_angle;
+    
+    if(!place_free(x+hspeed, y+vspeed)){
+        hspeed *= hfric;
+        rotspeed *= rotfric;
+        collided = true;
 
         wallSetSolid();
 
@@ -1784,17 +1791,18 @@ object_event_add(NapalmGrenade,ev_step,ev_step_normal,'
             }
         }
     }
-	
-	if (speed > 0)
+    
+    if (speed > 0)
         if (point_distance(x,y,view_xview[0],view_yview[0]) > 2000)
             instance_destroy();
-			
-	x += hspeed * global.delta_factor;
+    
+    x += hspeed * global.delta_factor;
     y += vspeed * global.delta_factor;
     x -= hspeed;
     y -= vspeed;
-	
-	wallUnsetSolid();
+
+
+    wallUnsetSolid();
 ');
 object_event_add(NapalmGrenade,ev_collision,Character,'
 	if(team != other.team) {
@@ -1849,7 +1857,7 @@ object_event_add(NapalmGrenade,ev_collision,Generator,'
 object_event_add(NapalmGrenade,ev_draw,0,'
 	if team == TEAM_RED color = c_orange;
 	else color = c_aqua;   
-    draw_sprite_ext(sprite_index,0,x,y,image_xscale,image_yscale,image_angle,color,1);
+    draw_sprite_ext(sprite_index,0,x,y,image_xscale,image_yscale,vis_angle,color,1);
 ');
 globalvar JarOPiss, Piss;
 JarOPiss = object_add();
@@ -1889,6 +1897,7 @@ object_event_add(JarOPiss,ev_step,ev_step_normal,'
 	if(abs(rotspeed) < 0.2) {
 		rotspeed=0;
 	}
+
 	image_angle += rotspeed;
 	if(place_free(x,y+1)) {
 		vspeed += 0.7;
@@ -1896,6 +1905,7 @@ object_event_add(JarOPiss,ev_step,ev_step_normal,'
 	if(vspeed>11) {
 		vspeed=11;
 	}
+    
 	image_angle-=hspeed*2.5;
 ');
 object_event_add(JarOPiss,ev_collision,BulletWall,'

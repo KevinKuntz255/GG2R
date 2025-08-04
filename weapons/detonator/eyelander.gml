@@ -14,8 +14,11 @@ object_event_add(Eyelander,ev_create,0,'
     lobbed = 0;
 
     abilityVisual = "WEAPON BLUR";
+    ability = DASH;
+    //owner.ability = DASH;
 
 	hasMeter = true;
+    hasAbility = true;
 	meterName = "CHARGE";
 	meterCount = 100;
 	maxMeter = 100;
@@ -23,7 +26,7 @@ object_event_add(Eyelander,ev_create,0,'
 
 object_event_add(Eyelander,ev_destroy,0,'
 	event_inherited();
-	charging = 0;
+	abilityActive = false;
 	owner.jumpStrength = 8+(0.6/2);
 ');
 
@@ -64,7 +67,7 @@ object_event_add(Eyelander,ev_step,ev_step_normal,'
 	if (abilityActive) {
         owner.jumpStrength = 0;
         if (owner.moveStatus != 4) meterCount -= 2; else if (owner.moveStatus == 4) meterCount -= 0.8; // lol, I am crazy for this one
-        if meterCount <= 0 {
+        /*if meterCount <= 0 {
 			owner.jumpStrength = 8+(0.6/2);
             abilityActive = false;
         }
@@ -80,32 +83,17 @@ object_event_add(Eyelander,ev_step,ev_step_normal,'
 			} else if (owner.image_xscale == 1) {
 				owner.hspeed += 1.8 + (owner.accel * 0.1);
 			}
-		}
+		}*/
     } else {
         owner.jumpStrength = 8+(0.6/2);
         if meterCount < 0 meterCount = 0;
         else if meterCount < maxMeter meterCount +=1;
     }
 	
-    if smashing {
-        image_speed=0.3;
-        if 1 != 1 { //Removed crit here
-            if image_index >= 11{
-                image_speed=0;
-                image_index=8;
-                stabbing = false;
-            } 
-        } else if image_index >= 4*owner.team+3 {
-            image_speed=0;
-            image_index=4*owner.team;
-            stabbing = false;
-        }    
-    } else {
-        if 1 <= 1  image_index=4*owner.team;
-        else image_index = 8;
-    }
+    event_inherited();
 ');
 
+/*
 object_event_add(Eyelander,ev_other,ev_user2,'
     if (!abilityActive && !owner.cloak && meterCount >= maxMeter) {
         abilityActive = true;
@@ -122,9 +110,9 @@ object_event_add(Eyelander,ev_other,ev_user2,'
             }
         }
         playsound(x,y,ChargeSnd);
-		if (smashing != 1) readyToStab = true;
+		readyToStab = true;
     }
-');
+');*/
 
 global.weapons[WEAPON_EYELANDER] = Eyelander;
 global.name[WEAPON_EYELANDER] = "Eyelander";

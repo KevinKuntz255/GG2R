@@ -1,19 +1,18 @@
 Meters syncing throughout weapon switch (WIP)
-as a reminder SoldierLoadout does not get called properly, reverts to FAN/Scattergun, This was due to "player.playerLoadout" being -1, setting it to 0 breaks scout, commenting until later.
 Fix detonator unknown var error
 Fix SEVERE loadout menu degradation that occurs when used continuously
+ERROR: Constantly flipping through weapons causes sprites to disappear (ev_create gets skipped?)
 
 Refactor, Cleanup or Organize:
-Merge Crit-based variables Into one abilityType instead of using multiple variables (as seen on SodaPopper's hyve call)
+Merge Crit-based variables Into one abilityType instead of using multiple variables (WIP)
 add global.delta_factor checks on ALL ALARMS/meters (WIP)
 
 Kevin's High Priority:
-Finish NapalmGrenade
 add shared GrenadeLauncher type
-add shared Medic Weapons
+add shared Medic HealBeam/Needle
+Finish NapalmGrenade (nvm, tackle networking a day before playtest)
 
 make consumables (only BonkHand so far) piggyback owner.canEat as a detector
-High amount of Refactoring due to all the new variables in weapon_init and projectile_init, build for weaponType/weaponGrade (75%)
 send and read_ubyte(variable, deserializationBuffer) for many projectiles and some weapons
 send and read_ubyte(variable, deserializationBuffer) in Character events to keep meter/ammo consistent throughout weapon switches
 
@@ -35,7 +34,7 @@ Atomizer (95%) Add Tauntkill
 Rundown (optional, weapon works akin to Baby Face's Blaster)
 Pyro:
 Phlog (90%) Add Afterburn
-Snowbite (90%) Add ev_draw override for Snow
+Snowbite (90%) Add ev_draw override to Character for Snow
 Napalm Grenade (70%)
 Soldier:
 Buff Banner (90%)
@@ -62,6 +61,7 @@ Option-Based Features:
 - Allow Needles on Medic Secondaries
 - Allow Sandvich on Heavy Primary (Sandvich Is implemented via a weapon atm)
 - Allow Mines on Weapon Switch
+- Dash First or Mines/Throw Sandwich first
 Direct Features:
 - Q/C Loadout, Page and Items
 - Loadout Pages (more the merrier)

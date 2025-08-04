@@ -21,6 +21,7 @@ object_event_add(ConsumableWeapon, ev_create, 0, '
     reloadBuffer = refireTime;
 
     isThrowable = true;
+    specialProjectile = Sandvich;
 
     if (!variable_local_exists("spriteBase")) spriteBase = "SandvichHand";
 

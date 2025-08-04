@@ -29,6 +29,8 @@ object_event_add(BonkHand,ev_create,0,'
 	sprite_index = normalSprite;
 	image_speed = 0;
 	
+    isThrowable = false;
+    
 	recoilTime = refireTime;
     recoilAnimLength = sprite_get_number(recoilSprite)/2;
     recoilImageSpeed = recoilAnimLength/recoilTime;

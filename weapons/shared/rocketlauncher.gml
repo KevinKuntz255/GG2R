@@ -23,7 +23,7 @@ object_event_add(RocketWeapon, ev_create, 0, '
     rocketSpeed = 13;
     specialProjectile = Rocket; // cow mangler specific;
 
-    if (!variable_local_exists("spriteBase")) spriteBase = "Rocketlauncher";
+    if (!variable_local_exists("spriteBase")) spriteBase = "DirectHit";
 
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\"+ spriteBase +"S.png", 2, 1, 0, 10, 6);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\"+ spriteBase +"FS.png", 4, 1, 0, 10, 6);

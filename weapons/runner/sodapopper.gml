@@ -24,7 +24,7 @@ object_event_add(SodaPopper,ev_create,0,'
 	meterCount=0;
 	abilityActive = false;
     abilityVisual = "WEAPON";
-    //ability = MINICRIT;
+    owner.ability = MINICRIT;
 	
     weaponGrade = UNIQUE;
     weaponType = SCATTERGUN;

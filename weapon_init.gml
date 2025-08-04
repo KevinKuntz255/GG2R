@@ -110,7 +110,9 @@ object_event_add(Weapon,ev_create,0,'
 
     abilityActive = false;
     abilityVisual = "";
-    abilityType= -1;
+    hasAbility = false;
+
+    isThrowable = false;
 
     // weaponGrade for Unique/Stock/Special
     weaponGrade = STOCK;
@@ -127,7 +129,6 @@ object_event_add(Weapon,ev_create,0,'
 	meterName = "";
 	maxMeter=-1;
 	meterCount=-1;
-
 
 	// Implement fixed reload times by parented variables
 	with(owner) { // reminder: activeWeapon is modified before Weapon ev_create is called

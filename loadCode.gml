@@ -559,11 +559,32 @@ globalvar piss, milk, bleed;
 piss = 0;
 milk = 1;
 bleed = 2;
-global.soakTypes = ds_map_create();
 
+global.soakTypes = ds_map_create();
 ds_map_add(global.soakTypes, piss, piss);
-ds_map_add(global.weaponTypes, milk, milk);
-ds_map_add(global.weaponTypes, bleed, bleed);
+ds_map_add(global.soakTypes, milk, milk);
+ds_map_add(global.soakTypes, bleed, bleed);
+
+globalvar MINICRIT, CRIT, INVIS, DASH, FLIGHT, FLIGHT_HORIZONTAL, FLIGHT_VERTICAL, HEAL;
+MINICRIT = 0;
+CRIT = 1;
+INVIS = 2;
+DASH = 3;
+FLIGHT = 4;
+FLIGHT_HORIZONTAL = 5;
+FLIGHT_VERTICAL = 6;
+HEAL = 7;
+global.abilityTypes = ds_map_create();
+
+ds_map_add(global.abilityTypes, MINICRIT, MINICRIT);
+ds_map_add(global.abilityTypes, CRIT, CRIT);
+ds_map_add(global.abilityTypes, INVIS, INVIS);
+ds_map_add(global.abilityTypes, DASH, DASH);
+ds_map_add(global.abilityTypes, FLIGHT, FLIGHT);
+ds_map_add(global.abilityTypes, FLIGHT_HORIZONTAL, FLIGHT_HORIZONTAL);
+ds_map_add(global.abilityTypes, FLIGHT_VERTICAL, FLIGHT_VERTICAL);
+ds_map_add(global.abilityTypes, HEAL, HEAL);
+
 object_event_add(Character,ev_create,0,'
 	accel = 0;
 	blurs = 0;
@@ -572,6 +593,11 @@ object_event_add(Character,ev_create,0,'
 	expectedWeaponBytes = 0;
 	flight = 0;
 	
+	checkedWeapon = false;
+
+	doubleTapped = true;
+	
+	ability = -1;
 	loaded1 = 0;
 	loaded2 = 0;
 	
@@ -587,10 +613,24 @@ object_event_add(Character,ev_create,0,'
 	soakType[0]=-1;
 	soakType[1]=-1;
 	soakType[2]=-1;
+
+	ammo[0] = -1;
+	ammo[1] = -1;
+
+	meter[0]=-1;
+	maxMeter[0]=-1;
+	meter[1]=-1;
+	maxMeter[1]=-1;
+	meterName[0] = "";
+	meterName[1] = "";
+	lastMeter=-1;
+	rechargeMeter = false;
+	meterChargeRate = 1;
+
+	weaponType[0] = -1;
+	weaponType[1] = -1;
+
 	//stuff from alt weapons
-    pissed=0;
-    milked = 0;
-    bleeding = 0;
     buffing=false;
     buffbanner=false;
     critting=0;
@@ -635,10 +675,7 @@ object_event_add(Character,ev_create,0,'
     sentrylevel=0;
     carrySentry=0;
     
-	meter[0]=-1;
-	maxMeter=-1;
-	meter[1]=-1;
-	curMeter=-1;
+	
 	// could test using the above instead later?
     //Things lorgan also prefers saved
     ammo[100] = false;  //uberReady
@@ -689,25 +726,26 @@ object_event_add(Character,ev_alarm,10,'
 ');
 
 object_event_add(Character,ev_step,ev_step_normal,'
-	/*if (currentWeapon.charging == 1 and currentWeapon.object_index == Eyelander)
+	abilityActive = currentWeapon.abilityActive;
+	if (abilityActive and ability == DASH)
 	{
 		if (moveStatus != 4) {
-			if (image_xscale = -1) {
+			if (image_xscale == -1) {
 				hspeed -= 3;
-			} else if (image_xscale = 1) {
+			} else if (image_xscale == 1) {
 				hspeed += 3;
 			}
 		} else {
 			if (image_xscale == -1) {
-				hspeed -= 1.8;
+				hspeed -= 1.8 + (accel * 0.1);
 			} else if (image_xscale == 1) {
-				hspeed += 1.8;
+				hspeed += 1.8 + (accel * 0.1);
 			}
 		}
-	}*/// the trimping becomes permadisabled when used on ev_step_normal
+	}/// the trimping becomes permadisabled when used on ev_step_normal
 	//var abilityVisual = string(currentWeapon.abilityVisual);
 
-	abilityActive = currentWeapon.abilityActive;
+	
 	makeBlur = abilityActive && string_count("BLUR",currentWeapon.abilityVisual) != 0;
 	blur = radioactive or (currentWeapon.abilityActive && string_count("BLUR",currentWeapon.abilityVisual) != 0);
 	if (blur) {
@@ -722,6 +760,7 @@ object_event_add(Character,ev_step,ev_step_normal,'
 			}
 	}
 ');
+
 globalvar DetoTrimpSnd, DetoFlyStartSnd, DetoFlySnd;
 DetoTrimpSnd = sound_add(directory + '/randomizer_sounds/DetoTrimpSnd.wav', 0, 1);
 DetoFlyStartSnd = sound_add(directory + '/randomizer_sounds/DetoFlyStartSnd.wav', 0, 1);
@@ -744,8 +783,8 @@ object_event_add(Character,ev_step,ev_step_end,'
 	xprevious = x;
 	yprevious = y;
 	
-	if (weapons[0] != -1) {
-		if(currentWeapon.abilityActive and weapons[1] == Eyelander) {
+	if (variable_local_exists("weapons[0]")) {
+		if(currentWeapon.abilityActive and ability == DASH) {
 			if(!place_free(x + sign(hspeed), y)) { // we hit a wall on the left or right
 				if(place_free(x + sign(hspeed), y - 6)) // if we could just walk up the step
 				{
@@ -806,7 +845,7 @@ object_event_add(Character,ev_step,ev_step_end,'
 				//playsound(x,y,DetoTrimpSnd);
 				//if (!instance_exists("currentWeapon.hype")) break;
 				//if (!currentWeapon.hype)
-				curMeter = i;
+				//curMeter = i;
 				meter[i] += 1/16 * speed;
 				if (player.activeWeapon == i)
 					if (!currentWeapon.abilityActive) 
@@ -1424,7 +1463,7 @@ object_event_add(SpecialHud,ev_step,ev_step_begin,'
 	if global.myself.object == -1 instance_destroy();
 ');
 object_event_add(SpecialHud,ev_draw,0,'
-	if global.myself.object = -1 exit;
+	if global.myself.object == -1 exit;
 	
 	xoffset = view_xview[0];
     yoffset = view_yview[0];
@@ -1439,31 +1478,33 @@ object_event_add(SpecialHud,ev_draw,0,'
     message2 = -1;
     title1 = "";
     title2 = "";
-	
-	var weapon;
-	weapon = global.myself.object.currentWeapon;
-	weaponType = weapon.weaponType;
-	//if weaponType == 
-	if global.myself.class == CLASS_DEMOMAN
+
+    messageoffset = 140;
+
+	if (global.myself.object.weaponType[0] == MINEGUN || global.myself.object.weaponType[1] == MINEGUN) // randomizerMode
 		yoffset += 50;
-	if weapon.hasMeter {
-		message1 = (weapon.meterCount / weapon.maxMeter) * 100;
-		//message1 = weapon.meterCount;
-		title1 = weapon.meterName;
+
+	if global.myself.object.meter[0] != -1 {
+		message1 = (global.myself.object.meter[0] / global.myself.object.maxMeter[0]) * 100;
+		title1 = global.myself.object.meterName[0];
+	}
+	if global.myself.object.meter[1] != -1 {
+		message2 = (global.myself.object.meter[1] / global.myself.object.maxMeter[1]) * 100;
+		title2 = global.myself.object.meterName[1];
 	}
 	if message1 != -1 {
         draw_healthbar(xoffset+665, yoffset+500, xoffset+785, yoffset+532,message1,c_black,c_white,c_white,0,true,true);
         draw_sprite_ext(UberHudS,uberoffset,xoffset+720,yoffset+515,2,2,0,c_white,1);
         draw_text_color(xoffset+730,yoffset+510,title1,c_white,c_white,c_white,c_white,1);
-        if message2 != -1 {
-            draw_healthbar(xoffset+665-140, yoffset+500, xoffset+785-140, yoffset+532,message2,c_black,c_white,c_white,0,true,true);
-           draw_sprite_ext(UberHudS,uberoffset,xoffset+720-140,yoffset+515,2,2,0,c_white,1);
-            draw_text_color(xoffset+730-140,yoffset+510,title2,c_white,c_white,c_white,c_white,1);
-        }
+    }
+    if message2 != -1
+    {
+        draw_healthbar(xoffset+665-messageoffset, yoffset+500, xoffset+785-messageoffset, yoffset+532,message2,c_black,c_white,c_white,0,true,true);
+        draw_sprite_ext(UberHudS,uberoffset,xoffset+720-messageoffset,yoffset+515,2,2,0,c_white,1);
+        draw_text_color(xoffset+730-messageoffset,yoffset+510,title2,c_white,c_white,c_white,c_white,1);
     }
 ');
 
-global.checkedWeapon = false;
 //Handles swapping out loadout weapons and the active weapon shown
 object_event_clear(PlayerControl,ev_step,ev_step_end);
 object_event_add(PlayerControl,ev_step,ev_step_end,'
@@ -1472,12 +1513,12 @@ object_event_add(PlayerControl,ev_step,ev_step_end,'
 		if(global.myself.object != -1){
 			//canSwitch = !global.myself.object.taunting or global.myself.object.weapons[1] == WEAPON_BOOTS or global.myself.object.canSwitch;
 			if (global.myself.object.taunting or !global.myself.object.canSwitch) break;
-			if(global.myself.activeWeapon == 0){
+			if (global.myself.activeWeapon == 0) {
 				global.myself.activeWeapon = 1;
 				if (global.myself.object.zoomed) {
 					write_ubyte(global.serverSocket, TOGGLE_ZOOM);
 				}
-			}else{
+			} else {
 				global.myself.activeWeapon = 0;
 			}
 
@@ -1510,20 +1551,13 @@ object_event_add(PlayerControl,ev_step,ev_step_end,'
 
 	                    global.paramOwner = object;
 	                    object.currentWeapon = instance_create(object.x,object.y,object.weapons[0]);
-	                    // check for rocket boots
-	                    if (!global.checkedWeapon) {
-						var checkWeapon;
-						checkWeapon = instance_create(0,0,weapons[1]);
-						if (checkWeapon.weaponType == WEAR) object.canSwitch = false;
-						with(checkWeapon) instance_destroy();
-						global.checkedWeapon = false;
-						}
 	                    global.paramOwner = noone
 
 	                }
 	                if(object.weapons[1] != global.weapons[real(string_copy(string(playerLoadout), 4, 2))]){
 	                    object.weapons[1] = global.weapons[real(string_copy(string(playerLoadout), 4, 2))];
 	                }
+	                
 	            }
             }
 
@@ -1604,6 +1638,26 @@ object_event_add(PlayerControl,ev_step,ev_step_end,'
 		// Healed HUD
 		if !instance_exists(HealedHud) && global.showHealer = 1 instance_create(0,0,HealedHud);
 		
+		// check for rocket boots
+        if (!global.myself.object.checkedWeapon) {
+        	global.paramOwner = global.myself.object;
+        	playsound(global.myself.object.x,global.myself.object.y,PickupSnd);
+        	global.myself.object.weaponType[0] = global.myself.object.currentWeapon.weaponType;
+			var checkWeapon;
+			checkWeapon = instance_create(0,0,global.myself.object.weapons[1]);
+			if (checkWeapon.weaponType == WEAR) global.myself.object.canSwitch = false;
+			global.myself.object.weaponType[1] = checkWeapon.weaponType;
+			if (checkWeapon.hasAbility) {
+				global.myself.object.ability = checkWeapon.ability;
+				global.myself.object.meterName[1] = checkWeapon.meterName;
+			    global.myself.object.meter[1] = checkWeapon.meterCount;
+			    global.myself.object.maxMeter[1] = checkWeapon.maxMeter;
+			}
+			with(checkWeapon) instance_destroy();
+			global.paramOwner = noone;
+			global.myself.object.checkedWeapon = true;
+		}
+
 		//this hud does most of the special displays (cooldown & charge timers)
 		if !instance_exists(SpecialHud) instance_create(0,0,SpecialHud);
 	}
