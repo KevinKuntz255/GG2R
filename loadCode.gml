@@ -596,7 +596,7 @@ object_event_add(Character,ev_create,0,'
 	checkedWeapon = false;
 
 	doubleTapped = true;
-	
+
 	ability = -1;
 	loaded1 = 0;
 	loaded2 = 0;
@@ -626,6 +626,7 @@ object_event_add(Character,ev_create,0,'
 	lastMeter=-1;
 	rechargeMeter = false;
 	meterChargeRate = 1;
+	abilityActive = false;
 
 	weaponType[0] = -1;
 	weaponType[1] = -1;
@@ -726,9 +727,10 @@ object_event_add(Character,ev_alarm,10,'
 ');
 
 object_event_add(Character,ev_step,ev_step_normal,'
-	abilityActive = currentWeapon.abilityActive;
 	if (abilityActive and ability == DASH)
 	{
+		jumpStrength = 0;
+		if (moveStatus != 4) meter[1] -= 2; else if (moveStatus == 4) meter[1] -= 0.8; // lol, I am crazy for this
 		if (moveStatus != 4) {
 			if (image_xscale == -1) {
 				hspeed -= 3;
@@ -742,9 +744,16 @@ object_event_add(Character,ev_step,ev_step_normal,'
 				hspeed += 1.8 + (accel * 0.1);
 			}
 		}
-	}/// the trimping becomes permadisabled when used on ev_step_normal
-	//var abilityVisual = string(currentWeapon.abilityVisual);
+		if (meter[1] <= 0)
+			abilityActive = false;
+	} else {
+		jumpStrength = 8+(0.6/2);
+	}
 
+	//var abilityVisual = string(currentWeapon.abilityVisual);
+	if (rechargeMeter && !abilityActive)
+		if meter[1] < maxMeter[1] meter[1] +=meterChargeRate;
+	// todo: add a check for which meter
 	
 	makeBlur = abilityActive && string_count("BLUR",currentWeapon.abilityVisual) != 0;
 	blur = radioactive or (currentWeapon.abilityActive && string_count("BLUR",currentWeapon.abilityVisual) != 0);
@@ -783,8 +792,8 @@ object_event_add(Character,ev_step,ev_step_end,'
 	xprevious = x;
 	yprevious = y;
 	
-	if (variable_local_exists("weapons[0]")) {
-		if(currentWeapon.abilityActive and ability == DASH) {
+	if (currentWeapon != -1) {
+		if(abilityActive and ability == DASH) {
 			if(!place_free(x + sign(hspeed), y)) { // we hit a wall on the left or right
 				if(place_free(x + sign(hspeed), y - 6)) // if we could just walk up the step
 				{
@@ -1652,6 +1661,7 @@ object_event_add(PlayerControl,ev_step,ev_step_end,'
 				global.myself.object.meterName[1] = checkWeapon.meterName;
 			    global.myself.object.meter[1] = checkWeapon.meterCount;
 			    global.myself.object.maxMeter[1] = checkWeapon.maxMeter;
+			    global.myself.object.rechargeMeter = checkWeapon.rechargeMeter;
 			}
 			with(checkWeapon) instance_destroy();
 			global.paramOwner = noone;

@@ -74,6 +74,7 @@ object_event_add(MineWeapon, ev_other, ev_user2, '
     var i, mine;
     with(Mine) {
         if(ownerPlayer == other.ownerPlayer) {
+            owner.doubleTapped = true;
             event_user(2);
         }
     }

@@ -52,7 +52,7 @@ object_event_add(SandvichHand,ev_other,ev_user2,'
             hspeed+=owner.hspeed;
         owner.alarm[6] = owner.eatCooldown / global.delta_factor;
         owner.canEat = false;
-        owner.doubleTapped = true;
+        //owner.doubleTapped = true;
     }
 ');
 

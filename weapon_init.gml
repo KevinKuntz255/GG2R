@@ -126,6 +126,7 @@ object_event_add(Weapon,ev_create,0,'
 
 	 // introducing meters
 	hasMeter = false;
+	rechargeMeter = false;
 	meterName = "";
 	maxMeter=-1;
 	meterCount=-1;

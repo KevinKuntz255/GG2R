@@ -22,6 +22,7 @@ object_event_add(Eyelander,ev_create,0,'
 	meterName = "CHARGE";
 	meterCount = 100;
 	maxMeter = 100;
+    rechargeMeter = true;
 ');
 
 object_event_add(Eyelander,ev_destroy,0,'
@@ -62,7 +63,7 @@ object_event_add(Eyelander,ev_alarm,1,'
         alarm[2] = 10;
     }
 ');
-
+/*
 object_event_add(Eyelander,ev_step,ev_step_normal,'
 	if (abilityActive) {
         owner.jumpStrength = 0;
@@ -83,7 +84,7 @@ object_event_add(Eyelander,ev_step,ev_step_normal,'
 			} else if (owner.image_xscale == 1) {
 				owner.hspeed += 1.8 + (owner.accel * 0.1);
 			}
-		}*/
+		}
     } else {
         owner.jumpStrength = 8+(0.6/2);
         if meterCount < 0 meterCount = 0;
@@ -91,7 +92,7 @@ object_event_add(Eyelander,ev_step,ev_step_normal,'
     }
 	
     event_inherited();
-');
+');*/
 
 /*
 object_event_add(Eyelander,ev_other,ev_user2,'
