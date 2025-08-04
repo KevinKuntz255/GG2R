@@ -2104,6 +2104,9 @@ object_event_add(Shot,ev_collision,Character,'
                     text.sprite_index=MiniCritS;
                 }
             break;
+            /*case Widowmaker:
+                owner.nutsnbolts += 20;
+            */
         }
         damageCharacter(ownerPlayer, other.id, hitDamage);
         if (other.lastDamageDealer != ownerPlayer and other.lastDamageDealer != other.player)

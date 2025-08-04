@@ -3,8 +3,8 @@ GrenadeWeapon = object_add();
 object_set_parent(GrenadeWeapon, Weapon);
 
 object_event_add(GrenadeWeapon, ev_create, 0, '
-    xoffset = 5;
-    yoffset = 2;
+    xoffset = 2;
+    yoffset = 4;
     refireTime = 28;
     event_inherited();
     

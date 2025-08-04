@@ -3,7 +3,7 @@ WEAPON_WIDOWMAKER = 54;
 
 globalvar Widowmaker;
 Widowmaker = object_add();
-object_set_parent(Widowmaker, Weapon);
+object_set_parent(Widowmaker, ShotgunWeapon);
 
 object_event_add(Widowmaker,ev_create,0,'
     xoffset=-5;
@@ -17,6 +17,8 @@ object_event_add(Widowmaker,ev_create,0,'
     idle=true;
     unscopedDamage = 0;
 ');
-
+/* ev_user2
+    nutsnbolts -= 20;
+*/
 global.weapons[WEAPON_WIDOWMAKER] = Widowmaker;
 global.name[WEAPON_WIDOWMAKER] = "Widowmaker (unimplemented)";
