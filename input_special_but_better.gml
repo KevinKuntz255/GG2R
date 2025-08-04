@@ -45,9 +45,9 @@ if(global.myself.class == CLASS_ENGINEER)
         // as suggested by Cat Al Ghul, start off FAST.
         if (global.myself.object.onground) {
             if (global.myself.object.image_xscale == -1) {
-                    global.myself.object.hspeed -= 12;
+                    //global.myself.object.hspeed -= 12;
             } else if (global.myself.object.image_xscale == 1) {
-                global.myself.object.hspeed += 12;
+                //global.myself.object.hspeed += 12;
             }
         }
         playsound(global.myself.object.x,global.myself.object.y,ChargeSnd);

@@ -19,9 +19,10 @@ object_event_add(MineWeapon, ev_create, 0, '
     damSource = DAMAGE_SOURCE_MINEGUN;
 
     weaponGrade = UNIQUE;
-    weaponType = ROCKETLAUNCHER;
-    rocketSound = RocketSnd; // direct hit specific
-    rocketSpeed = 13;
+    weaponType = MINEGUN;
+
+    mineSound = RocketSnd; // direct hit specific
+    mineSpeed = 13;
     specialProjectile = Mine; // cow mangler specific;
 
     if (!variable_local_exists("spriteBase")) spriteBase = "DirectHit";
@@ -67,10 +68,11 @@ object_event_add(MineWeapon, ev_other, ev_user1, '
         sendEventFireWeapon(ownerPlayer, seed);
         doEventFireWeapon(ownerPlayer, seed);
     }
+    // prevent accidentally charging
+    owner.doubleTapped = true;
 ');
 
 object_event_add(MineWeapon, ev_other, ev_user2, '
-    {
     var i, mine;
     with(Mine) {
         if(ownerPlayer == other.ownerPlayer) {
@@ -80,6 +82,7 @@ object_event_add(MineWeapon, ev_other, ev_user2, '
     }
     lobbed = 0;
 ');
+
 object_event_add(MineWeapon, ev_other, ev_user3, '
     var oid, newx, newy;
     playsound(x,y,MinegunSnd);
@@ -95,6 +98,8 @@ object_event_add(MineWeapon, ev_other, ev_user3, '
 ');
 
 object_event_add(MineWeapon, ev_other, ev_user12, '
+    event_inherited();
+
     write_ubyte(global.serializeBuffer, lobbed);
     with(Mine) {
         if(ownerPlayer == other.ownerPlayer) {
@@ -102,7 +107,9 @@ object_event_add(MineWeapon, ev_other, ev_user12, '
         }
     }
 ');
-object_event_add(MineWeapon, ev_other, ev_user12, '
+object_event_add(MineWeapon, ev_other, ev_user13, '
+    event_inherited();
+    
     var i, mine;
     receiveCompleteMessage(global.serverSocket, 1, global.deserializeBuffer);
     lobbed = read_ubyte(global.deserializeBuffer);
@@ -113,7 +120,7 @@ object_event_add(MineWeapon, ev_other, ev_user12, '
         }
     }
     
-    for(i=0; i&lt;lobbed; i+=1) {
+    for(i=0; i<lobbed; i+=1) {
         mine = instance_create(0,0,Mine);
         mine.owner = owner;
         mine.ownerPlayer = ownerPlayer;

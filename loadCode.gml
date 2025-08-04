@@ -593,6 +593,9 @@ object_event_add(Character,ev_create,0,'
 	expectedWeaponBytes = 0;
 	flight = 0;
 	
+	hleft = 0;
+
+	lastTurn = 0;
 	checkedWeapon = false;
 
 	doubleTapped = true;
@@ -727,32 +730,53 @@ object_event_add(Character,ev_alarm,10,'
 ');
 
 object_event_add(Character,ev_step,ev_step_normal,'
+	charSetSolids();
+
 	if (abilityActive and ability == DASH)
 	{
 		jumpStrength = 0;
 		if (moveStatus != 4) meter[1] -= 2; else if (moveStatus == 4) meter[1] -= 0.8; // lol, I am crazy for this
+		if (meter[1] <= 0) abilityActive = false;
+
 		if (moveStatus != 4) {
 			if (image_xscale == -1) {
 				hspeed -= 3;
+				if (lastTurn != image_xscale) {
+					if(place_free(x - 4.3, y)) hspeed -= 12;
+					lastTurn = image_xscale;
+				}
 			} else if (image_xscale == 1) {
 				hspeed += 3;
+				if (lastTurn != image_xscale) {
+					if(place_free(x + 4.3, y)) hspeed += 12;
+					lastTurn = image_xscale;
+				}
 			}
 		} else {
 			if (image_xscale == -1) {
 				hspeed -= 1.8 + (accel * 0.1);
+				if (lastTurn != image_xscale) {
+					if(place_free(x - 4.3, y)) hspeed -= 8;
+					lastTurn = image_xscale;
+				}
 			} else if (image_xscale == 1) {
 				hspeed += 1.8 + (accel * 0.1);
+				if (lastTurn != image_xscale) {
+					if(place_free(x + 4.3, y)) hspeed += 8;
+					lastTurn = image_xscale;
+				}
 			}
 		}
-		if (meter[1] <= 0)
-			abilityActive = false;
 	} else {
+		lastTurn = 0;
 		jumpStrength = 8+(0.6/2);
 	}
 
+	charUnsetSolids();
+
 	//var abilityVisual = string(currentWeapon.abilityVisual);
 	if (rechargeMeter && !abilityActive)
-		if meter[1] < maxMeter[1] meter[1] +=meterChargeRate;
+		if meter[1] < maxMeter[1] meter[1] += meterChargeRate;
 	// todo: add a check for which meter
 	
 	makeBlur = abilityActive && string_count("BLUR",currentWeapon.abilityVisual) != 0;
@@ -791,15 +815,16 @@ object_event_add(Character,ev_step,ev_step_end,'
 	}
 	xprevious = x;
 	yprevious = y;
-	
+
 	if (currentWeapon != -1) {
 		if(abilityActive and ability == DASH) {
-			if(!place_free(x + sign(hspeed), y)) { // we hit a wall on the left or right
+			if(!place_free(x + hspeed, y)) { // we hit a wall on the left or right
+
 				if(place_free(x + sign(hspeed), y - 6)) // if we could just walk up the step
 				{
 					playsound(x,y,DetoTrimpSnd);
 					if (keyState & $80) {
-						vspeed -= 7.3 * accel; // hold W to fly
+						vspeed -= 7.5 * accel; // hold W to fly
 					}
 					//effect_create_below(ef_smoke,x-hspeed*1.2,y-vspeed*1.2+40,0,c_gray);
 					if !variable_local_exists("jumpFlameParticleType")
@@ -821,10 +846,14 @@ object_event_add(Character,ev_step,ev_step_end,'
 					{
 						part_particles_create(global.jumpFlameParticleSystem,x,y+19,jumpFlameParticleType,1);
 					}
-					//hspeed -= 5;
-					accel += 0.5;
+					accel += 0.35;
 				} else {
-					accel = 0;
+					accel = min(0, accel - 4.5);
+					if (!onground && keyState & $80) {
+						vspeed += 1 * (accel * 3)
+					}
+					//if place_free(x, y + 6) vspeed += 10;
+					//vspeed = min(vspeed * accel, vspeed + 2.5 * (-accel * 0.45));
 				}
 			}
 			if (moveStatus == 4 && !flight)
@@ -1074,7 +1103,7 @@ object_event_add(Weapon,ev_draw,0,'
 	    else
 	        image_alpha = power(owner.cloakAlpha, 2);
 	    draw_sprite_ext(sprite_index, imageOffset, round(x+xoffset*image_xscale), round(y+yoffset) + owner.equipmentOffset, image_xscale, image_yscale, image_angle, c_white, image_alpha);
-	    if (abilityActive && string_count("WEAPON", abilityVisual) > 0) 
+	    if (owner.abilityActive && string_count("WEAPON", abilityVisual) > 0) 
 	    {
 				if (owner.team == TEAM_RED)
 					ubercolour = c_orange;

@@ -46,8 +46,23 @@ object_event_add(MeleeWeapon, ev_destroy, 0, '
 ');
 
 object_event_add(MeleeWeapon, ev_alarm, 1, '
-
     shot = instance_create(x,y,MeleeMask);
+    if (owner.abilityActive && owner.ability == DASH) {
+        shot.splashHit = true;
+        shot.splashAmount = 3;
+        shot.knockBack = true;
+        if (owner.meter[1] <= 50 || owner.moveStatus == 4 && owner.meter[1] <= 60) { // give grace since youre flying
+            shotDamage = 50; 
+            playsound(x,y,CritSnd);
+            shot.crit=1;
+        } else if (owner.meter[1] <= 70 || owner.moveStatus == 4 && owner.meter[1] <= 80) {
+            shotDamage = 40; 
+            playsound(x,y,CritSnd);
+            shot.crit=2;
+        }
+        owner.abilityActive = false;
+        owner.meter[1] = 0;
+    }
     shot.direction = owner.aimDirection;
     shot.speed = owner.speed;
     shot.owner = owner;

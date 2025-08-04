@@ -6,7 +6,7 @@ Eyelander = object_add();
 object_set_parent(Eyelander, MeleeWeapon);
 
 object_event_add(Eyelander,ev_create,0,'
-    xoffset=-15;
+    xoffset=-19;
     yoffset=-40;
     spriteBase = "Eyelander";
 	event_inherited();
@@ -25,44 +25,6 @@ object_event_add(Eyelander,ev_create,0,'
     rechargeMeter = true;
 ');
 
-object_event_add(Eyelander,ev_destroy,0,'
-	event_inherited();
-	abilityActive = false;
-	owner.jumpStrength = 8+(0.6/2);
-');
-
-object_event_add(Eyelander,ev_alarm,1,'
-    { 
-        shot = instance_create(x,y,MeleeMask);
-        shot.direction= owner.aimDirection;
-        shot.speed=owner.speed;
-        shot.owner=owner;
-        shot.ownerPlayer=ownerPlayer;
-        shot.team=owner.team;
-        if (abilityActive) {
-            shot.splashHit = true;
-            shot.splashAmount = 3;
-            shot.knockBack = true;
-			if (meterCount <= 50 || owner.moveStatus == 4 && meterCount <= 60) { // give grace since youre flying
-				shot.hitDamage = 50; 
-				playsound(x,y,CritSnd);
-				shot.crit=1;
-			} else if (meterCount <= 70 || owner.moveStatus == 4 && meterCount <= 80) {
-				shot.hitDamage = 40; 
-				playsound(x,y,CritSnd);
-				shot.crit=2;
-			}
-			abilityActive = false;
-			meterCount = 0;
-		} else {
-			shot.hitDamage = 35;
-		}
-        shot.weapon=WEAPON_EYELANDER;
-
-        //Removed crit thing here
-        alarm[2] = 10;
-    }
-');
 /*
 object_event_add(Eyelander,ev_step,ev_step_normal,'
 	if (abilityActive) {

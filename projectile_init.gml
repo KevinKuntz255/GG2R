@@ -1,11 +1,11 @@
-//Some needed things for weapons
 globalvar MeleeHitMapSnd, MeleeHitSnd, JarateSnd, CritHitSnd;
 MeleeHitMapSnd = sound_add(directory + '/randomizer_sounds/MeleeHitMapSnd.wav', 0, 1);
 MeleeHitSnd = sound_add(directory + '/randomizer_sounds/MeleeHitSnd.wav', 0, 1);
 JarateSnd = sound_add(directory + '/randomizer_sounds/JarateSnd.wav', 0, 1);
 CritHitSnd = sound_add(directory + '/randomizer_sounds/CritHitSnd.wav', 0, 1);
-// create RadioBlur here so that It's in the first file callled in plugin.gml
-globalvar MeleeMask, RadioBlur, Text, MissS, CritS, MiniCritS;
+
+// Misc
+globalvar RadioBlur, Text, MissS, CritS, MiniCritS;
 RadioBlur=object_add();
 Text = object_add();
 MissS = sprite_add(pluginFilePath + "\randomizer_sprites\MissS.png", 1, 0, 0, 0, 0);
@@ -192,6 +192,9 @@ object_event_add(Text,ev_step,ev_step_normal,'
 	image_alpha -= 0.05;
 	if image_alpha <= 0.1 instance_destroy();
 ');
+
+//Some needed things for weapons
+globalvar MeleeMask;
 MeleeMask = object_add();
 object_set_parent(MeleeMask, StabMask);
 object_event_add(MeleeMask,ev_create,0,'
@@ -2045,28 +2048,43 @@ object_event_add(Piss,ev_alarm,0,'
     instance_destroy();
 ');
 
-globalvar NatachaShot;
-NatachaShot = object_add();
-object_set_sprite(NatachaShot, ShotS);
-object_set_parent(NatachaShot, Shot);
-object_event_add(NatachaShot,ev_create,0,'
+globalvar Grenade, GrenadeS;
+Grenade = object_add();
+GrenadeS = sprite_add(pluginFilePath + "\randomizer_sprites\GrenadeS.png", 2, 1, 0, 10, 6);
+object_set_sprite(Grenade, GrenadeS);
+object_set_parent(Grenade, Mine);
+
+// modify variables
+object_event_add(Grenade,ev_create,0,'
+    event_inherited();
     {
-        hitDamage = 6;
-		lifetime = 40;
-		alarm[0] = lifetime;
-		originx=x;
-		originy=y;
-			
-        // Controls whether this bullet penetrates bubbles or not
-        // Also controls whether this bullet destroys friendly bubbles
+        blastRadius = 60;
+        alarm[2]=60 / global.delta_factor;
+        hfric=0.5;
+        rotfric=0.7;
+        rotspeed=random(20)-10;
+        image_speed=0;
+        used=0;
         perseverant = choose(0, 0, 1); // 1/3 chance
     }
 ');
-object_event_add(NatachaShot,ev_alarm,0,'
-    instance_destroy();
+
+object_event_add(Grenade,ev_alarm,2,'
+    event_user(2);
 ');
-object_event_add(NatachaShot,ev_collision,Character,'
-    gunSetSolids();
+
+object_event_add(Grenade,ev_collision,Character,'
+    event_user(2);
+');
+
+object_event_add(Grenade,ev_collision,Sentry,'
+    event_user(2);
+');
+
+// for radioactivity
+object_event_clear(Shot,ev_collision,Character);
+object_event_add(Shot,ev_collision,Character,'
+	gunSetSolids();
     if (!place_free(x, y)) 
     {
         instance_destroy();
@@ -2075,8 +2093,18 @@ object_event_add(NatachaShot,ev_collision,Character,'
     }
     gunUnsetSolids();
 
-    if(other.id != ownerPlayer.object and other.team != team  && other.hp > 0 && other.ubered == 0)
+    if(other.id != ownerPlayer.object and other.team != team  && other.hp > 0 && other.ubered == 0 && !other.radioactive)
     {
+        switch(weapon.object_index) {
+            case Reserveshooter:
+                if (!other.onground && other.moveStatus == 1) {
+                    hitDamage += 6;
+                    var text;
+                    text=instance_create(x,y,Text);
+                    text.sprite_index=MiniCritS;
+                }
+            break;
+        }
         damageCharacter(ownerPlayer, other.id, hitDamage);
         if (other.lastDamageDealer != ownerPlayer and other.lastDamageDealer != other.player)
         {
@@ -2088,7 +2116,7 @@ object_event_add(NatachaShot,ev_collision,Character,'
         other.lastDamageSource = weapon;
         
         var blood;
-        if(global.gibLevel > 0 && !other.radioactive)
+        if(global.gibLevel > 0)
         {
             blood = instance_create(x,y,Blood);
             blood.direction = direction-180;
@@ -2096,8 +2124,7 @@ object_event_add(NatachaShot,ev_collision,Character,'
         dealFlicker(other.id);
         with(other)
         {
-            motion_add(other.direction, other.speed*0.1);
-			speed*=0.95;
+            motion_add(other.direction, other.speed*0.03);
         }
         instance_destroy();
     }
@@ -2261,54 +2288,6 @@ object_event_add(Bubble,ev_destroy,0,"
 	instance_create(x,y,Pop);
 ");
 
-// for radioactivity
-object_event_clear(Shot,ev_collision,Character);
-object_event_add(Shot,ev_collision,Character,'
-	gunSetSolids();
-    if (!place_free(x, y)) 
-    {
-        instance_destroy();
-        gunUnsetSolids();
-        exit;
-    }
-    gunUnsetSolids();
-
-    if(other.id != ownerPlayer.object and other.team != team  && other.hp > 0 && other.ubered == 0 && !other.radioactive)
-    {
-        switch(weapon.object_index) {
-            case Reserveshooter:
-                if (!other.onground && other.moveStatus == 1) {
-                    hitDamage += 6;
-                    var text;
-                    text=instance_create(x,y,Text);
-                    text.sprite_index=MiniCritS;
-                }
-            break;
-        }
-        damageCharacter(ownerPlayer, other.id, hitDamage);
-        if (other.lastDamageDealer != ownerPlayer and other.lastDamageDealer != other.player)
-        {
-            other.secondToLastDamageDealer = other.lastDamageDealer;
-            other.alarm[4] = other.alarm[3]
-        }
-        other.alarm[3] = ASSIST_TIME / global.delta_factor;
-        other.lastDamageDealer = ownerPlayer;
-        other.lastDamageSource = weapon;
-        
-        var blood;
-        if(global.gibLevel > 0)
-        {
-            blood = instance_create(x,y,Blood);
-            blood.direction = direction-180;
-        }
-        dealFlicker(other.id);
-        with(other)
-        {
-            motion_add(other.direction, other.speed*0.03);
-        }
-        instance_destroy();
-    }
-');
 // Use the damage API
 global.dealDamageFunction += '
 	if (object_is_ancestor(argument1.object_index, Character)) {
