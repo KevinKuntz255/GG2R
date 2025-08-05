@@ -40,8 +40,6 @@ if(global.myself.class == CLASS_ENGINEER)
         global.myself.object.abilityActive = true;
         global.myself.object.accel = 0;
         global.myself.object.moveStatus = 0;
-        // jerry-rigging consistency in charging by makin u slightly jumped
-        if (global.myself.object.onground) global.myself.object.vspeed -= 0.15; else global.myself.object.vspeed += 0.5; 
         // as suggested by Cat Al Ghul, start off FAST.
         if (global.myself.object.onground) {
             if (global.myself.object.image_xscale == -1) {

@@ -737,17 +737,42 @@ object_event_add(Character,ev_step,ev_step_normal,'
 		jumpStrength = 0;
 		if (moveStatus != 4) meter[1] -= 2; else if (moveStatus == 4) meter[1] -= 0.8; // lol, I am crazy for this
 		if (meter[1] <= 0) abilityActive = false;
+		backupx = x;
+		backupy = y;
+		if(!place_free(x, y)) { // This fixed some stuck problems I faced yesterday
+			var safe;
+			safe = false;
 
+			if (place_free(x + 4, y)) x = backupx + 4;
+			if (place_free(x - 4, y)) x = backupx - 4;
+			if (place_free(x,y)) safe = true;
+
+			if(!safe && vspeed-y != 0 && !place_free(x, y + sign(y-vspeed))) { // we hit a ceiling or floor
+				accel += 1;
+				vspeed -= 7.5 * accel; // doesnt matter acc, let the y keep going up
+				y = backupy - 7.5;
+			}
+			characterHitObstacle();
+			if (place_free(x,y)) safe = true;
+			if (!safe) {
+				hspeed = 0;
+				vspeed -= 7.5 * accel;
+				y = backupy - 8; // try one more time
+				x = backupx;
+				playsound(x,y,PickupSnd);
+				exit;
+			}
+		}
 		if (moveStatus != 4) {
 			if (image_xscale == -1) {
 				hspeed -= 3;
-				if (lastTurn != image_xscale) {
+				if (lastTurn != image_xscale) { // right
 					if(place_free(x - 4.3, y)) hspeed -= 12;
 					lastTurn = image_xscale;
 				}
 			} else if (image_xscale == 1) {
 				hspeed += 3;
-				if (lastTurn != image_xscale) {
+				if (lastTurn != image_xscale) { // left
 					if(place_free(x + 4.3, y)) hspeed += 12;
 					lastTurn = image_xscale;
 				}
@@ -780,7 +805,7 @@ object_event_add(Character,ev_step,ev_step_normal,'
 	// todo: add a check for which meter
 	
 	makeBlur = abilityActive && string_count("BLUR",currentWeapon.abilityVisual) != 0;
-	blur = radioactive or (currentWeapon.abilityActive && string_count("BLUR",currentWeapon.abilityVisual) != 0);
+	blur = radioactive or (abilityActive && string_count("BLUR",currentWeapon.abilityVisual) != 0);
 	if (blur) {
 		with(RadioBlur)
 			if (owner == other.id) exit;
@@ -794,10 +819,11 @@ object_event_add(Character,ev_step,ev_step_normal,'
 	}
 ');
 
-globalvar DetoTrimpSnd, DetoFlyStartSnd, DetoFlySnd;
+globalvar DetoTrimpSnd, DetoFlyStartSnd, DetoFlySnd, DetoSlamSnd;
 DetoTrimpSnd = sound_add(directory + '/randomizer_sounds/DetoTrimpSnd.wav', 0, 1);
 DetoFlyStartSnd = sound_add(directory + '/randomizer_sounds/DetoFlyStartSnd.wav', 0, 1);
 DetoFlySnd = sound_add(directory + '/randomizer_sounds/DetoFlySnd.wav', 0, 1);
+DetoSlamSnd = sound_add(directory + '/randomizer_sounds/DetoSlamSnd.wav', 0, 1);
 object_event_clear(Character,ev_step,ev_step_end);
 object_event_add(Character,ev_step,ev_step_end,'
 	charSetSolids();
@@ -818,8 +844,13 @@ object_event_add(Character,ev_step,ev_step_end,'
 
 	if (currentWeapon != -1) {
 		if(abilityActive and ability == DASH) {
+			if(!place_free(x, y)) {
+				//if(!place_free(x, y - 6))
+				//	characterHitObstacle();
+				//else if (place_free(x, y - 6))
+				//y -= 6;
+			}
 			if(!place_free(x + hspeed, y)) { // we hit a wall on the left or right
-
 				if(place_free(x + sign(hspeed), y - 6)) // if we could just walk up the step
 				{
 					playsound(x,y,DetoTrimpSnd);
@@ -847,11 +878,23 @@ object_event_add(Character,ev_step,ev_step_end,'
 						part_particles_create(global.jumpFlameParticleSystem,x,y+19,jumpFlameParticleType,1);
 					}
 					accel += 0.35;
+					if (!onground) vspeed += 1.5 * (accel * 1.5);
 				} else {
-					accel = min(0, accel - 4.5);
-					if (!onground && keyState & $80) {
-						vspeed += 1 * (accel * 3)
+					if (accel >= 1.7 && !onground) { // wall bumped and youre flying lets bounce
+						//vspeed += 0.2 * (accel * 5);
+						// I may have gone too far for the funny
+						vspeed /= -vspeed * 0.6;
+						if (lastTurn != 1) { // left
+							playsound(x,y,DetoSlamSnd);
+							//if(place_free(x + 4, y)) hspeed += 4;
+							hspeed *= -hspeed * 12;
+						} else if (lastTurn != -1) { // right
+							playsound(x,y,DetoSlamSnd);
+							//if(place_free(x - 4, y)) hspeed -= 4;
+							hspeed /= hspeed * 12;
+						}
 					}
+					accel = min(0.35, accel - 4.5);
 					//if place_free(x, y + 6) vspeed += 10;
 					//vspeed = min(vspeed * accel, vspeed + 2.5 * (-accel * 0.45));
 				}
@@ -864,6 +907,7 @@ object_event_add(Character,ev_step,ev_step_end,'
 					loopsoundmaintain(x,y,DetoFlySnd);
 				started to get annoying for me*/alarm[11] = 2 / global.delta_factor;
 			}
+			//if (accel >= 2) show_error(string(accel), false); // show me the acceleration!
 			if (keyState & $80) {
 				if (accel > 1.3 && !onground) {
 					moveStatus = 4; // bork it so youre always flyin
