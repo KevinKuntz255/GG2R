@@ -40,6 +40,7 @@ if(global.myself.class == CLASS_ENGINEER)
         global.myself.object.abilityActive = true;
         global.myself.object.accel = 0;
         global.myself.object.moveStatus = 0;
+        global.myself.object.dashon = true;
         // as suggested by Cat Al Ghul, start off FAST.
         if (global.myself.object.onground) {
             if (global.myself.object.image_xscale == -1) {

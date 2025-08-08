@@ -284,12 +284,15 @@ object_event_add(MeleeMask,ev_collision,Character,'
                     //doEventBallstun(other.player,0); simply no
                     //sendEventBallStun(other.player,0);
 					// righ, have this instead
-					speed*= 0.55;
+					speed *= 0.55;
                 }
             } else if weapon == WEAPON_FISTS or weapon == WEAPON_SAXTONHALE {
                 if other.hp <= 0 with(other) {motion_add(other.owner.aimDirection,25);};
             } else if weapon == WEAPON_SHIV {
-                //other.bleeding = true; I will maybe add this at another time
+                for(i=0; i<3; i+=1) 
+                {
+                    if (other.soakType[i] == -1 && other.soakType[i] != bleed) other.soakType[i] = bleed; //
+                }
                 other.alarm[8] = 120;
     //      } else if weapon == WEAPON_BUFFBANNER{
             } else if weapon == WEAPON_OVERDOSE { //ubersaw
@@ -2140,6 +2143,9 @@ object_event_add(Grenade, ev_other, ev_user12, '
 ');
 
 */
+object_event_add(Shot, ev_create, 0, '
+    weapon = Scattergun; // prevent crashes
+');
 // for radioactivity
 object_event_clear(Shot,ev_collision,Character);
 object_event_add(Shot,ev_collision,Character,'

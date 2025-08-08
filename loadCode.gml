@@ -613,6 +613,7 @@ object_event_add(Character,ev_create,0,'
 	
 	soaked = false;
 	// 3 soakTypes, 3 types, if possibly at the same time
+	dashon = true;
 	soakType[0]=-1;
 	soakType[1]=-1;
 	soakType[2]=-1;
@@ -679,8 +680,7 @@ object_event_add(Character,ev_create,0,'
     sentrylevel=0;
     carrySentry=0;
     
-	
-	// could test using the above instead later?
+
     //Things lorgan also prefers saved
     ammo[100] = false;  //uberReady
     ammo[101] = 0;      //lobbed (scottish resistance)
@@ -737,58 +737,69 @@ object_event_add(Character,ev_step,ev_step_normal,'
 		jumpStrength = 0;
 		if (moveStatus != 4) meter[1] -= 2; else if (moveStatus == 4) meter[1] -= 0.8; // lol, I am crazy for this
 		if (meter[1] <= 0) abilityActive = false;
-		backupx = x;
-		backupy = y;
+		if (place_free(x,y) || place_free(x,y-6)) {
+			backupx = x;
+			backupy = y;
+		}
 		if(!place_free(x, y)) { // This fixed some stuck problems I faced yesterday
 			var safe;
 			safe = false;
 
-			if (place_free(x + 4, y)) x = backupx + 4;
+			/*if (place_free(x + 4, y)) x = backupx + 4;
 			if (place_free(x - 4, y)) x = backupx - 4;
 			if (place_free(x,y)) safe = true;
-
+			*/
 			if(!safe && vspeed-y != 0 && !place_free(x, y + sign(y-vspeed))) { // we hit a ceiling or floor
-				accel += 1;
-				vspeed -= 7.5 * accel; // doesnt matter acc, let the y keep going up
-				y = backupy - 7.5;
+				y = backupy - 6;
+				x = backupx;
+				safe = true;
 			}
-			characterHitObstacle();
+			//characterHitObstacle();
 			if (place_free(x,y)) safe = true;
 			if (!safe) {
-				hspeed = 0;
-				vspeed -= 7.5 * accel;
-				y = backupy - 8; // try one more time
+				//hspeed = 0;
+				//vspeed -= 7.5 * accel;
+				y = backupy; // try one more time
 				x = backupx;
-				playsound(x,y,PickupSnd);
-				exit;
+				if(place_free(x + sign(hspeed), y - 6)) {
+					y -= 6;
+					x = backupx + hspeed;
+					safe = true;
+				}
+				playsound(x,y,UberEndSnd);
 			}
+			if (place_free(x,y)) safe = true;
+			if (!safe) exit;
 		}
-		if (moveStatus != 4) {
-			if (image_xscale == -1) {
-				hspeed -= 3;
-				if (lastTurn != image_xscale) { // right
-					if(place_free(x - 4.3, y)) hspeed -= 12;
-					lastTurn = image_xscale;
+		if(!place_free(x + hspeed, y)) exit; // we hit a wall on the left or right
+		if (dashon) {
+			if (moveStatus != 4) {
+				if (image_xscale == -1) {
+					hspeed -= 3;
+					if (lastTurn != image_xscale) { // right
+						if(place_free(x - 4.3, y)) hspeed -= 12;
+						lastTurn = image_xscale;
+					}
+				} else if (image_xscale == 1) {
+					hspeed += 3;
+					if (lastTurn != image_xscale) { // left
+						if(place_free(x + 4.3, y)) hspeed += 12;
+						lastTurn = image_xscale;
+					}
 				}
-			} else if (image_xscale == 1) {
-				hspeed += 3;
-				if (lastTurn != image_xscale) { // left
-					if(place_free(x + 4.3, y)) hspeed += 12;
-					lastTurn = image_xscale;
-				}
-			}
-		} else {
-			if (image_xscale == -1) {
-				hspeed -= 1.8 + (accel * 0.1);
-				if (lastTurn != image_xscale) {
-					if(place_free(x - 4.3, y)) hspeed -= 8;
-					lastTurn = image_xscale;
-				}
-			} else if (image_xscale == 1) {
-				hspeed += 1.8 + (accel * 0.1);
-				if (lastTurn != image_xscale) {
-					if(place_free(x + 4.3, y)) hspeed += 8;
-					lastTurn = image_xscale;
+			} else {
+				if (image_xscale == -1) {
+					hspeed -= 1.8 + (accel * 0.1);
+					if (lastTurn != image_xscale) {
+						if(place_free(x - 4.3, y)) hspeed -= 8;
+						lastTurn = image_xscale;
+					}
+				} else if (image_xscale == 1) {
+					hspeed += 1.8 + (accel * 0.1);
+					if (lastTurn != image_xscale) {
+						if(place_free(x + 4.3, y)) hspeed += 8;
+						lastTurn = image_xscale;
+					}
 				}
 			}
 		}
@@ -844,13 +855,8 @@ object_event_add(Character,ev_step,ev_step_end,'
 
 	if (currentWeapon != -1) {
 		if(abilityActive and ability == DASH) {
-			if(!place_free(x, y)) {
-				//if(!place_free(x, y - 6))
-				//	characterHitObstacle();
-				//else if (place_free(x, y - 6))
-				//y -= 6;
-			}
 			if(!place_free(x + hspeed, y)) { // we hit a wall on the left or right
+				accel += 0.1;
 				if(place_free(x + sign(hspeed), y - 6)) // if we could just walk up the step
 				{
 					playsound(x,y,DetoTrimpSnd);
@@ -878,27 +884,42 @@ object_event_add(Character,ev_step,ev_step_end,'
 						part_particles_create(global.jumpFlameParticleSystem,x,y+19,jumpFlameParticleType,1);
 					}
 					accel += 0.35;
-					if (!onground) vspeed += 1.5 * (accel * 1.5);
+					//if (!onground) vspeed += 1.5 * (accel * 1.5);
+					if (accel >= 6 && !onground) { 
+						vspeed /= -vspeed * -2;
+						playsound(x,y,PickupSnd);
+					}
 				} else {
-					if (accel >= 1.7 && !onground) { // wall bumped and youre flying lets bounce
+					if (accel >= 2.25 && !onground) { // wall bumped and youre flying lets bounce
 						//vspeed += 0.2 * (accel * 5);
 						// I may have gone too far for the funny
-						vspeed /= -vspeed * 0.6;
 						if (lastTurn != 1) { // left
 							playsound(x,y,DetoSlamSnd);
+							accel *= 2;
 							//if(place_free(x + 4, y)) hspeed += 4;
-							hspeed *= -hspeed * 12;
+							//hspeed *= -hspeed * 12;
+							hspeed = -hspeed * (12 * accel);
+							vspeed -= 4 * accel;
+							dashon = false;
 						} else if (lastTurn != -1) { // right
 							playsound(x,y,DetoSlamSnd);
 							//if(place_free(x - 4, y)) hspeed -= 4;
-							hspeed /= hspeed * 12;
+							//hspeed /= hspeed * 12;
+							accel *= 2;
+							hspeed = -hspeed * (12 * accel);
+							vspeed -= 4 * accel;
+							dashon = false;
+						} else {
+							//playsound(x,y,PickupSnd);
+							//vspeed /= -vspeed * -0.1;
 						}
 					}
-					accel = min(0.35, accel - 4.5);
+					accel = min(0.35, accel - 0.15);
 					//if place_free(x, y + 6) vspeed += 10;
 					//vspeed = min(vspeed * accel, vspeed + 2.5 * (-accel * 0.45));
 				}
 			}
+			if (onground) dashon = true;
 			if (moveStatus == 4 && !flight)
 			{
 				/*if(alarm[11] <= 0)
