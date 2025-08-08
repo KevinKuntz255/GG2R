@@ -3,22 +3,19 @@ WEAPON_STICKYJUMPER = 33;
 
 globalvar StickyJumper;
 StickyJumper = object_add();
-object_set_parent(StickyJumper, Weapon);
+object_set_parent(StickyJumper, MineWeapon);
 
 object_event_add(StickyJumper,ev_create,0,'
     xoffset = -3;
-    yoffset = -2;
+    yoffset = 2;
     refireTime = 26;
+    spriteBase = "StickyJumper";
     event_inherited();
-    maxMines = 8;
-    lobbed = 0;
-    reloadTime = 20;
-    reloadBuffer = 26;
     maxAmmo = 12;
     ammoCount = maxAmmo;
-    idle=true;
-    unscopedDamage = 0;
+    mineDamage = 0;
+    specialProjectile = JumperMine;
 ');
 
 global.weapons[WEAPON_STICKYJUMPER] = StickyJumper;
-global.name[WEAPON_STICKYJUMPER] = "Sticky Jumper (unimplemented)";
+global.name[WEAPON_STICKYJUMPER] = "Sticky Jumper";

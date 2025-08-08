@@ -27,7 +27,7 @@ execute_file(pluginFilePath + "\weapons\shared\throwable.gml");
 execute_file(pluginFilePath + "\weapons\shared\flashlight.gml");
 execute_file(pluginFilePath + "\weapons\shared\flaregun.gml");
 execute_file(pluginFilePath + "\weapons\shared\lasergun.gml");
-//execute_file(pluginFilePath + "\weapons\shared\banner.gml");
+execute_file(pluginFilePath + "\weapons\shared\banner.gml");
 execute_file(pluginFilePath + "\weapons\shared\consumable.gml");
 //execute_file(pluginFilePath + "\weapons\shared\crossbow.gml");
 //execute_file(pluginFilePath + "\weapons\shared\wrangler.gml");

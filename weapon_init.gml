@@ -77,7 +77,7 @@ ds_map_add(global.weaponTypes, MACHINEGUN, MACHINEGUN);
 
 // Sounds
 globalvar SwitchSnd, FlashlightSnd, swingSnd, BallSnd, DirecthitSnd, ManglerChargesnd, LaserShotSnd, BowSnd, ChargeSnd, FlaregunSnd, BuffbannerSnd, CritSnd, ShotSnd;
-globalvar chaingunSnd, pistolSnd; // had to move due to undebuggable errors, also in lowercase due to the same problem, soom you figure it out.
+globalvar chaingunSnd, pistolSnd, ManglerShotSnd; // had to move due to undebuggable errors, also in lowercase due to the same problem.
 SwitchSnd = sound_add(directory + '/randomizer_sounds/switchSnd.wav', 0, 1);
 FlashlightSnd = sound_add(directory + '/randomizer_sounds/FlashlightSnd.wav', 0, 1);
 swingSnd = sound_add(directory + '/randomizer_sounds/swingSnd.wav', 0, 1);
@@ -93,6 +93,7 @@ CritSnd = sound_add(directory + '/randomizer_sounds/CritSnd.wav', 0, 1);
 ShotSnd = sound_add(directory + '/randomizer_sounds/ShotSnd.wav', 0, 1);
 chaingunSnd = sound_add(directory + '/randomizer_sounds/ChaingunSnd.wav', 0, 1);
 pistolSnd = sound_add(directory + '/randomizer_sounds/PistolSnd.wav', 0, 1);
+ManglerShotSnd = sound_add(directory + '/randomizer_sounds/ManglerShotSnd.wav', 0, 1);
 object_event_add(Weapon,ev_create,0,'
     owner.expectedWeaponBytes = 2;
 

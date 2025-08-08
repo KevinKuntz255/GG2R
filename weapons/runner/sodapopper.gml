@@ -16,13 +16,12 @@ object_event_add(SodaPopper,ev_create,0,'
     ammoCount = maxAmmo;
     reloadTime = 20;
     reloadBuffer = 20;
-    idle=true;
 
 	hasMeter = true;
+    hasAbility = true;
 	meterName = "HYPE";
 	maxMeter=210;
 	meterCount=0;
-	abilityActive = false;
     abilityVisual = "WEAPON";
     owner.ability = MINICRIT;
 	
@@ -43,24 +42,6 @@ object_event_add(SodaPopper,ev_create,0,'
 
     reloadAnimLength = sprite_get_number(reloadSprite)/2;
     reloadImageSpeed = reloadAnimLength/reloadTime;
-');
-
-object_event_add(SodaPopper,ev_destroy,0,'
-    if (global.myself.object != -1)
-        if (owner.player.activeWeapon == 0) owner.meter[0] = 0; else owner.meter[1] = 0;
-');
-
-object_event_add(SodaPopper,ev_step,ev_step_normal, '
-	if meterCount >= maxMeter {
-		abilityActive = true;
-	}
-	if (abilityActive) {
-		meterCount -= 1;
-    }
-	if (meterCount <= 0 && abilityActive) {
-		abilityActive = false;
-        if (owner.player.activeWeapon == 0) owner.meter[0] = 0; else owner.meter[1] = 0;
-    }
 ');
 
 global.weapons[WEAPON_SODAPOPPER] = SodaPopper;

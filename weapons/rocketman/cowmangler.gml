@@ -17,6 +17,7 @@ object_event_add(CowMangler,ev_create,0,'
     weaponType = ROCKETLAUNCHER;
 
     //ability = CHARGE_WEAPON;
+    rocketSound = ManglerShotSnd;
     abilityVisual = "WEAPON";
     abilityActive = false;
 

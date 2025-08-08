@@ -699,8 +699,40 @@ object_event_add(Character,ev_create,0,'
     ammo[114] = -1;     //napalm grenade timer
     ammo[115] = 0;      //lobbed (sticky sticker)
     // damn that is alot of work
+
+    tripleJumpUsed = false;
+
+    // where the givePassiveEffects are, since on creation happens only once
+    for(i=0; i<2; i+=1)
+    	execute_string(global.givePassiveEffects, id, weapons[i], i);
 ');
 
+// character, weapon, number
+global.givePassiveEffects = '
+	character = argument0;
+	weapon = argument1;
+	num = argument2;
+	switch(weapon)
+	{
+		case Kukri:
+			character.maxHp += 20;
+			character.hp += 20;
+		break;
+		case StickyJumper:
+		case ForceANature:
+		case TerminalBreath:
+		case BigEarner:
+			character.maxHp -= 20;
+			character.hp -= 20;
+		break;
+		case Paintrain:
+			if instance_exists(IntelligenceBaseBlue) || instance_exists(IntelligenceBaseRed) || instance_exists(IntelligenceRed) || instance_exists(IntelligenceBlue) {
+            character.maxHp+=30;
+            character.hp+=30;
+        }
+        character.capStrength +=1;
+	}
+';
 object_event_add(Character,ev_destroy,0,'
 	with(RadioBlur) {
 		if (owner == other.id) {
@@ -853,6 +885,9 @@ object_event_add(Character,ev_step,ev_step_end,'
 	xprevious = x;
 	yprevious = y;
 
+	if (onground) 
+		tripleJumpUsed = false;
+
 	if (currentWeapon != -1) {
 		if(abilityActive and ability == DASH) {
 			if(!place_free(x + hspeed, y)) { // we hit a wall on the left or right
@@ -887,7 +922,6 @@ object_event_add(Character,ev_step,ev_step_end,'
 					//if (!onground) vspeed += 1.5 * (accel * 1.5);
 					if (accel >= 6 && !onground) { 
 						vspeed /= -vspeed * -2;
-						playsound(x,y,PickupSnd);
 					}
 				} else {
 					if (accel >= 2.25 && !onground) { // wall bumped and youre flying lets bounce
@@ -941,18 +975,20 @@ object_event_add(Character,ev_step,ev_step_end,'
 				}
 			}
 		} //detected upwards slope, Fly!
-
-		for(i=0; i<1; i+=1) 
-		{
-			if(weapons[i] == SodaPopper && (hspeed != 0 || vspeed != 0)) {
-				//playsound(x,y,DetoTrimpSnd);
-				//if (!instance_exists("currentWeapon.hype")) break;
-				//if (!currentWeapon.hype)
-				//curMeter = i;
-				meter[i] += 1/16 * speed;
-				if (player.activeWeapon == i)
-					if (!currentWeapon.abilityActive) 
-					currentWeapon.meterCount = meter[i];
+		
+		if(weapons[player.activeWeapon] == SodaPopper) {
+			if (abilityActive)
+				meter[player.activeWeapon] -= 1;
+			if (hspeed != 0 || vspeed != 0) {
+				if (meter[player.activeWeapon] <= maxMeter[player.activeWeapon] && !abilityActive) 
+					meter[player.activeWeapon] += 1/16 * speed;
+			}
+			if (meter[player.activeWeapon] >= maxMeter[player.activeWeapon] && currentWeapon.object_index == SodaPopper) {
+				abilityActive = true;
+				currentWeapon.shotDamage = 12;
+			} else if (meter[player.activeWeapon] <= 0 && currentWeapon.object_index == SodaPopper) {
+				abilityActive = false;
+				if (currentWeapon.object_index == SodaPopper) currentWeapon.shotDamage = 8;
 			}
 		}
 	}
@@ -1744,7 +1780,6 @@ object_event_add(PlayerControl,ev_step,ev_step_end,'
 		// check for rocket boots
         if (!global.myself.object.checkedWeapon) {
         	global.paramOwner = global.myself.object;
-        	playsound(global.myself.object.x,global.myself.object.y,PickupSnd);
         	global.myself.object.weaponType[0] = global.myself.object.currentWeapon.weaponType;
 			var checkWeapon;
 			checkWeapon = instance_create(0,0,global.myself.object.weapons[1]);
@@ -1756,6 +1791,13 @@ object_event_add(PlayerControl,ev_step,ev_step_end,'
 			    global.myself.object.meter[1] = checkWeapon.meterCount;
 			    global.myself.object.maxMeter[1] = checkWeapon.maxMeter;
 			    global.myself.object.rechargeMeter = checkWeapon.rechargeMeter;
+			}
+			firstWep = global.myself.object.currentWeapon;
+			if firstWep.hasAbility {
+				global.myself.object.meterName[0] = firstWep.meterName;
+			    global.myself.object.meter[0] = firstWep.meterCount;
+			    global.myself.object.maxMeter[0] = firstWep.maxMeter;
+			    global.myself.object.rechargeMeter = firstWep.rechargeMeter;
 			}
 			with(checkWeapon) instance_destroy();
 			global.paramOwner = noone;

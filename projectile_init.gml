@@ -565,12 +565,10 @@ object_event_add(DetonationFlare,ev_other,ev_user5,'
                     else if (other.team == team)
                     {
                         moveStatus = 2;
-                        vspeed*=0.8;
                     }
                     else
                     {
                         moveStatus = 4;
-                        vspeed*=0.8
                     }
                 } else if false {
                     var text;
@@ -1419,7 +1417,7 @@ object_event_add(Ball,ev_collision,Character,'
             other.currentWeapon.ammoCount =1;
             other.currentWeapon.alarm[5]=-1;
             other.ammo[107] = -1;
-            playsound(x,y,PickupSnd);
+            //playsound(x,y,PickupSnd);
             instance_destroy(); 
         }
     }
@@ -2086,6 +2084,22 @@ object_event_add(Grenade,ev_collision,Sentry,'
     event_user(2);
 ');
 
+object_event_add(Grenade,ev_collision,TeamGate,'
+    {
+    //instance_destroy()
+        speed *= -1;
+           // stickied = true;
+    }
+');
+
+object_event_add(Grenade,ev_collision,BulletWall,'
+    {
+    //instance_destroy()
+        speed *= -1;
+           // stickied = true;
+    }
+');
+
 object_event_add(Grenade, ev_step, ev_step_begin, '      
     if (global.particles == PARTICLES_NORMAL && index > 1) {
         effect_create_above(ef_smokeup, x, y, 0, c_gray);
@@ -2196,6 +2210,48 @@ object_event_add(Shot,ev_collision,Character,'
         }
         instance_destroy();
     }
+');
+
+
+globalvar JumperMine, JumperMineS;
+JumperMine = object_add();
+//JumperMineS = sprite_add(pluginFilePath + "\randomizer_sprites\JumperMineS.png", 2, 1, 0, 10, 6);
+JumperMineS = sprite_add(directory + "\randomizer_sprites\JumperMineS.png", 4, 0, 0, 4, 2);
+object_set_sprite(JumperMine, JumperMineS);
+object_set_parent(JumperMine, Mine);
+
+// modify variables
+object_event_add(JumperMine, ev_create, 0, '
+    event_inherited();
+    explosionDamage = 0;
+    splashThreshold = false;
+    knockback = 20; // boost knockback
+    blastRadius = 60;
+');
+
+object_event_add(JumperMine, ev_other, ev_user2, '
+    if(exploded == true) {
+        exit;
+    } else {
+        exploded = true;
+    }
+    var explosion;
+    explosion = instance_create(x,y,Explosion);
+    explosion.sprite_index = ExplosionSmallS;
+    playsound(x,y,ExplosionSnd);
+
+    with (Character) {
+        if (distance_to_object(other) < other.blastRadius)
+        {
+            var rdir, vectorfactor;
+            rdir = point_direction(other.x, other.y, x+(left_bound_offset+right_bound_offset)/2, y+(top_bound_offset+bottom_bound_offset)/2);
+            vectorfactor = point_distance(0, 0, sin(degtorad(rdir)), cos(degtorad(rdir))*0.8);
+            motion_add(rdir, min(15, other.knockback-other.knockback*(distance_to_object(other)/other.blastRadius)) * vectorfactor);
+            moveStatus = 4;
+        }
+    }
+
+    instance_destroy();
 ');
 
 // copied from qcwep as made by ZaSpai

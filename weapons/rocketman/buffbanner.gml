@@ -5,12 +5,11 @@ WEAPON_BUFFBANNER = 16;
 
 globalvar BuffBanner;
 BuffBanner = object_add();
-object_set_parent(BuffBanner, Weapon);
+object_set_parent(BuffBanner, BannerWeapon);
 
 object_event_add(BuffBanner,ev_create,0,'
     xoffset=-9;
     yoffset=-9;
-    refireTime=18;
     event_inherited();
     maxAmmo = 1; // this dont matter
 	maxMeter = 4;

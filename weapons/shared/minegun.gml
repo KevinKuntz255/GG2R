@@ -3,9 +3,6 @@ MineWeapon = object_add();
 object_set_parent(MineWeapon, Weapon);
 
 object_event_add(MineWeapon, ev_create, 0, '
-    xoffset = -3;
-    yoffset = -2;
-    refireTime = 26;
     event_inherited();
     
     maxMines = 8;
@@ -22,14 +19,16 @@ object_event_add(MineWeapon, ev_create, 0, '
     weaponType = MINEGUN;
 
     mineSound = RocketSnd; // direct hit specific
-    mineSpeed = 13;
+    mineSpeed = 12;
+    mineDamage = 45;
     specialProjectile = Mine; // cow mangler specific;
 
     if (!variable_local_exists("spriteBase")) spriteBase = "DirectHit";
 
-    normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\"+ spriteBase +"S.png", 2, 1, 0, 10, 6);
-    recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\"+ spriteBase +"FS.png", 4, 1, 0, 10, 6);
-    reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\"+ spriteBase +"FRS.png", 2, 1, 0, 10, 6);
+    normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\"+ spriteBase +"S.png", 2, 1, 0, 3, 5);
+    recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\"+ spriteBase +"FS.png", 2, 1, 0, 3, 5);
+    //reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\"+ spriteBase +"FRS.png", 2, 1, 0, 3, 5);
+    reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\"+ spriteBase +"FS.png", 2, 1, 0, 3, 5);
 
     sprite_index = normalSprite;
 
@@ -74,7 +73,7 @@ object_event_add(MineWeapon, ev_other, ev_user1, '
 
 object_event_add(MineWeapon, ev_other, ev_user2, '
     var i, mine;
-    with(Mine) {
+    with(specialProjectile) {
         if(ownerPlayer == other.ownerPlayer) {
             owner.doubleTapped = true;
             event_user(2);
@@ -88,11 +87,13 @@ object_event_add(MineWeapon, ev_other, ev_user3, '
     playsound(x,y,MinegunSnd);
     ammoCount = max(0, ammoCount-1);
 
-    oid = createShot(x+lengthdir_x(10,owner.aimDirection),y+lengthdir_y(10,owner.aimDirection), Mine, DAMAGE_SOURCE_MINEGUN, owner.aimDirection, 12);
+    oid = createShot(x+lengthdir_x(10,owner.aimDirection),y+lengthdir_y(10,owner.aimDirection), specialProjectile, DAMAGE_SOURCE_MINEGUN, owner.aimDirection, mineSpeed);
     oid.image_angle = 0;
+    oid.explosionDamage = mineDamage;
     lobbed += 1;
     justShot=true;
     readyToShoot = false;
+    oid.weapon = id;
     alarm[0] = refireTime / global.delta_factor;
     alarm[5] = (reloadBuffer + reloadTime) / global.delta_factor;
 ');
@@ -101,7 +102,7 @@ object_event_add(MineWeapon, ev_other, ev_user12, '
     event_inherited();
 
     write_ubyte(global.serializeBuffer, lobbed);
-    with(Mine) {
+    with(specialProjectile) {
         if(ownerPlayer == other.ownerPlayer) {
             event_user(12);
         }
@@ -114,14 +115,14 @@ object_event_add(MineWeapon, ev_other, ev_user13, '
     receiveCompleteMessage(global.serverSocket, 1, global.deserializeBuffer);
     lobbed = read_ubyte(global.deserializeBuffer);
     
-    with(Mine) {
+    with(specialProjectile) {
         if(ownerPlayer == other.ownerPlayer) {
             instance_destroy();
         }
     }
     
     for(i=0; i<lobbed; i+=1) {
-        mine = instance_create(0,0,Mine);
+        mine = instance_create(0,0,specialProjectile);
         mine.owner = owner;
         mine.ownerPlayer = ownerPlayer;
         mine.team = owner.team;

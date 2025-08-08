@@ -28,11 +28,10 @@ object_event_add(SydneySleeper,ev_other,ev_user3,'
         if(object_index == Character or object_is_ancestor(object_index, Character)) {
             if(!ubered and !radioactive and team != other.owner.team) {
                 if other.hitDamage == other.maxDamage {
-                    playsound(x,y,PickupSnd);
                     soaked = true;
-                        for(i=0; i<3; i+=1) {
-                            if (soakType[i] == -1 && soakType[i] != piss) soakType[i] = piss; // Test later
-                        }
+                    for(i=0; i<3; i+=1) {
+                        if (soakType[i] == -1 && soakType[i] != piss) soakType[i] = piss; // Test later
+                    }
                 }
             }
         }
@@ -40,4 +39,4 @@ object_event_add(SydneySleeper,ev_other,ev_user3,'
 ');
 
 global.weapons[WEAPON_SYDNEYSLEEPER] = SydneySleeper;
-global.name[WEAPON_SYDNEYSLEEPER] = "Sydney Sleeper (unfinished)";
+global.name[WEAPON_SYDNEYSLEEPER] = "Sydney Sleeper";

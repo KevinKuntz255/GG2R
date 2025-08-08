@@ -15,7 +15,7 @@ object_event_add(RocketWeapon, ev_create, 0, '
     rocketrange = 501;
     idle = true;
 
-    damSource = DAMAGE_SOURCE_ROCKETLAUNCHER;
+    damSource = DAMAGE_SOURCE_ROCKETLAUNCHER; // todo: add damage sources coinciding with kill log implementation
 
     weaponGrade = UNIQUE;
     weaponType = ROCKETLAUNCHER;
@@ -27,7 +27,7 @@ object_event_add(RocketWeapon, ev_create, 0, '
 
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\"+ spriteBase +"S.png", 2, 1, 0, 10, 6);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\"+ spriteBase +"FS.png", 4, 1, 0, 10, 6);
-    reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\"+ spriteBase +"FRS.png", 2, 1, 0, 10, 6);
+    reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\"+ spriteBase +"FRS.png", 24, 1, 0, 10, 6);
 
     sprite_index = normalSprite;
 
@@ -70,7 +70,7 @@ object_event_add(RocketWeapon, ev_other, ev_user3, '
     var oid, newx, newy;
     newx = x+lengthdir_x(20,owner.aimDirection);
     newy = y+lengthdir_y(20,owner.aimDirection);
-    if (rocketSpeed != -1) oid = createShot(newx, newy, specialProjectile, DAMAGE_SOURCE_ROCKETLAUNCHER, owner.aimDirection, rocketSpeed); else oid = createShot(newx, newy, specialProjectile, DAMAGE_SOURCE_ROCKETLAUNCHER, owner.aimDirection, 13);
+    oid = createShot(newx, newy, specialProjectile, DAMAGE_SOURCE_ROCKETLAUNCHER, owner.aimDirection, rocketSpeed);
     oid.gun=id;
     with (oid)
     {

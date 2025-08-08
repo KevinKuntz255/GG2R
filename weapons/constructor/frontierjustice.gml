@@ -11,6 +11,7 @@ object_event_add(FrontierJustice,ev_create,0,'
     refireTime=20;
     event_inherited();
     maxAmmo = 3;
+    ammoCount = maxAmmo;
 ');
 // mechanics: revenge crits on sentry kill
 global.weapons[WEAPON_FRONTIERJUSTICE] = FrontierJustice;

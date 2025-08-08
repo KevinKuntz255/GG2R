@@ -14,7 +14,6 @@ object_event_add(Paintrain,ev_create,0,'
 	lobbed = 0;
 	
 	//owner.runPower = 5;
-	owner.capStrength = 2;
 ');
 object_event_add(Paintrain,ev_destroy,0,'
     event_inherited();

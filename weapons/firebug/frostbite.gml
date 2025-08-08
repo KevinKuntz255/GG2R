@@ -168,4 +168,4 @@ object_event_add(Frostbite,ev_draw,0,'
 ');
 
 global.weapons[WEAPON_FROSTBITE] = Frostbite;
-global.name[WEAPON_FROSTBITE] = "Frostbite";
+global.name[WEAPON_FROSTBITE] = "Frostbite (unfinished)";

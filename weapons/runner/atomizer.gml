@@ -13,7 +13,6 @@ object_event_add(Atomizer,ev_create,0,'
     yoffset=-25;
     spriteBase = "Atomizer";
     event_inherited();
-	trip = false;
     depth = 1;
 
     team = owner.team;
@@ -37,12 +36,12 @@ object_event_add(Atomizer,ev_destroy,0,'
 
 // todo: move trip to owner as done in haxxy_melee_only
 object_event_add(Atomizer,ev_step,ev_step_normal,'
-	if (owner.doublejumpUsed and !trip){
+	if (owner.doublejumpUsed && !owner.tripleJumpUsed){
 		owner.doublejumpUsed = false;
-		trip = true;
+        owner.tripleJumpUsed = true;
 	}
 	if (owner.onground)
-		trip = false;
+		owner.tripleJumpUsed = false;
 
 	if (owner.taunting && owner.tauntsprite == ScoutTKillS) {
 		//if (owner.tauntindex >= sprite_get_number(owner.tauntsprite) && !abilityActive) {
@@ -72,4 +71,4 @@ object_event_add(Atomizer,ev_step,ev_step_normal,'
 ');
 
 global.weapons[WEAPON_ATOMIZER] = Atomizer;
-global.name[WEAPON_ATOMIZER] = "Atomizer (Unfinished)";
+global.name[WEAPON_ATOMIZER] = "Atomizer";

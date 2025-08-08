@@ -3,9 +3,6 @@ GrenadeWeapon = object_add();
 object_set_parent(GrenadeWeapon, Weapon);
 
 object_event_add(GrenadeWeapon, ev_create, 0, '
-    xoffset = 2;
-    yoffset = 4;
-    refireTime = 28;
     event_inherited();
     
     maxMines = 4;
@@ -21,14 +18,15 @@ object_event_add(GrenadeWeapon, ev_create, 0, '
     weaponGrade = UNIQUE;
     weaponType = GRENADELAUNCHER;
     grenadeSound = MinegunSnd;
-    grenadeSpeed = 13;
+    grenadeSpeed = 15;
+    grenadeDamage = 40;
     specialProjectile = Grenade;
 
     if (!variable_local_exists("spriteBase")) spriteBase = "GrenadeLauncher";
 
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\"+ spriteBase +"S.png", 1, 1, 0, 13, 6);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\"+ spriteBase +"FS.png", 1, 1, 0, 13, 6);
-    reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\"+ spriteBase +"FRS.png", 1, 1, 0, 13, 6);
+    reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\"+ spriteBase +"FS.png", 1, 1, 0, 13, 6);
 
     sprite_index = normalSprite;
 
@@ -71,26 +69,27 @@ object_event_add(GrenadeWeapon, ev_other, ev_user1, '
     owner.doubleTapped = true;
 ');
 
+/*
 object_event_add(GrenadeWeapon, ev_other, ev_user2, '
     var i, mine;
-    with(Mine) {
+    with(specialProjectile) {
         if(ownerPlayer == other.ownerPlayer) {
             owner.doubleTapped = true;
             event_user(2);
         }
     }
     lobbed = 0;
-');
+');*/
 
 object_event_add(GrenadeWeapon, ev_other, ev_user3, '
     var oid, newx, newy;
     playsound(x,y,MinegunSnd);
     ammoCount = max(0, ammoCount-1);
 
-    oid = createShot(x+lengthdir_x(10,owner.aimDirection),y+lengthdir_y(10,owner.aimDirection), specialProjectile, DAMAGE_SOURCE_MINEGUN, owner.aimDirection, 15);
+    oid = createShot(x+lengthdir_x(10,owner.aimDirection),y+lengthdir_y(10,owner.aimDirection), specialProjectile, DAMAGE_SOURCE_MINEGUN, owner.aimDirection, grenadeSpeed);
     oid.image_angle = 0;
     oid.vspeed-=2.5;
-    oid.explosionDamage = 40;
+    oid.explosionDamage = grenadeDamage;
     lobbed += 1;
     justShot=true;
     readyToShoot = false;

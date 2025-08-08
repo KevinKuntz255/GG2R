@@ -7,6 +7,8 @@ object_set_parent(SandvichHand, ConsumableWeapon);
 
 // take out base vars when comfortable, This one uses networking so i tread lightly
 object_event_add(SandvichHand,ev_create,0,'
+    xoffset = -12;
+    yoffset = 3;
     event_inherited();
     owner.expectedWeaponBytes = 3;
 ');

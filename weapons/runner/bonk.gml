@@ -39,7 +39,7 @@ object_event_add(BonkHand,ev_create,0,'
     reloadImageSpeed = reloadAnimLength/reloadTime;
 
     if (!owner.radioactive) {
-        if (team == TEAM_BLUE) owner._oldTauntSprite = ScoutBlueTauntS; else owner._oldTauntSprite = ScoutRedTauntS;
+        if (owner.team == TEAM_BLUE) owner._oldTauntSprite = ScoutBlueTauntS; else owner._oldTauntSprite = ScoutRedTauntS;
         owner.tauntsprite = ScoutBuffS;
         owner.tauntlength = sprite_get_number(owner.tauntsprite)/2;
         owner.tauntindex=owner.tauntlength * owner.player.team;

@@ -15,4 +15,4 @@ object_event_add(JarateHand,ev_create,0,'
 ');
 
 global.weapons[WEAPON_JARATE] = JarateHand;
-global.name[WEAPON_JARATE] = "Jarate (unimplemented)";
+global.name[WEAPON_JARATE] = "Jarate";

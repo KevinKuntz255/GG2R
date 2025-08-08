@@ -3,8 +3,6 @@ BannerWeapon = object_add();
 object_set_parent(BannerWeapon, Weapon);
 
 object_event_add(BannerWeapon, ev_create, 0, '
-    xoffset=-12;
-    yoffset=3;
     refireTime=18;
     event_inherited();
 
@@ -21,15 +19,9 @@ object_event_add(BannerWeapon, ev_create, 0, '
 
     shotSpeed = 13;
     
-    throwProjectile = -1;
-    projectileSpeed = 13;
-    randomDir = false;
-    projectileDir[0] = 7;
-    projectileDir[1] = 4;
-    
     specialSnd = BuffbannerSnd;
 
-    if (!variable_local_exists("spriteBase")) spriteBase = "JarateHand";
+    if (!variable_local_exists("spriteBase")) spriteBase = "BuffBanner";
 
     normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\" + spriteBase + "S.png", 4, 1, 0, 0, 0);
     recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\" + spriteBase + "S.png", 4, 1, 0, 0, 0);
@@ -73,7 +65,7 @@ object_event_add(BannerWeapon,ev_step,ev_step_normal, '
     image_index = owner.team+2*real(ammoCount);
 ');
 
-object_Event_add(BannerWeapon, ev_other, ev_user1, '
+object_event_add(BannerWeapon, ev_other, ev_user1, '
     if (!owner.cloak && meterCount >= maxMeter)
     {
         meterCount = 0;

@@ -3,8 +3,6 @@ ConsumableWeapon = object_add();
 object_set_parent(ConsumableWeapon, Weapon);
 
 object_event_add(ConsumableWeapon, ev_create, 0, '
-    xoffset = -12;
-    yoffset = 3;
     refireTime = 18;
     event_inherited();
     //owner.expectedWeaponBytes = 3; risky
