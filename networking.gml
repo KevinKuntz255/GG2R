@@ -19,6 +19,11 @@ object_event_add(Player, ev_create, 0, '
     joined = false;
     activeWeapon = 0;
 ');
+with(Player)
+{
+    joined = false;
+    activeWeapon = 0;
+}
 //Hopefully sends loadout and asks for loadouts upon server join
 object_event_add(PlayerControl, ev_create, 0, '
     with(Player){

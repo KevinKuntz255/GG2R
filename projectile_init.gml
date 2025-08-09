@@ -198,7 +198,6 @@ globalvar MeleeMask;
 MeleeMask = object_add();
 object_set_parent(MeleeMask, StabMask);
 object_event_add(MeleeMask,ev_create,0,'
-    event_inherited();
     {
         hitDamage = 8;
         alarm[0]=6;
