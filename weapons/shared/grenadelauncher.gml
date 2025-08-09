@@ -90,6 +90,7 @@ object_event_add(GrenadeWeapon, ev_other, ev_user3, '
     oid.image_angle = 0;
     oid.vspeed-=2.5;
     oid.explosionDamage = grenadeDamage;
+    oid.weapon = id;
     lobbed += 1;
     justShot=true;
     readyToShoot = false;

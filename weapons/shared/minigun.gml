@@ -76,6 +76,7 @@ object_event_add(MinigunWeapon, ev_other, ev_user1,'
                     if (specialShot != -1) shot = createShot(shotx, shoty, specialShot, DAMAGE_SOURCE_MINIGUN, owner.aimDirection+(random(shotDir[0])-shotDir[1]), 12+random(1)); else shot = createShot(shotx, shoty, Shot, DAMAGE_SOURCE_MINIGUN, owner.aimDirection+(random(shotDir[0])-shotDir[1]), 12+random(1));
                     shot.hspeed += owner.hspeed;
                     shot.alarm[0] = 30 / global.delta_factor;
+                    shot.weapon = id;
                     if shotDamage != -1 shot.hitDamage = shotDamage;
                 }
                 else

@@ -87,6 +87,7 @@ object_event_add(PistolWeapon, ev_other, ev_user3, '
         shot.hspeed += owner.hspeed;
         shot.speed = 13;
         shot.direction += random(shotDir[0])-shotDir[1];
+        shot.weapon = id;
         // Move shot forward to avoid immediate collision with a wall behind the character
         shot.x += lengthdir_x(15, shot.direction);
         shot.y += lengthdir_y(15, shot.direction);

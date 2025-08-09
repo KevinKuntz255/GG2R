@@ -10,6 +10,7 @@ object_event_add(PyroShotgun, ev_create, 0, '
     yoffset=-3;
     spriteBase = "PyroShotgun";
     event_inherited();
+    weaponType = SHOTGUN;
 ');
 
 global.weapons[WEAPON_PYROSHOTGUN] = PyroShotgun;

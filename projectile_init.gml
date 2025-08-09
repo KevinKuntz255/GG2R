@@ -198,6 +198,7 @@ globalvar MeleeMask;
 MeleeMask = object_add();
 object_set_parent(MeleeMask, StabMask);
 object_event_add(MeleeMask,ev_create,0,'
+    event_inherited();
     {
         hitDamage = 8;
         alarm[0]=6;
@@ -226,6 +227,7 @@ object_event_add(MeleeMask,ev_collision,Obstacle,'
     }
 ');
 object_event_add(MeleeMask,ev_collision,Character,'
+    if (ownerPlayer.object == -1) exit;
     if(other.id != ownerPlayer.object and other.team != team  && other.hp > 0 && other.ubered == 0)
     {
         if(!collision_line(x,y-12,other.x,other.y,Obstacle,true,true)) and (!collision_line(x,y-12,other.x,other.y,TeamGate,true,true) and (!collision_line(x,y-12,other.x,other.y,BulletWall,true,true)))
@@ -1584,7 +1586,7 @@ object_event_add(MadMilk,ev_other,ev_user2,'
 			if(other.team != team) && !ubered and hp > 0 && !radioactive {
 					soaked = true;
                     for(i=0; i<3; i+=1) {
-                        if (soakType[i] == -1 && soakType[i] != milked) soakType[i] = milked; // Test later
+                        if (soakType[i] == -1 && soakType[i] != milk) soakType[i] = milk; // Test later
                     }
 					alarm[8]=250-distance_to_object(other);
 					cloak=false;     
@@ -2158,7 +2160,7 @@ object_event_add(Grenade, ev_other, ev_user12, '
 
 */
 object_event_add(Shot, ev_create, 0, '
-    weapon = Scattergun; // prevent crashes
+    weapon = Shotgun; // prevent crashes
 ');
 // for radioactivity
 object_event_clear(Shot,ev_collision,Character);
@@ -2174,7 +2176,7 @@ object_event_add(Shot,ev_collision,Character,'
 
     if(other.id != ownerPlayer.object and other.team != team  && other.hp > 0 && other.ubered == 0 && !other.radioactive)
     {
-        switch(weapon.object_index) {
+        switch(weapon) {
             case Reserveshooter:
                 if (!other.onground && other.moveStatus == 1) {
                     hitDamage += 6;

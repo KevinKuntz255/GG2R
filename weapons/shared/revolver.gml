@@ -123,7 +123,7 @@ object_event_add(RevolverWeapon, ev_other, ev_user1, '
         stab.hitDamage = 0;
         stab.weapon = DAMAGE_SOURCE_KNIFE;
         stab.golden = golden;
-        
+
         // BH reward - *B*obble *H*ead
         if(hasClassReward(ownerPlayer, "BH"))
         {
@@ -147,6 +147,7 @@ object_event_add(RevolverWeapon, ev_other, ev_user3, '
     with(shot)
         speed += owner.hspeed * hspeed / 15;
 
+    shot.weapon = id;
     // Move shot forward one 30fps step to avoid immediate collision with a wall behind the character
     // delta_factor is left out intentionally!
     shot.x += lengthdir_x(shot.speed, shot.direction);
