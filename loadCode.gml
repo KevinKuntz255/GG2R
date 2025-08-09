@@ -1457,7 +1457,7 @@ object_event_add(Quote,ev_create,0,'
 	maxHp = 140;
 	baseRunPower = 1.07;
 	weapons[0] = Blade;
-	weapons[1] = Machinegun;
+	weapons[1] = Shotgun;
 
 	if (global.paramPlayer.team == TEAM_RED)
 	{

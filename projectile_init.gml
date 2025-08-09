@@ -2159,9 +2159,7 @@ object_event_add(Grenade, ev_other, ev_user12, '
 ');
 
 */
-object_event_add(Shot, ev_create, 0, '
-    weapon = Shotgun; // prevent crashes
-');
+
 // for radioactivity
 object_event_clear(Shot,ev_collision,Character);
 object_event_add(Shot,ev_collision,Character,'
@@ -2176,18 +2174,20 @@ object_event_add(Shot,ev_collision,Character,'
 
     if(other.id != ownerPlayer.object and other.team != team  && other.hp > 0 && other.ubered == 0 && !other.radioactive)
     {
-        switch(weapon) {
-            case Reserveshooter:
-                if (!other.onground && other.moveStatus == 1) {
-                    hitDamage += 6;
-                    var text;
-                    text=instance_create(x,y,Text);
-                    text.sprite_index=MiniCritS;
-                }
-            break;
-            /*case Widowmaker:
-                owner.nutsnbolts += 20;
-            */
+        if variable_local_exists("weapon") {
+            switch(weapon) {
+                case Reserveshooter:
+                    if (!other.onground && other.moveStatus == 1) {
+                        hitDamage += 6;
+                        var text;
+                        text=instance_create(x,y,Text);
+                        text.sprite_index=MiniCritS;
+                    }
+                break;
+                /*case Widowmaker:
+                    owner.nutsnbolts += 20;
+                */
+            }
         }
         damageCharacter(ownerPlayer, other.id, hitDamage);
         if (other.lastDamageDealer != ownerPlayer and other.lastDamageDealer != other.player)
