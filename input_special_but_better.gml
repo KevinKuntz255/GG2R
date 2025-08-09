@@ -29,27 +29,4 @@ if(global.myself.class == CLASS_ENGINEER)
 } else if global.myself.class == CLASS_SNIPER {
     if (global.myself.activeWeapon == 0) write_ubyte(global.serverSocket, TOGGLE_ZOOM);
     //if (global.myself.object.currentWeapon.weaponType == RIFLE) write_ubyte(global.serverSocket, TOGGLE_ZOOM);
-} else if global.myself.object.ability == DASH {
-    global.myself.object.doubleTapped = !global.myself.object.doubleTapped;
-        if (global.myself.object.abilityActive) {
-            global.myself.object.abilityActive = false;
-            global.myself.object.meter[1] = 0;
-        } // stop, no matter what
-    if ((global.myself.object.currentWeapon.weaponType == MINEGUN || global.myself.object.currentWeapon.isThrowable) && !global.myself.object.doubleTapped) exit; // a sort of buffer for weapons like SandvichHand and Minegun
-    if (!global.myself.object.abilityActive && !global.myself.object.cloak && global.myself.object.meter[1] >= global.myself.object.maxMeter[1]) {
-        global.myself.object.abilityActive = true;
-        global.myself.object.accel = 0;
-        global.myself.object.moveStatus = 0;
-        global.myself.object.dashon = true;
-        // as suggested by Cat Al Ghul, start off FAST.
-        if (global.myself.object.onground) {
-            if (global.myself.object.image_xscale == -1) {
-                    //global.myself.object.hspeed -= 12;
-            } else if (global.myself.object.image_xscale == 1) {
-                //global.myself.object.hspeed += 12;
-            }
-        }
-        playsound(global.myself.object.x,global.myself.object.y,ChargeSnd);
-        if (global.myself.object.currentWeapon.weaponType == MELEE) global.myself.object.currentWeapon.readyToStab = true;
-    }
 }

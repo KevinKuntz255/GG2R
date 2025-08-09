@@ -58,8 +58,8 @@ object_event_add(Eyelander,ev_step,ev_step_normal,'
 
 /*
 object_event_add(Eyelander,ev_other,ev_user2,'
-    if (!abilityActive && !owner.cloak && meterCount >= maxMeter) {
-        abilityActive = true;
+    if (!owner.abilityActive && !owner.cloak && owner.meter[1] >= owner.maxMeter[1]) {
+        owner.abilityActive = true;
 		owner.accel = 0;
 		owner.moveStatus = 0;
         // jerry-rigging consistency in charging by makin u slightly jumped

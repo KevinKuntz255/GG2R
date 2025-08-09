@@ -612,12 +612,21 @@ object_event_add(Character,ev_create,0,'
 	crit = -1;
 	
 	soaked = false;
-	// 3 soakTypes, 3 types, if possibly at the same time
 	dashon = true;
+	// 3 soakTypes, 3 types, if possibly at the same time
+	for(i=0; i<4; i+=1) soakType[i] = -1;
 	soakType[0]=-1;
 	soakType[1]=-1;
 	soakType[2]=-1;
 
+	for(i=0; i<3; i+=1) {
+		ammo[i] = -1;
+		meter[i] = -1;
+		maxMeter[i] = -1;
+		meterName[i] = -1;
+		abilityActive[i] = -1; // todo: this
+		weeaponType[i] = -1;
+	}
 	ammo[0] = -1;
 	ammo[1] = -1;
 
@@ -701,6 +710,24 @@ object_event_add(Character,ev_create,0,'
     // damn that is alot of work
 
     tripleJumpUsed = false;
+
+    // check for rocket boots/abilities
+   	global.paramOwner = id;
+	weaponType[0] = currentWeapon.weaponType;
+	var checkWeapon;
+	checkWeapon = instance_create(0,0,weapons[1]);
+	if (checkWeapon.weaponType == WEAR) canSwitch = false;
+	if (checkWeapon.hasAbility) {
+		ability = checkWeapon.ability;
+		meterName[1] = checkWeapon.meterName;
+	    meter[1] = checkWeapon.meterCount;
+	    maxMeter[1] = checkWeapon.maxMeter;
+	    rechargeMeter = checkWeapon.rechargeMeter;
+	}
+	with(checkWeapon) instance_destroy();
+	maxMeter[0] = currentWeapon.maxMeter;
+	meterName[0] = currentWeapon.meterName;
+	global.paramOwner = noone;
 
     // where the givePassiveEffects are, since on creation happens only once
     for(i=0; i<2; i+=1)
@@ -1776,33 +1803,6 @@ object_event_add(PlayerControl,ev_step,ev_step_end,'
 	
 		// Healed HUD
 		if !instance_exists(HealedHud) && global.showHealer = 1 instance_create(0,0,HealedHud);
-		
-		// check for rocket boots
-        if (!global.myself.object.checkedWeapon) {
-        	global.paramOwner = global.myself.object;
-        	global.myself.object.weaponType[0] = global.myself.object.currentWeapon.weaponType;
-			var checkWeapon;
-			checkWeapon = instance_create(0,0,global.myself.object.weapons[1]);
-			if (checkWeapon.weaponType == WEAR) global.myself.object.canSwitch = false;
-			global.myself.object.weaponType[1] = checkWeapon.weaponType;
-			if (checkWeapon.hasAbility) {
-				global.myself.object.ability = checkWeapon.ability;
-				global.myself.object.meterName[1] = checkWeapon.meterName;
-			    global.myself.object.meter[1] = checkWeapon.meterCount;
-			    global.myself.object.maxMeter[1] = checkWeapon.maxMeter;
-			    global.myself.object.rechargeMeter = checkWeapon.rechargeMeter;
-			}
-			firstWep = global.myself.object.currentWeapon;
-			if firstWep.hasAbility {
-				global.myself.object.meterName[0] = firstWep.meterName;
-			    global.myself.object.meter[0] = firstWep.meterCount;
-			    global.myself.object.maxMeter[0] = firstWep.maxMeter;
-			    global.myself.object.rechargeMeter = firstWep.rechargeMeter;
-			}
-			with(checkWeapon) instance_destroy();
-			global.paramOwner = noone;
-			global.myself.object.checkedWeapon = true;
-		}
 
 		//this hud does most of the special displays (cooldown & charge timers)
 		if !instance_exists(SpecialHud) instance_create(0,0,SpecialHud);
@@ -1940,6 +1940,9 @@ object_event_add(Character,ev_other,ev_user12,'
 	        write_ubyte(global.serializeBuffer, ceil(hp));
 	        write_ubyte(global.serializeBuffer, currentWeapon.ammoCount);
 	        
+	        write_ubyte(global.serializeBuffer, abilityActive);
+	        write_ubyte(global.serializeBuffer, accel);
+
 	        temp = 0;
 	        if(cloak) temp |= $01;
 	        //allocate the next three bits of the byte for movestatus sync
@@ -1999,7 +2002,7 @@ object_event_add(Character,ev_other,ev_user13,'
 	    
 	    var temp, newIntel;
 	    if(global.updateType == QUICK_UPDATE) or (global.updateType == FULL_UPDATE) {
-	        receiveCompleteMessage(global.serverSocket,9,global.deserializeBuffer);
+	        receiveCompleteMessage(global.serverSocket,11,global.deserializeBuffer);
 	        x = read_ushort(global.deserializeBuffer)/5;
 	        y = read_ushort(global.deserializeBuffer)/5;
 	        hspeed = read_byte(global.deserializeBuffer)/8.5;
@@ -2007,9 +2010,14 @@ object_event_add(Character,ev_other,ev_user13,'
 	        xprevious = x;
 	        yprevious = y;
 	        
+
 	        hp = read_ubyte(global.deserializeBuffer);
 	        currentWeapon.ammoCount = read_ubyte(global.deserializeBuffer);
 	        
+	        abilityActive = read_ubyte(global.deserializeBuffer);
+	        accel = read_ubyte(global.deserializeBuffer);
+	        // todo: add meters here too, this is for full syncing to new players just joining in/playing against demoknight
+
 	        temp = read_ubyte(global.deserializeBuffer);
 	        cloak = (temp & $01 != 0);
 	        moveStatus = (temp >> 1) & $07;
