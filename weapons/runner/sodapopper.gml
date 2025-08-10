@@ -18,12 +18,11 @@ object_event_add(SodaPopper,ev_create,0,'
     reloadBuffer = 20;
 
 	hasMeter = true;
-    hasAbility = true;
 	meterName = "HYPE";
 	maxMeter=210;
 	meterCount=0;
     abilityVisual = "WEAPON";
-    owner.ability = MINICRIT;
+    ability = MINICRIT;
 	
     weaponGrade = UNIQUE;
     weaponType = SCATTERGUN;

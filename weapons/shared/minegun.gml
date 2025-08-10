@@ -72,6 +72,7 @@ object_event_add(MineWeapon, ev_other, ev_user1, '
 ');
 
 object_event_add(MineWeapon, ev_other, ev_user2, '
+    event_inherited();
     var i, mine;
     with(specialProjectile) {
         if(ownerPlayer == other.ownerPlayer) {

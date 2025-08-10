@@ -8,12 +8,18 @@ object_event_add(BannerWeapon, ev_create, 0, '
 
     isMelee = true;
 
+    idle = true;
+    
     maxAmmo = 1;
     ammoCount = maxAmmo;
 
     weaponGrade = UNIQUE;
     weaponType = BANNER;
 
+    ability = MINICRIT;
+    meterName = "RAGE";
+    rechargeMeter = false;
+    maxMeter = 4;
     reloadTime = 300;
     reloadBuffer = refireTime;
 

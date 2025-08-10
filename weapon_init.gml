@@ -113,7 +113,7 @@ object_event_add(Weapon,ev_create,0,'
 
     abilityActive = false;
     abilityVisual = "";
-    hasAbility = false;
+    ability = -1;
 
     isThrowable = false;
 
@@ -189,13 +189,13 @@ object_event_add(Weapon, ev_other, ev_user2, '
 	        // jerry-rigging consistency in charging by makin u slightly jumped
 			if (owner.onground) owner.vspeed -= 0.15; else owner.vspeed += 0.5; 
 	        // as suggested by Cat Al Ghul, start off FAST.
-	        if (owner.onground) {
+	        /*if (owner.onground) {
 	            if (owner.image_xscale == -1) {
 	                    owner.hspeed -= 12;
 	            } else if (owner.image_xscale == 1) {
 	                owner.hspeed += 12;
 	            }
-	        }
+	        }*/
 	        playsound(x,y,ChargeSnd);
 			readyToStab = true;
 		}

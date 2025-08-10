@@ -11,16 +11,9 @@ object_event_add(BuffBanner,ev_create,0,'
     xoffset=-9;
     yoffset=-9;
     event_inherited();
-    maxAmmo = 1; // this dont matter
 	maxMeter = 4;
 	meterCount = 0;
-    ammoCount = maxAmmo;
-    reloadTime = 500;
-    reloadBuffer = 18;
-    idle=true;
     readyToStab=false;
-    image_speed = 0;
-    unscopedDamage = 0;
 	isMelee = true;
 	
     weaponGrade = UNIQUE;
@@ -41,13 +34,12 @@ object_event_add(BuffBanner,ev_create,0,'
 ');
 
 object_event_add(BuffBanner,ev_other,ev_user1,'
-	if (!owner.cloak && meterCount >= maxMeter)
+	if (!owner.cloak && owner.meter[ownerPlayer.activeWeapon] >= owner.maxMeter[ownerPlayer.activeWeapon])
 	{
-		meterCount = 0;
+		owner.meter[ownerPlayer.activeWeapon] = 0;
 		playsound(x,y,BuffbannerSnd);
-        owner.canSwitch = false;
 	}
 ');
 
 global.weapons[WEAPON_BUFFBANNER] = BuffBanner;
-global.name[WEAPON_BUFFBANNER] = "Buff Banner (spriteonly)";
+global.name[WEAPON_BUFFBANNER] = "Buff Banner";

@@ -2050,6 +2050,64 @@ object_event_add(Piss,ev_alarm,0,'
     instance_destroy();
 ');
 
+globalvar NatachaShot;
+NatachaShot = object_add();
+object_set_sprite(NatachaShot, ShotS);
+object_set_parent(NatachaShot, Shot);
+object_event_add(NatachaShot,ev_create,0,'
+    {
+        hitDamage = 6;
+        lifetime = 40;
+        alarm[0] = lifetime;
+        originx=x;
+        originy=y;
+            
+        // Controls whether this bullet penetrates bubbles or not
+        // Also controls whether this bullet destroys friendly bubbles
+        perseverant = choose(0, 0, 1); // 1/3 chance
+    }
+');
+object_event_add(NatachaShot,ev_alarm,0,'
+    instance_destroy();
+');
+object_event_add(NatachaShot,ev_collision,Character,'
+    gunSetSolids();
+    if (!place_free(x, y)) 
+    {
+        instance_destroy();
+        gunUnsetSolids();
+        exit;
+    }
+    gunUnsetSolids();
+
+    if(other.id != ownerPlayer.object and other.team != team  && other.hp > 0 && other.ubered == 0)
+    {
+        damageCharacter(ownerPlayer, other.id, hitDamage);
+        if (other.lastDamageDealer != ownerPlayer and other.lastDamageDealer != other.player)
+        {
+            other.secondToLastDamageDealer = other.lastDamageDealer;
+            other.alarm[4] = other.alarm[3]
+        }
+        other.alarm[3] = ASSIST_TIME / global.delta_factor;
+        other.lastDamageDealer = ownerPlayer;
+        other.lastDamageSource = weapon;
+        
+        var blood;
+        if(global.gibLevel > 0 && !other.radioactive)
+        {
+            blood = instance_create(x,y,Blood);
+            blood.direction = direction-180;
+        }
+        dealFlicker(other.id);
+        with(other)
+        {
+            motion_add(other.direction, other.speed*0.1);
+            speed*=0.95;
+        }
+        instance_destroy();
+    }
+');
+
 globalvar Grenade, GrenadeS;
 Grenade = object_add();
 //GrenadeS = sprite_add(pluginFilePath + "\randomizer_sprites\GrenadeS.png", 2, 1, 0, 10, 6);
@@ -2156,7 +2214,6 @@ object_event_add(Grenade, ev_other, ev_user12, '
         vspeed = read_byte(global.deserializeBuffer)/5;
     }
 ');
-
 */
 
 // for radioactivity
@@ -2173,19 +2230,21 @@ object_event_add(Shot,ev_collision,Character,'
 
     if(other.id != ownerPlayer.object and other.team != team  && other.hp > 0 && other.ubered == 0 && !other.radioactive)
     {
-        if variable_local_exists("weapon") {
-            switch(weapon) {
-                case Reserveshooter:
-                    if (!other.onground && other.moveStatus == 1) {
-                        hitDamage += 6;
-                        var text;
-                        text=instance_create(x,y,Text);
-                        text.sprite_index=MiniCritS;
-                    }
-                break;
-                /*case Widowmaker:
-                    owner.nutsnbolts += 20;
-                */
+        with(weapon) {
+            if variable_local_exists("object_index") {
+                switch(object_index) {
+                    case Reserveshooter:
+                        if (!other.onground && other.moveStatus == 2) {
+                            hitDamage += 6;
+                            var text;
+                            text=instance_create(x,y,Text);
+                            text.sprite_index=MiniCritS;
+                        }
+                    break;
+                    /*case Widowmaker:
+                        owner.nutsnbolts += 20;
+                    */
+                }
             }
         }
         damageCharacter(ownerPlayer, other.id, hitDamage);
@@ -2426,13 +2485,14 @@ global.dealDamageFunction += '
         var pissed, milked;
         pissed = false;
         milked = false;
-        if (argument1.soaked)
+        if (argument1.soaked) {
             for(i=0; i<3; i+=1) {
                 if (argument1.soakType[i] == piss)
                     pissed = true;
                 if (argument1.soakType[i] == milk)
                    milked = true;
             }
+        }
 		//if (pissed || argument1.object.crit == 2 || (argument0.object.currentWeapon.abilityActive && argument0.object.currentWeapon.ability = MINICRIT)) {
         if (pissed) {
 			argument2 += 1*0.35; // add this dmg for healing factors
@@ -2444,7 +2504,7 @@ global.dealDamageFunction += '
 		if (argument0 != noone && instance_exists(argument0)) {
 			if (argument0.object_index == Player) {
 				if (argument0.object != -1 && instance_exists(argument0.object)) {
-					if (argument0.object.currentWeapon.object_index == BlackBox && argument1.team != argument0.team) argument0.object.hp += argument2*0.3; // BlackBox heal code
+					if (argument0.object.currentWeapon.object_index == BlackBox && argument1.team != argument0.team) argument0.object.hp += argument2*0.3; // todo: move BlackBox heal code to Rocket instead of dealDamage, does not account for switching weapons
                     if (milked) argument0.object.hp += argument2*0.35; // milk heal code
 				}
 			}

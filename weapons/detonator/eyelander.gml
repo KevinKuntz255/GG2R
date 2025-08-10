@@ -15,10 +15,8 @@ object_event_add(Eyelander,ev_create,0,'
 
     abilityVisual = "WEAPON BLUR";
     ability = DASH;
-    //owner.ability = DASH;
 
 	hasMeter = true;
-    hasAbility = true;
 	meterName = "CHARGE";
 	meterCount = 100;
 	maxMeter = 100;

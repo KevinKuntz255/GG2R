@@ -10,6 +10,9 @@ object_event_add(Minegun, ev_other, ev_user1, '
     owner.doubleTapped = true;
 ');
 
+object_event_add(Minegun, ev_other, ev_user2, '
+	event_inherited();
+');
 /*
 object_event_add(Minegun, ev_other, ev_user3, '
 	if (owner.abilityActive and owner.ability == DASH)
