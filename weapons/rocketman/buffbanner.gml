@@ -33,13 +33,5 @@ object_event_add(BuffBanner,ev_create,0,'
     reloadImageSpeed = reloadAnimLength/reloadTime;
 ');
 
-object_event_add(BuffBanner,ev_other,ev_user1,'
-	if (!owner.cloak && owner.meter[ownerPlayer.activeWeapon] >= owner.maxMeter[ownerPlayer.activeWeapon])
-	{
-		owner.meter[ownerPlayer.activeWeapon] = 0;
-		playsound(x,y,BuffbannerSnd);
-	}
-');
-
 global.weapons[WEAPON_BUFFBANNER] = BuffBanner;
 global.name[WEAPON_BUFFBANNER] = "Buff Banner";

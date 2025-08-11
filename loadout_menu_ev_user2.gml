@@ -115,7 +115,7 @@ switch(mousedclass){
         load2.description[2,1] = " +33% clip size# +15% refire speed";
         load2.description[2,2] = " -15% damage penalty";
         load2.description[3,0] = " " + chr(149) + "Heals 40 hp";
-        load2.description[3,1] = " " + chr(149) + "Can overheal user";
+        load2.description[3,1] = " " + chr(149) + "Adds 50+ max health for 20 seconds";
         load2.description[3,2] = " " + chr(149) + "Can't be dropped";
         load2.description[4,1] = " " + chr(149) + "On kill deals crits# +30% damage";
         load2.description[4,2] = " " + chr(149) + "Slower swing speed";

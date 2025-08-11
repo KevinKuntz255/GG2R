@@ -598,13 +598,17 @@ object_event_add(Character,ev_create,0,'
 	loaded1 = 0;
 	loaded2 = 0;
 	
+	oldmaxHp = -1;
+	newmaxHp = -1;
+
 	overheal = 0;
     isSaxtonHale = false;
     raged=false;
     canSwitch = true;
 	
 	crit = -1;
-	
+
+	nomRate = 1.6;
 	soaked = false;
 	dashon = true;
 	// 3 soakTypes, 3 types, if possibly at the same time
@@ -766,6 +770,12 @@ object_event_add(Character,ev_alarm,10,'
 	buffbanner = false;
 	stunned = false;
 	radioactive = false;
+	playsound(x,y,BowSnd);
+');
+
+object_event_add(Character,ev_alarm,11,'
+	maxHp = oldmaxHp;
+	if (hp > maxHp) hp = maxHp;
 	playsound(x,y,BowSnd);
 ');
 
@@ -1054,8 +1064,13 @@ object_event_add(Character,ev_step,ev_step_end,'
 	        canEat = false;
 	        alarm[6] = eatCooldown / global.delta_factor;
 	    }
-	    if (hp <= maxHp)
-	        hp += 1.6 * global.delta_factor;
+	    if (hp <= maxHp) {
+	        hp += nomRate * global.delta_factor;
+	    }
+        if (weapons[1] == ChocolateHand) {
+        	if (hp >= maxHp) maxHp = newmaxHp;
+        	alarm[11] = 900 / global.delta_factor;
+        }
 	    if (omnomnomnomindex >= omnomnomnomend)
 	        omnomnomnom=false;
 	}
@@ -1616,7 +1631,7 @@ object_event_add(PlayerControl,ev_step,ev_step_end,'
 		        instance_create(0,0,NutsNBoltsHud);
 		}
 		if(global.myself.class == CLASS_HEAVY) {
-			if (global.myself.object.weapons[1] == SandvichHand) // fix q/c
+			if (global.myself.object.weapons[1] == SandvichHand || global.myself.object.weapons[1] == ChocolateHand) // fix q/c
 			{
 				if(!instance_exists(SandwichHud))
 					instance_create(0,0,SandwichHud);

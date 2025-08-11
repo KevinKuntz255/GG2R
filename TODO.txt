@@ -1,27 +1,26 @@
-Meters syncing throughout weapon switch (WIP)
 Fix detonator unknown var error
 Fix SEVERE loadout menu degradation that occurs when used continuously
 ERROR: Constantly flipping through weapons causes sprites to disappear (ev_create gets skipped?)
 ERROR: Phlog can errorloop the player when switching or spawning, due to ev_draw conflict from above error
+
 Refactor, Cleanup or Organize:
-Merge Crit-based variables Into one abilityType instead of using multiple variables (WIP)
 Implement auto-recharge for single use weapons (Bonk, Mad Milk, etc)
 
 Kevin's High Priority:
-add shared Medic HealBeam/Needle
-Finish NapalmGrenade (nvm, tackle networking on the 22th)
-
 make consumables/throwables piggyback owner.canEat as a detector
+re-add crit variable/visuals to all projectiles due to buffBanner's addition
+add shared Medic HealBeam/Needle
+Finish NapalmGrenade (nvm, uses ClientBeginStep, ask MCBoss if there needs to be an override, or a different solution)
+
 send and read_ubyte(variable, deserializationBuffer) for many projectiles and some weapons
 move uberCharge from currentWeapon to Character
-send and read_ubyte(variable, deserializationBuffer) in Character events to keep meter/ammo consistent throughout weapon switches (WIP)
+send and read_ubyte(variable, deserializationBuffer) in Character events to keep meter/ammo consistent throughout weapon switches (50%)
 
 TESTING REQUIRED:
 Soak an enemy with both milk, piss, and make em bleed
 
 All:
 Add Taunts (25%)
-replace loaded1 or loaded2 calls with weapons[0] and weapons[1] calls (check projectile_init)
 Make a sweeping check through all weapons to implement kill log through damSource (DAMAGE_SOURCE_WEAPON);
 Implement taunts optimally (Per-Weapon Is not viable)
 

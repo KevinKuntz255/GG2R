@@ -68,15 +68,15 @@ object_event_add(BannerWeapon,ev_alarm,6, '
 ');
 
 object_event_add(BannerWeapon,ev_step,ev_step_normal, '
-    image_index = owner.team+2*real(ammoCount);
+    image_index = owner.team+2;
 ');
 
-object_event_add(BannerWeapon, ev_other, ev_user1, '
-    if (!owner.cloak && meter >= maxMeter)
+object_event_add(BannerWeapon,ev_other,ev_user1,'
+    if (!owner.cloak && owner.meter[ownerPlayer.activeWeapon] >= owner.maxMeter[ownerPlayer.activeWeapon])
     {
-        meter = 0;
+        owner.meter[ownerPlayer.activeWeapon] = 0;
         playsound(x,y,SpecialSnd);
-        owner.canSwitch = false;
+        owner.alarm[10] = 150 / global.delta_factor;
     }
 ');
 

@@ -148,8 +148,8 @@ object_event_add(MeleeWeapon, ev_other, ev_user1, '
         stab.weapon = DAMAGE_SOURCE_KNIFE;
         stab.golden = golden;
         
-        // 'BH' reward - *B*obble *H*ead
-        if(hasClassReward(ownerPlayer, 'BH'))
+        // BH reward - *B*obble *H*ead
+        if(hasClassReward(ownerPlayer, "BH"))
         {
             ds_list_add(stab.overlays, HatBobbleSpyStabS);
         }
