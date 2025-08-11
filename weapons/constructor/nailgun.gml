@@ -15,7 +15,6 @@ object_event_add(Nailgun,ev_create,0,'
     reloadTime = 20;
     reloadBuffer = 20;
     idle=true;
-    unscopedDamage = 0;
 ');
 
 global.weapons[WEAPON_NAILGUN] = Nailgun;

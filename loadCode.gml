@@ -798,13 +798,13 @@ object_event_add(Character,ev_step,ev_step_normal,'
 				}
 			} else {
 				if (image_xscale == -1) {
-					hspeed -= 1.8 + (accel * 0.1);
+					hspeed -= 1.8 + (accel * 0.15);
 					if (lastTurn != image_xscale) {
 						hspeed = -4;
 						lastTurn = image_xscale;
 					}
 				} else if (image_xscale == 1) {
-					hspeed += 1.8 + (accel * 0.1);
+					hspeed += 1.8 + (accel * 0.15);
 					if (lastTurn != image_xscale) {
 						hspeed = 4;
 						lastTurn = image_xscale;
@@ -860,11 +860,12 @@ object_event_add(Character,ev_step,ev_step_end,'
 	xprevious = x;
 	yprevious = y;
 
-	if (onground) 
+	if (onground) {
 		tripleJumpUsed = false;
+		dashon = true;
+	}
 
-	if (currentWeapon != -1) {
-		if(abilityActive and ability == DASH) {
+	if(abilityActive and ability == DASH) {
 			if(!place_free(x + hspeed, y)) { // we hit a wall on the left or right
 				if(place_free(x + sign(hspeed), y - 6)) // if we could just walk up the step
 				{
@@ -898,7 +899,7 @@ object_event_add(Character,ev_step,ev_step_end,'
 						vspeed /= -vspeed * -2;
 					}
 				} else {
-					if (accel >= 2.25 && !onground) { // wall bumped and youre flying lets bounce
+					if (accel >= 5 && !onground) { // wall bumped and youre flying lets bounce
 						//vspeed += 0.2 * (accel * 5);
 						// I may have gone too far for the funny
 						if (lastTurn != 1) { // left
@@ -922,19 +923,10 @@ object_event_add(Character,ev_step,ev_step_end,'
 							//vspeed /= -vspeed * -0.1;
 						}
 					}
-					accel = min(0.35, accel - 0.15);
+					accel = min(0.35, accel - 0.1);
 					//if place_free(x, y + 6) vspeed += 10;
 					//vspeed = min(vspeed * accel, vspeed + 2.5 * (-accel * 0.45));
 				}
-			}
-			if (onground) dashon = true;
-			if (moveStatus == 4 && !flight)
-			{
-				/*if(alarm[11] <= 0)
-					loopsoundstart(x,y,DetoFlySnd);
-				else
-					loopsoundmaintain(x,y,DetoFlySnd);
-				started to get annoying for me*/alarm[11] = 2 / global.delta_factor;
 			}
 			//if (accel >= 2) show_error(string(accel), false); // show me the acceleration!
 			if (keyState & $80) {
@@ -949,6 +941,8 @@ object_event_add(Character,ev_step,ev_step_end,'
 				}
 			}
 		} //detected upwards slope, Fly!
+	if (currentWeapon != -1) {
+		
 		
 		if(weapons[player.activeWeapon] == SodaPopper) {
 			if (abilityActive)
@@ -1124,10 +1118,12 @@ object_event_add(Character,ev_step,ev_step_end,'
 	if(deathmatch_invulnerable <= 0)
 	    deathmatch_invulnerable = 0;
 ');
+
 object_event_add(Weapon,ev_create,0,'
 	spark = 0;
     alarm[9]=2;
 ');
+
 object_event_clear(Weapon,ev_alarm,6);
 object_event_add(Weapon,ev_alarm,6,'
 	if (reloadSprite != -1 && object_index != Rifle && object_index != BazaarBargain && object_index != Machina && alarm[5] > 0)

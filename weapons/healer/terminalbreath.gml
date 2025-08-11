@@ -23,7 +23,6 @@ object_event_add(TerminalBreath,ev_create,0,'
     reloadTime = 55;
     reloadBuffer = 0;
     idle=true;
-    unscopedDamage = 0;
 ');
 
 global.weapons[WEAPON_TERMINALBREATH] = TerminalBreath;

@@ -24,7 +24,6 @@ object_event_add(Overhealer,ev_create,0,'
     reloadBuffer = 0;
     idle=true;
     loopsoundstop(UberIdleSnd);
-    unscopedDamage = 0;
 ');
 
 global.weapons[WEAPON_OVERHEALER] = Overhealer;

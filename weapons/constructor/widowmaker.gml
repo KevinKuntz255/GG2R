@@ -15,8 +15,8 @@ object_event_add(Widowmaker,ev_create,0,'
     reloadTime = 15;
     reloadBuffer = 20;
     idle=true;
-    unscopedDamage = 0;
 ');
+
 /* ev_user2
     nutsnbolts -= 20;
 */

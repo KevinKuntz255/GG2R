@@ -28,7 +28,6 @@ object_event_add(Brewinggun,ev_create,0,'
     reloadBuffer = 20;
     idle=true;
     loopsoundstop(UberIdleSnd);
-    unscopedDamage = 0;
 ');
 
 global.weapons[WEAPON_POTION] = Brewinggun;

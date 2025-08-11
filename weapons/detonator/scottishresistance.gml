@@ -17,7 +17,6 @@ object_event_add(ScottishResitance,ev_create,0,'
     maxAmmo = 8;
     ammoCount = maxAmmo;
     idle=true;
-    unscopedDamage = 0;
 
     weaponGrade = UNIQUE;
     weaponType = MINEGUN;

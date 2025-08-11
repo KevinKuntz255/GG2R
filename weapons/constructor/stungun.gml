@@ -16,7 +16,6 @@ object_event_add(Stungun,ev_create,0,'
     reloadBuffer = 20;
     idle=true;
     hasShot=true;
-    unscopedDamage = 0;
 ');
 
 global.weapons[WEAPON_STUNGUN] = Stungun;

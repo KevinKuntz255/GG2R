@@ -21,10 +21,6 @@ object_event_add(TigerUppercut,ev_create,0,'
     alarm[3]=1;
     canActivate=true;
     activateTime=7;
-    unscopedDamage = 0;
-
-    weaponGrade = UNIQUE;
-    weaponType = MINEGUN;
 ');
 
 global.weapons[WEAPON_TIGERUPPERCUT] = TigerUppercut;

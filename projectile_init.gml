@@ -297,7 +297,7 @@ object_event_add(MeleeMask,ev_collision,Character,'
                 other.alarm[8] = 120;
     //      } else if weapon == WEAPON_BUFFBANNER{
             } else if weapon == WEAPON_OVERDOSE { //ubersaw
-                if (owner.loaded1 >= WEAPON_MEDIGUN && owner.loaded1 <= WEAPON_POTION) or (owner.loaded2 >= WEAPON_MEDIGUN && owner.loaded2 <= WEAPON_POTION){
+                /*if (owner.loaded1 >= WEAPON_MEDIGUN && owner.loaded1 <= WEAPON_POTION) or (owner.loaded2 >= WEAPON_MEDIGUN && owner.loaded2 <= WEAPON_POTION){
                     with(owner) {
                         ammo[WEAPON_MEDIGUN] = min(250,ammo[WEAPON_MEDIGUN]+50);
                         ammo[WEAPON_KRITSKRIEG] = min(250,ammo[WEAPON_KRITSKRIEG]+50);
@@ -310,7 +310,10 @@ object_event_add(MeleeMask,ev_collision,Character,'
                         ammo[WEAPON_QUICKFIX] == 250 or 
                         ammo[WEAPON_POTION] == 250 ammo[100] = true;
                     }
-                }
+                }*/
+                // owner.uberCharge = min(250,owner.uberCharge+50);
+                // if (owner.uberCharge == 250) canUber = true;
+                // todo: replace all that with the single uberCharge call above
             }
 
             other.timeUnscathed = 0;

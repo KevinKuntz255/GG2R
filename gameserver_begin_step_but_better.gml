@@ -299,7 +299,7 @@ for(i=0; i < ds_list_size(global.players); i+=1)
                 case TOGGLE_ZOOM:
                     if player.object != -1 {
                         if player.class == CLASS_SNIPER {
-                            if global.myself.activeWeapon == 0 {
+                            if global.myself.activeWeapon == 0 && global.myself.object.weaponType[0] != BOW {
                                 write_ubyte(global.sendBuffer, TOGGLE_ZOOM);
                                 write_ubyte(global.sendBuffer, playerId);
                                 toggleZoom(player.object);

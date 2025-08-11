@@ -23,7 +23,6 @@ object_event_add(GrenadeHand,ev_create,0,'
     idle=true;
     time = 0;
     charge = 0;
-    unscopedDamage = 0;
 	lobbed=0;
 ');
 

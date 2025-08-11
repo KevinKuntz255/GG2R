@@ -17,7 +17,6 @@ object_event_add(Stickysticker,ev_create,0,'
     maxAmmo = 8;
     ammoCount = maxAmmo;
     idle=true;
-    unscopedDamage = 0;
 ');
 
 global.weapons[WEAPON_STICKYSTICKER] = Stickysticker;

@@ -15,7 +15,6 @@ object_event_add(Ubersaw,ev_create,0,'
     
     canBuff = false;
     alarm[3] = 90;
-    unscopedDamage = 0;
 	// TEMP
 	healTarget = noone;
 	if !variable_local_exists("uberCharge")

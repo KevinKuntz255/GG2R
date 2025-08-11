@@ -15,7 +15,6 @@ object_event_add(Pumson,ev_create,0,'
     reloadTime = 15;
     reloadBuffer = 20;
     idle=true;
-    unscopedDamage = 0;
 ');
 // mechanics: penetration, spy "strobe", drain uber
 /* ev_collision,Character

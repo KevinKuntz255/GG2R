@@ -3,7 +3,7 @@ WEAPON_SHERIFF = 52;
 
 globalvar Sheriff;
 Sheriff = object_add();
-object_set_parent(Sheriff, Weapon);
+object_set_parent(Sheriff, ShotgunWeapon);
 
 object_event_add(Sheriff,ev_create,0,'
     xoffset=-5;
@@ -15,7 +15,6 @@ object_event_add(Sheriff,ev_create,0,'
     reloadTime = 15;
     reloadBuffer = 20;
     idle=true;
-    unscopedDamage = 0;
 ');
 
 global.weapons[WEAPON_SHERIFF] = Sheriff;

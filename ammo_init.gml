@@ -55,7 +55,7 @@ object_event_add(AmmoCounter,ev_draw,0,'
 	            case BuffBanner:
 	            case JarateHand: 
 	            //case Invisibeam: ???
-	            case Kritzieg:
+	            case Kritzkrieg:
 	            case QuickFix:
 	            case Widowmaker:
 	            case Stungun:

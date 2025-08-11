@@ -16,7 +16,6 @@ object_event_add(Machinegun,ev_create,0,'
     ammoCount = maxAmmo;
     reloadBuffer = 15;
     isRefilling = false;
-    unscopedDamage = 0;
 	
 	//C type blades (slightly smaller, slightly faster, standard life)
 	bladeRefireTime = 8;

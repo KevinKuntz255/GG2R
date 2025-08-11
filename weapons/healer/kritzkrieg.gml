@@ -1,11 +1,12 @@
 globalvar WEAPON_KRITSKRIEG;
 WEAPON_KRITSKRIEG = 46;
 
-globalvar Kritzieg;
-Kritzieg = object_add();
-object_set_parent(Kritzieg, Weapon);
+// there was a minor spelling mistake. 3 programmers in and this hasn't been fixed? For Shame!!!!!!
+globalvar Kritzkrieg;
+Kritzkrieg = object_add();
+object_set_parent(Kritzkrieg, Weapon);
 
-object_event_add(Kritzieg,ev_create,0,'
+object_event_add(Kritzkrieg,ev_create,0,'
     xoffset = -7;
     yoffset = 0;
     refireTime = 3;
@@ -24,8 +25,7 @@ object_event_add(Kritzieg,ev_create,0,'
     reloadBuffer = 0;
     idle=true;
     loopsoundstop(UberIdleSnd);
-    unscopedDamage = 0;
 ');
 
-global.weapons[WEAPON_KRITSKRIEG] = Kritzieg;
+global.weapons[WEAPON_KRITSKRIEG] = Kritzkrieg;
 global.name[WEAPON_KRITSKRIEG] = "Kritzkrieg (unimplemented)"

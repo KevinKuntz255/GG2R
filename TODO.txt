@@ -6,38 +6,36 @@ ERROR: Phlog can errorloop the player when switching or spawning, due to ev_draw
 Refactor, Cleanup or Organize:
 Merge Crit-based variables Into one abilityType instead of using multiple variables (WIP)
 add global.delta_factor checks on ALL ALARMS/meters (WIP)
+Implement auto-recharge for single use weapons (Bonk, Mad Milk, etc)
 
 Kevin's High Priority:
-add shared GrenadeLauncher type
 add shared Medic HealBeam/Needle
-Finish NapalmGrenade (nvm, tackle networking a day before playtest)
+Finish NapalmGrenade (nvm, tackle networking on the 22th)
 
-make consumables (only BonkHand so far) piggyback owner.canEat as a detector
+make consumables/throwables piggyback owner.canEat as a detector
 send and read_ubyte(variable, deserializationBuffer) for many projectiles and some weapons
-send and read_ubyte(variable, deserializationBuffer) in Character events to keep meter/ammo consistent throughout weapon switches
+move uberCharge from currentWeapon to Character
+send and read_ubyte(variable, deserializationBuffer) in Character events to keep meter/ammo consistent throughout weapon switches (WIP)
 
 TESTING REQUIRED:
 Soak an enemy with both milk, piss, and make em bleed
 
 All:
-add global.delta_factor checks on ALL ALARMS/meters
-Merge Crit-based variables Into one type instead of using multiple variables (as seen on SodaPopper's hyve call)
-Add Taunts (WIP)
+Add Taunts (25%)
 replace loaded1 or loaded2 calls with weapons[0] and weapons[1] calls (check projectile_init)
 Make a sweeping check through all weapons to implement kill log through damSource (DAMAGE_SOURCE_WEAPON);
-Implement taunts optimally
+Implement taunts optimally (Per-Weapon Is not viable)
 
 Implement:
 Weapons:
 Scout:
-Atomizer (95%) Add Tauntkill
 Rundown (optional, weapon works akin to Baby Face's Blaster)
 Pyro:
 Phlog (90%) Add Afterburn
-Snowbite (90%) Add ev_draw override to Character for Snow
-Napalm Grenade (70%)
+Snowbite (90%) Add ev_draw override to Character for Snow/Freezing
+Napalm Grenade (70%) Add Networking
 Soldier:
-Buff Banner (90%)
+Buff Banner (95%)
 Cow Mangler (50%)
 Heavy:
 Iron Maiden

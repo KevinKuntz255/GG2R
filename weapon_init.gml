@@ -109,7 +109,7 @@ object_event_add(Weapon,ev_create,0,'
     //speedboost=0;
     lobbed = 0;
 	baseDamage=-1; // stops crashing when youre zooming in
-    unscopedDamage = -1; // this too
+    unscopedDamage = 0; // this too
 
     abilityActive = false;
     abilityVisual = "";
