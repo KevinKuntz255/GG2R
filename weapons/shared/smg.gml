@@ -87,7 +87,7 @@ object_event_add(smgWeapon, ev_other, ev_user1, '
             hspeed += owner.hspeed;
         justShot = true;
         readyToShoot = false;
-        alarm[0] = refireTime;
-        alarm[5] = reloadBuffer + reloadTime;
+        alarm[0] = refireTime / global.delta_factor;
+        alarm[5] = (reloadBuffer + reloadTime) / global.delta_factor;
     }
 ');

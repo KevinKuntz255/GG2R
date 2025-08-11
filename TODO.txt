@@ -5,7 +5,6 @@ ERROR: Constantly flipping through weapons causes sprites to disappear (ev_creat
 ERROR: Phlog can errorloop the player when switching or spawning, due to ev_draw conflict from above error
 Refactor, Cleanup or Organize:
 Merge Crit-based variables Into one abilityType instead of using multiple variables (WIP)
-add global.delta_factor checks on ALL ALARMS/meters (WIP)
 Implement auto-recharge for single use weapons (Bonk, Mad Milk, etc)
 
 Kevin's High Priority:

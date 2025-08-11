@@ -12,7 +12,7 @@ object_event_add(BuffBanner,ev_create,0,'
     yoffset=-9;
     event_inherited();
 	maxMeter = 4;
-	meterCount = 0;
+	meter = 0;
     readyToStab=false;
 	isMelee = true;
 	

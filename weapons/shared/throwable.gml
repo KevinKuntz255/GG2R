@@ -48,7 +48,7 @@ object_event_add(ThrowableWeapon, ev_alarm, 5, '
     event_inherited();
 
     ammoCount = maxAmmo;
-    if meterCount != -1 meterCount = maxMeter;
+    if meter != -1 meter = maxMeter;
 ');
 
 object_event_add(ThrowableWeapon, ev_step, ev_step_normal, '
@@ -69,9 +69,9 @@ object_event_add(ThrowableWeapon, ev_other, ev_user1, '
             hspeed += owner.hspeed;
         ammoCount = max(0, ammoCount-1);
         
-        alarm[5] = reloadBuffer + reloadTime;
+        alarm[5] = (reloadBuffer + reloadTime) / global.delta_factor;
         readyToShoot = false;
-        alarm[0] = refireTime;
+        alarm[0] = refireTime / global.delta_factor;
     }
 ');
 

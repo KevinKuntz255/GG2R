@@ -20,7 +20,7 @@ object_event_add(IronMaiden,ev_create,0,'
     
     isMetered = true;
     //meterMax = 400;
-    //meterCount = maxAmmo;
+    //meter = maxAmmo;
 
     //Overlays for the overheat
     //overlaySprite = MinigunOverlayS;

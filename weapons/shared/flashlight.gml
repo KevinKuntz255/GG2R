@@ -131,7 +131,7 @@ object_event_add(FlashlightWeapon,ev_other,ev_user3, '
                         object.secondToLastDamageDealer = object.lastDamageDealer;
                         object.alarm[4] = object.alarm[3]
                     }
-                    object.alarm[3] = ASSIST_TIME;
+                    object.alarm[3] = ASSIST_TIME / global.delta_factor;
                     object.lastDamageDealer = other.ownerPlayer;
                     object.cloakAlpha = min(object.cloakAlpha + 0.3, 1);
                     if(global.gibLevel > 0 && !object.radioactive){
@@ -157,7 +157,7 @@ object_event_add(FlashlightWeapon,ev_other,ev_user3, '
         with(Generator) {
             if(team != other.owner.team) {
                 if(collision_line(other.x,other.y,other.a[i],other.b[i],id,true,false)>=0) {
-                    alarm[0] = regenerationBuffer;
+                    alarm[0] = regenerationBuffer / global.delta_factor;
                     isShieldRegenerating = false;
                     //allow overkill to be applied directly to the target
                     if (other.hitDamage > shieldHp) {

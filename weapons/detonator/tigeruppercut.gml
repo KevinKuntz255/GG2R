@@ -18,7 +18,7 @@ object_event_add(TigerUppercut,ev_create,0,'
     ammoCount = maxAmmo;
     idle=true;
     readyToStab=false;
-    alarm[3]=1;
+    alarm[3]=1 / global.delta_factor;
     canActivate=true;
     activateTime=7;
 ');

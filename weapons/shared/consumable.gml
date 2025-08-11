@@ -44,7 +44,7 @@ object_event_add(ConsumableWeapon, ev_alarm, 5, '
     event_inherited();
 
     ammoCount = maxAmmo;
-    if meterCount != -1 meterCount = maxMeter;
+    if meter != -1 meter = maxMeter;
 ');
 
 object_event_add(ConsumableWeapon, ev_step, ev_step_normal, '

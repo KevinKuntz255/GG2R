@@ -32,11 +32,11 @@ object_event_add(Phlog,ev_other,ev_user1,'
             }
             alarm[3]=2;
             justShot=true;
-            alarm[5] = reloadBuffer;
+            alarm[5] = reloadBuffer / global.delta_factor;
             isRefilling = false;
             ammoCount-=2;
-            if ammoCount > 0 alarm[0]=refireTime;
-            else alarm[0]=50;
+            if ammoCount > 0 alarm[0]=refireTime / global.delta_factor;
+            else alarm[0]=50 / global.delta_factor;
             
         if !collision_line(x,y,x+lengthdir_x(28,owner.aimDirection),y+lengthdir_y(28,owner.aimDirection),Obstacle,1,0) and !place_meeting(x+lengthdir_x(25,owner.aimDirection),y+lengthdir_y(25,owner.aimDirection),TeamGate) {    
             shot=true;

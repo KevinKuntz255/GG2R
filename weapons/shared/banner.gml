@@ -17,8 +17,8 @@ object_event_add(BannerWeapon, ev_create, 0, '
     weaponType = BANNER;
 
     ability = MINICRIT;
-    meterName = "RAGE";
-    rechargeMeter = false;
+    abilityName = "RAGE";
+    rechargeAbility = false;
     maxMeter = 4;
     reloadTime = 300;
     reloadBuffer = refireTime;
@@ -50,7 +50,7 @@ object_event_add(BannerWeapon, ev_alarm, 5, '
     event_inherited();
 
     ammoCount = maxAmmo;
-    if meterCount != -1 meterCount = maxMeter;
+    if meter != -1 meter = maxMeter;
 ');
 
 object_event_add(BannerWeapon,ev_alarm,6, '
@@ -72,9 +72,9 @@ object_event_add(BannerWeapon,ev_step,ev_step_normal, '
 ');
 
 object_event_add(BannerWeapon, ev_other, ev_user1, '
-    if (!owner.cloak && meterCount >= maxMeter)
+    if (!owner.cloak && meter >= maxMeter)
     {
-        meterCount = 0;
+        meter = 0;
         playsound(x,y,SpecialSnd);
         owner.canSwitch = false;
     }

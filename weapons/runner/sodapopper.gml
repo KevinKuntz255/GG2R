@@ -17,10 +17,9 @@ object_event_add(SodaPopper,ev_create,0,'
     reloadTime = 20;
     reloadBuffer = 20;
 
-	hasMeter = true;
-	meterName = "HYPE";
+	abilityName = "HYPE";
 	maxMeter=210;
-	meterCount=0;
+	meter=0;
     abilityVisual = "WEAPON";
     ability = MINICRIT;
 	

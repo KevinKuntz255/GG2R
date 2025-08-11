@@ -127,12 +127,11 @@ object_event_add(Weapon,ev_create,0,'
 	
     isMelee = false;
 
-	 // introducing meters
-	hasMeter = false;
-	rechargeMeter = false;
-	meterName = "";
+	 // introducing meters, renamed to ability
+	rechargeAbility = false;
+	abilityName = "";
 	maxMeter=-1;
-	meterCount=-1;
+	meter=-1;
 
 	// Implement fixed reload times by parented variables
 	with(owner) { // reminder: activeWeapon is modified before Weapon ev_create is called
@@ -160,7 +159,7 @@ object_event_add(Weapon,ev_create,0,'
 			fire = true;
 		}
 	}
-	playsound(x,y,SwitchSnd);
+	if (!owner.cloak) playsound(x,y,SwitchSnd);
 ');
 object_event_add(Weapon,ev_destroy,0,'
 	if (alarm[0] > 1.25) {

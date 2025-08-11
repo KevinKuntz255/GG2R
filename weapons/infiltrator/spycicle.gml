@@ -27,7 +27,7 @@ object_event_add(Spycicle,ev_step,ev_step_normal,'
     if owner.burnDuration > 0 or owner.burnIntensity > 0 && owner.ammo[112] >= 30*15 {
         playsound(x,y,CompressionBlastSnd);
         owner.fireproof = true;
-        alarm[10] = 60;
+        alarm[10] = 60 / global.delta_factor;
     }
 ');
 

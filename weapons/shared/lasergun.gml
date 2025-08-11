@@ -78,12 +78,12 @@ object_event_add(laserWeapon, ev_other, ev_user1, '
         with(shot) {   
             hspeed += owner.hspeed;
         
-            alarm[0] = 35 * ((min(1, abs(cos(degtorad(other.owner.aimDirection))) * 13 / abs(cos(degtorad(other.owner.aimDirection))*13+owner.hspeed))-1)/2+1)
+            alarm[0] = (35 * ((min(1, abs(cos(degtorad(other.owner.aimDirection))) * 13 / abs(cos(degtorad(other.owner.aimDirection))*13+owner.hspeed))-1)/2+1)) / global.delta_factor;
            // motion_add(owner.direction, owner.speed);
         }
         justShot = true;
         readyToShoot = false;
-        alarm[0] = refireTime;
-        alarm[5] = reloadBuffer + reloadTime;
+        alarm[0] = refireTime / global.delta_factor;
+        alarm[5] = (reloadBuffer + reloadTime) / global.delta_factor;
     }
 ');

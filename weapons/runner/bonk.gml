@@ -16,11 +16,10 @@ object_event_add(BonkHand,ev_create,0,'
     isMetered = true;
 
 	maxMeter = 1;
-    meterCount = maxMeter;
+    meter = maxMeter;
 
     abilityActive = false;
     abilityVisual = "BLUR";
-    //owner.inheritAbility = true; // so that radioactive is called for alarm[10]
 
 	normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\BonkHandS.png", 4, 0, 0, 21, 25);
 	recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\BonkHandS.png", 4, 0, 1, 21, 25);
@@ -75,9 +74,9 @@ object_event_add(BonkHand,ev_step,ev_step_normal,'
 ');
 
 object_event_add(BonkHand,ev_other,ev_user0,'
-    alarm[0]=refireTime;
-    if owner.ammo[105] == -1 alarm[5] = reloadBuffer + reloadTime;
-    else alarm[5] = reloadBuffer + owner.ammo[105];
+    alarm[0]=refireTime / global.delta_factor;
+    if owner.ammo[105] == -1 alarm[5] = (reloadBuffer + reloadTime) / global.delta_factor;
+    else alarm[5] = (reloadBuffer + owner.ammo[105]) / global.delta_factor;
 ');
 
 object_event_add(BonkHand,ev_other,ev_user1,'
@@ -87,8 +86,8 @@ object_event_add(BonkHand,ev_other,ev_user1,'
         owner.image_speed=owner.tauntspeed;
 		ammoCount = max(0, ammoCount-1);
 		playsound(x,y,PickupSnd);
-		alarm[5] = reloadBuffer + reloadTime;
-		owner.alarm[10] = 150;
+		alarm[5] = (reloadBuffer + reloadTime) / global.delta_factor;
+		owner.alarm[10] = 150 / global.delta_factor;
     }
 ');
 

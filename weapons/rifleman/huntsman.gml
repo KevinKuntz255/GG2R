@@ -68,7 +68,7 @@ object_event_add(HuntsMan,ev_step,ev_step_begin,'
                 hspeed+=owner.hspeed;
             justShot=true;
             readyToShoot=false;
-            alarm[0]=refireTime;
+            alarm[0]= refireTime / global.delta_factor;
             bonus=0;
             overheat=0;
             owner.runPower = 0.9;
@@ -101,13 +101,13 @@ object_event_add(HuntsMan,ev_other,ev_user1,'
             owner.runPower = 0.6;
             owner.jumpStrength = 6;
             abilityActive = true;
-            alarm[1] = 2;
+            alarm[1] = 2 / global.delta_factor;
             if bonus < 100 bonus+=1.2;
             else if overheat < (30*4) overheat+=1;
             else {
                 bonus = 0;
                 readyToShoot=false;
-                alarm[0]=refireTime;
+                alarm[0]=refireTime / global.delta_factor;
                 overheat = 0;
             }
         }

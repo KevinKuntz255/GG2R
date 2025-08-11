@@ -200,7 +200,7 @@ object_set_parent(MeleeMask, StabMask);
 object_event_add(MeleeMask,ev_create,0,'
     {
         hitDamage = 8;
-        alarm[0]=6;
+        alarm[0]=6 / global.delta_factor;
         crit=0;
         hit = 0;
         flameLife = 15;
@@ -276,7 +276,7 @@ object_event_add(MeleeMask,ev_collision,Character,'
                     }
                     burnedBy = other.ownerPlayer;
                     afterburnSource = WEAPON_AXE;
-                    alarm[0] = decayDelay;
+                    alarm[0] = decayDelay / global.delta_factor;
                 }
             }
             
@@ -294,7 +294,7 @@ object_event_add(MeleeMask,ev_collision,Character,'
                 {
                     if (other.soakType[i] == -1 && other.soakType[i] != bleed) other.soakType[i] = bleed; //
                 }
-                other.alarm[8] = 120;
+                other.alarm[8] = 120 / global.delta_factor;
     //      } else if weapon == WEAPON_BUFFBANNER{
             } else if weapon == WEAPON_OVERDOSE { //ubersaw
                 /*if (owner.loaded1 >= WEAPON_MEDIGUN && owner.loaded1 <= WEAPON_POTION) or (owner.loaded2 >= WEAPON_MEDIGUN && owner.loaded2 <= WEAPON_POTION){
@@ -320,9 +320,9 @@ object_event_add(MeleeMask,ev_collision,Character,'
             if (other.lastDamageDealer != ownerPlayer && other.lastDamageDealer != other.player)
             {
                 other.secondToLastDamageDealer = other.lastDamageDealer;
-                other.alarm[4] = other.alarm[3]
+                other.alarm[4] = other.alarm[3];
             }
-            other.alarm[3] = ASSIST_TIME;
+            other.alarm[3] = ASSIST_TIME / global.delta_factor;
             other.lastDamageDealer = ownerPlayer;
             other.lastDamageCrit = 1;
             other.lastDamageSource = weapon;
@@ -346,11 +346,11 @@ object_event_add(MeleeMask,ev_collision,Character,'
                 {
                     splashHit = false;
                 }
-                alarm[0] = 1;
+                alarm[0] = 1 / global.delta_factor;
             }
         }
         else {
-            alarm[0] = 1;
+            alarm[0] = 1 / global.delta_factor;
         }
     }
 ');
@@ -369,7 +369,7 @@ object_event_add(MeleeMask,ev_collision,Sentry,'
             instance_destroy();
         }
         else
-            alarm[0] = 1;
+            alarm[0] = 1 / global.delta_factor;
     } else if weapon == WEAPON_WRENCH or weapon == WEAPON_EUREKAEFFECT {
         /*if other.sapped > 0 {
             if global.isHost {
@@ -425,7 +425,7 @@ object_event_add(MeleeMask,ev_collision,Sentry,'
 ');
 object_event_add(MeleeMask,ev_collision,Generator,'
     if (other.team != team) {
-        other.alarm[0] = other.regenerationBuffer;
+        other.alarm[0] = other.regenerationBuffer / global.delta_factor;
         other.isShieldRegenerating = false;
         //allow overkill to be applied directly to the target
         if weapon == WEAPON_PAINTRAIN {
@@ -520,7 +520,7 @@ object_event_add(DetonationFlare,ev_other,ev_user5,'
                         }
                         burnedBy = other.ownerPlayer;
                         afterburnSource = WEAPON_DETONATOR;
-                        alarm[0] = decayDelay;
+                        alarm[0] = decayDelay / global.delta_factor;
                     }
 					if (player != other.ownerPlayer) damageCharacter(other.ownerPlayer, id, other.explosionDamage*sqr((1-(distance_to_object(other)/other.blastRadius)))*(1+0*0.35)*1*bonus);
 					else if (player == other.ownerPlayer)
@@ -540,10 +540,10 @@ object_event_add(DetonationFlare,ev_other,ev_user5,'
                         if (lastDamageDealer != other.ownerPlayer and lastDamageDealer != player and other.reflector != lastDamageDealer)
                         {
                             secondToLastDamageDealer = lastDamageDealer;
-                            alarm[4] = alarm[3]
+                            alarm[4] = alarm[3];
                         }
                         if (other.ownerPlayer != id or (other.reflector != noone and other.ownerPlayer == id))
-                            alarm[3] = ASSIST_TIME;
+                            alarm[3] = ASSIST_TIME / global.delta_factor;
                         lastDamageDealer = other.ownerPlayer;
                         lastDamageSource = other.weapon;
                         //lastDamageCrit = other.crit;
@@ -599,7 +599,7 @@ object_event_add(DetonationFlare,ev_other,ev_user5,'
          
          with (Generator){
             if (distance_to_object(other) < other.blastRadius) && (team != other.team) { 
-                alarm[0] = regenerationBuffer;
+                alarm[0] = regenerationBuffer / global.delta_factor;
                 isShieldRegenerating = false;
                 //allow overkill to be applied directly to the target
                 var hitDamage;
@@ -656,7 +656,7 @@ object_event_add(SapAnimation,ev_create,0,'
     done = false;
     offset=0;
     image_speed = 0;
-    alarm[0]=5;
+    alarm[0]=5 / global.delta_factor;
     alpha=0.01;
 ');
 object_event_add(SapAnimation,ev_destroy,0,'
@@ -682,7 +682,7 @@ object_event_add(SapAnimation,ev_step,ev_step_normal,'
     if team==TEAM_RED sprite_index=SpySapRedS;
     else sprite_index=SpySapBlueS;
 
-    //alarm[0] = 43;
+
     x=owner.x;
     y=owner.y;
 
@@ -723,7 +723,7 @@ object_set_parent(SapMask, StabMask);
 object_event_add(SapMask,ev_create,0,'
     {
         hitDamage = 8;
-        alarm[0]=6;
+        alarm[0]=6 / global.delta_factor;
         playsound(x,y,KnifeSnd)
     }
 ');
@@ -748,7 +748,7 @@ object_event_add(SapMask,ev_collision,Sentry,'
             instance_destroy();
         }
         else
-            alarm[0] = 1;
+            alarm[0] = 1 / global.delta_factor;
     }
 ');
 object_event_add(SapMask,ev_collision,ControlPointSetupGate,'
@@ -757,7 +757,7 @@ object_event_add(SapMask,ev_collision,ControlPointSetupGate,'
 ');
 object_event_add(SapMask,ev_collision,Generator,'
     if (other.team != team) {
-        other.alarm[0] = other.regenerationBuffer;
+        other.alarm[0] = other.regenerationBuffer / global.delta_factor;
         other.isShieldRegenerating = false;
         //allow overkill to be applied directly to the target
         if (hitDamage/2 > other.shieldHp) {
@@ -783,7 +783,7 @@ object_event_add(Arrow,ev_create,0,'
         hitDamage = 6;
         
         lifetime = 100;
-        alarm[0] = lifetime;
+        alarm[0] = lifetime / global.delta_factor;
         originx=x;
         originy=y;
         used=0;
@@ -865,7 +865,7 @@ object_event_add(Arrow,ev_collision,Character,'
                     }
                     burnedBy = other.helper;
                     afterburnSource = WEAPON_FIREARROW;
-                    alarm[0] = decayDelay;
+                    alarm[0] = decayDelay / global.delta_factor;
                 }
             }
         }
@@ -875,7 +875,7 @@ object_event_add(Arrow,ev_collision,Character,'
             attached = other.id;
             xoffset=x-other.x;
             yoffset=y-other.y;
-            alarm[0]=-1;
+            alarm[0]= -1 / global.delta_factor;
             speed=0;
             dir = direction;
             scale=image_xscale*other.image_xscale;
@@ -886,11 +886,11 @@ object_event_add(Arrow,ev_collision,Character,'
                     other.secondToLastDamageDealer = other.lastDamageDealer;
                     other.alarm[4] = other.alarm[3]
                 }
-                other.alarm[3] = ASSIST_TIME;
+                other.alarm[3] = ASSIST_TIME / global.delta_factor;
             } else {
                 other.secondToLastDamageDealer = helper;
-                other.alarm[4] = other.alarm[3]
-                other.alarm[3] = ASSIST_TIME;
+                other.alarm[4] = other.alarm[3];
+                other.alarm[3] = ASSIST_TIME / global.delta_factor;
             }
             other.lastDamageDealer = ownerPlayer;
             other.lastDamageSource = weapon;
@@ -955,7 +955,7 @@ object_event_add(Arrow,ev_collision,ControlPointSetupGate,'
 ');
 object_event_add(Arrow,ev_collision,Generator,'
     if(other.team != team && attached = -1) {
-        other.alarm[0] = other.regenerationBuffer;
+        other.alarm[0] = other.regenerationBuffer / global.delta_factor;
         other.isShieldRegenerating = false;
         //allow overkill to be applied directly to the target
         if (hitDamage*speed/2.5 > other.shieldHp) {
@@ -1037,7 +1037,7 @@ object_event_add(LaserShot,ev_create,0,'
     {
         hitDamage = 16;
         lifetime = 40;
-        alarm[0] = lifetime;
+        alarm[0] = lifetime / global.delta_factor;
         originx=x;
         originy=y;
         used=false;
@@ -1100,9 +1100,9 @@ object_event_add(LaserShot,ev_collision,Character,'
             other.timeUnscathed = 0;
             if (other.lastDamageDealer != ownerPlayer && other.lastDamageDealer != other.player){
                 other.secondToLastDamageDealer = other.lastDamageDealer;
-                other.alarm[4] = other.alarm[3]
+                other.alarm[4] = other.alarm[3];
             }
-            other.alarm[3] = ASSIST_TIME;
+            other.alarm[3] = ASSIST_TIME / global.delta_factor;
             other.lastDamageDealer = ownerPlayer;
             other.lastDamageSource = weapon;
             var blood;
@@ -1167,7 +1167,7 @@ object_event_add(LaserShot,ev_collision,ControlPointSetupGate,'
 ');
 object_event_add(LaserShot,ev_collision,Generator,'
     if(other.team != team) {
-        other.alarm[0] = other.regenerationBuffer;
+        other.alarm[0] = other.regenerationBuffer / global.delta_factor;
         other.isShieldRegenerating = false;
         //allow overkill to be applied directly to the target
         if (hitDamage > other.shieldHp) {
@@ -1224,7 +1224,7 @@ object_event_add(FANShot,ev_collision,Character,'
         if (other.lastDamageDealer != ownerPlayer and other.lastDamageDealer != other.player)
         {
             other.secondToLastDamageDealer = other.lastDamageDealer;
-            other.alarm[4] = other.alarm[3]
+            other.alarm[4] = other.alarm[3];
         }
         other.alarm[3] = ASSIST_TIME / global.delta_factor;
         other.lastDamageDealer = ownerPlayer;
@@ -1262,7 +1262,7 @@ object_event_add(Sandvich,ev_create,0,'
     hfric=0.4;
     rotfric=0.6;
     direction = 270;
-    alarm[0]=210;
+    alarm[0]=210 / global.delta_factor;
     rotspeed=0;
     fadeout = false;
     vis_angle = 0;
@@ -1293,7 +1293,7 @@ object_event_add(Ball,ev_create,0,'
         exploded = false;
         bubbled = false;
         reflector = noone;
-        alarm[2]=30*15;
+        alarm[2]= (30*15) / global.delta_factor;
         hfric=0.5;
         rotfric=0.7;
         rotspeed=random(20)-10;
@@ -1395,9 +1395,9 @@ object_event_add(Ball,ev_collision,Character,'
     if(/*other.id != ownerPlayer.object and*/other.team != team  && other.hp > 0 && other.ubered == 0 && used==0 && speed >= 0.2) && bounced <2 {
         if (other.lastDamageDealer != ownerPlayer && other.lastDamageDealer != other.player){
             other.secondToLastDamageDealer = other.lastDamageDealer;
-            other.alarm[4] = other.alarm[3]
+            other.alarm[4] = other.alarm[3];
         }
-        other.alarm[3] = ASSIST_TIME;
+        other.alarm[3] = ASSIST_TIME / global.delta_factor;
         other.lastDamageDealer = ownerPlayer;
         other.lastDamageSource = weapon;
         other.lastDamageCrit = 1;
@@ -1418,10 +1418,10 @@ object_event_add(Ball,ev_collision,Character,'
         instance_destroy();
     } else if other.team == team && other.currentWeapon.object_index == Sandman {
         if other.currentWeapon.ammoCount < 1 {
-            other.currentWeapon.ammoCount =1;
-            other.currentWeapon.alarm[5]=-1;
-            other.ammo[107] = -1;
-            //playsound(x,y,PickupSnd);
+            other.currentWeapon.ammoCount = 1;
+            other.currentWeapon.alarm[5] =-1;
+            other.meter[1] = 1;
+            playsound(x,y,PickupSnd);
             instance_destroy(); 
         }
     }
@@ -1507,8 +1507,8 @@ object_event_add(MadMilk,ev_create,0,'
         exploded = false;
         bubbled = false;
         reflector = noone;
-        alarm[1]=29;
-        alarm[2]=60;
+        alarm[1]=29 / global.delta_factor;
+        alarm[2]=60 / global.delta_factor;
         hfric=0.5;
         rotfric=0.7;
         rotspeed=random(20)-10;
@@ -1590,7 +1590,7 @@ object_event_add(MadMilk,ev_other,ev_user2,'
                     for(i=0; i<3; i+=1) {
                         if (soakType[i] == -1 && soakType[i] != milk) soakType[i] = milk; // Test later
                     }
-					alarm[8]=250-distance_to_object(other);
+					alarm[8]= (250-distance_to_object(other)) / global.delta_factor;
 					cloak=false;     
 			}
 			if radioactive {
@@ -1667,7 +1667,7 @@ object_event_add(MadMilk,ev_draw,0,'
 ');
 object_event_add(Milk,ev_create,0,'
 	lifetime=250;
-    alarm[0]=lifetime;
+    alarm[0]=lifetime / global.delta_factor;
     stick = false;
     ogib=-1;
     odir=0;
@@ -1713,13 +1713,13 @@ object_event_add(NapalmGrenade,ev_create,0,'
 	{
 		explosionDamage = 30;
 		animationState = 1;
-		alarm[1] = 29;
+		alarm[1] = 29 / global.delta_factor;
 		stickied = false;
 		blastRadius = 60;
 		exploded = false;
 		bubbled = false;
 		reflector = noone;
-		alarm[2]=60; //2 seconds to detonate
+		alarm[2]=60 / global.delta_factor; //2 seconds to detonate
 		hfric=0.9;
 		rotfric=0.9;
 		rotspeed=random(20)-10;
@@ -1740,7 +1740,7 @@ object_event_add(NapalmGrenade,ev_alarm,2,'
 		//doNapalm(ownerPlayer,x,y);
 		// implement later
         instance_destroy();
-	} else alarm[3] = 60 //the server has 2 seconds to send the detonation event. if it didnt happen after that just destroy the grenade
+	} else alarm[3] = 60 / global.delta_factor //the server has 2 seconds to send the detonation event. if it didnt happen after that just destroy the grenade
 ');
 object_event_add(NapalmGrenade,ev_alarm,3,'
 	instance_destroy();
@@ -1815,7 +1815,7 @@ object_event_add(NapalmGrenade,ev_step,ev_step_normal,'
 object_event_add(NapalmGrenade,ev_collision,Character,'
 	if(team != other.team) {
 		if used == 0 {
-			alarm[2]=10;
+			alarm[2]=10 / global.delta_factor;
 			used = 1;
 		}
 	}
@@ -1830,7 +1830,7 @@ object_event_add(NapalmGrenade,ev_collision,TeamGate,'
 object_event_add(NapalmGrenade,ev_collision,Sentry,'
     if(team != other.team) {
 		if used == 0 {
-			alarm[2]=1;
+			alarm[2]= 1 / global.delta_factor;
 			used = 1;
 		}
 	}
@@ -1856,7 +1856,7 @@ object_event_add(NapalmGrenade,ev_collision,ControlPointSetupGate,'
 object_event_add(NapalmGrenade,ev_collision,Generator,'
     if(other.team != team) {
 		if used == 0 {
-			alarm[2]=1;
+			alarm[2]=1 / global.delta_factor;
 			used = 1;
 		}
 		instance_destroy();
@@ -1873,13 +1873,13 @@ Piss = object_add();
 object_event_add(JarOPiss,ev_create,0,'
 	{
     animationState = 1;
-    alarm[1] = 29;
+    alarm[1] = 29 / global.delta_factor;
     stickied = false;
     blastRadius = 60;
     exploded = false;
     bubbled = false;
     reflector = noone;
-    alarm[2]=60;
+    alarm[2]= 60 / global.delta_factor;
     hfric=0.5;
     rotfric=0.7;
     rotspeed=random(20)-10;
@@ -1982,7 +1982,7 @@ object_event_add(JarOPiss,ev_other,ev_user2,'
                     if (soakType[i] == -1 && soakType[i] != piss) soakType[i] = piss; // Test later
                 }
 				pissed=1; // in modern context this variable name is making me laugh
-				alarm[8]=250-distance_to_object(other);
+				alarm[8]= (250-distance_to_object(other)) / global.delta_factor;
 				cloak=false;    
 			}
 
@@ -2012,7 +2012,7 @@ object_event_add(JarOPiss,ev_other,ev_user2,'
 ');
 object_event_add(Piss,ev_create,0,'
 	lifetime=250;
-    alarm[0]=lifetime;
+    alarm[0] = lifetime / global.delta_factor;
     stick = false;
     ogib=-1;
     odir=0;
@@ -2061,7 +2061,7 @@ object_event_add(NatachaShot,ev_create,0,'
     {
         hitDamage = 6;
         lifetime = 40;
-        alarm[0] = lifetime;
+        alarm[0] = lifetime / global.delta_factor;
         originx=x;
         originy=y;
             
@@ -2393,7 +2393,7 @@ object_event_add(QCShot,ev_collision,Character,'
             other.secondToLastDamageDealer = other.lastDamageDealer;
             other.alarm[4] = other.alarm[3]
         }
-        other.alarm[3] = ASSIST_TIME;
+        other.alarm[3] = ASSIST_TIME / global.delta_factor;
         other.lastDamageDealer = ownerPlayer;
         other.lastDamageSource = weapon;
         

@@ -16,19 +16,18 @@ object_event_add(Eyelander,ev_create,0,'
     abilityVisual = "WEAPON BLUR";
     ability = DASH;
 
-	hasMeter = true;
-	meterName = "CHARGE";
-	meterCount = 100;
+	abilityName = "CHARGE";
+	meter = 100;
 	maxMeter = 100;
-    rechargeMeter = true;
+    rechargeAbility = true;
 ');
 
 /*
 object_event_add(Eyelander,ev_step,ev_step_normal,'
 	if (abilityActive) {
         owner.jumpStrength = 0;
-        if (owner.moveStatus != 4) meterCount -= 2; else if (owner.moveStatus == 4) meterCount -= 0.8; // lol, I am crazy for this one
-        /*if meterCount <= 0 {
+        if (owner.moveStatus != 4) meter -= 2; else if (owner.moveStatus == 4) meter -= 0.8; // lol, I am crazy for this one
+        /*if meter <= 0 {
 			owner.jumpStrength = 8+(0.6/2);
             abilityActive = false;
         }
@@ -47,8 +46,8 @@ object_event_add(Eyelander,ev_step,ev_step_normal,'
 		}
     } else {
         owner.jumpStrength = 8+(0.6/2);
-        if meterCount < 0 meterCount = 0;
-        else if meterCount < maxMeter meterCount +=1;
+        if meter < 0 meter = 0;
+        else if meter < maxMeter meter +=1;
     }
 	
     event_inherited();

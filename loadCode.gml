@@ -617,14 +617,14 @@ object_event_add(Character,ev_create,0,'
 		ammo[i] = -1;
 		meter[i] = -1;
 		maxMeter[i] = -1;
-		meterName[i] = "";
+		abilityName[i] = "";
 		abilityActive[i] = -1; // todo: this
 		weeaponType[i] = -1;
 	}
 
 	lastMeter=-1;
-	rechargeMeter = false;
-	meterChargeRate = 1;
+	rechargeAbility = false;
+	rechargeRate = 1;
 	abilityActive = false;
 
 	//stuff from alt weapons
@@ -703,15 +703,15 @@ object_event_add(Character,ev_create,0,'
 	if (checkWeapon.weaponType == WEAR) canSwitch = false;
 	if (checkWeapon.ability != -1) {
 		ability = checkWeapon.ability;
-		meterName[1] = checkWeapon.meterName;
-	    meter[1] = checkWeapon.meterCount;
+		abilityName[1] = checkWeapon.abilityName;
+	    meter[1] = checkWeapon.meter;
 	    maxMeter[1] = checkWeapon.maxMeter;
-	    rechargeMeter = checkWeapon.rechargeMeter;
+	    rechargeAbility = checkWeapon.rechargeAbility;
 	}
 	with(checkWeapon) instance_destroy();
 	if (currentWeapon.ability != -1) {
 		maxMeter[0] = currentWeapon.maxMeter;
-		meterName[0] = currentWeapon.meterName;
+		abilityName[0] = currentWeapon.abilityName;
 	}
 	global.paramOwner = noone;
 
@@ -753,7 +753,6 @@ object_event_add(Character,ev_destroy,0,'
             instance_destroy();
         }
 	}
-	//loopsoundstop(DetoFlySnd);
 ');
 
 object_event_add(Character,ev_alarm,8,'
@@ -763,11 +762,6 @@ object_event_add(Character,ev_alarm,8,'
 	pissed = 0;*/
 ');
 
-object_event_add(Character,ev_alarm,11,'
-	{
-    //loopsoundstop(DetoFlySnd);
-    }
-');
 object_event_add(Character,ev_alarm,10,'
 	buffbanner = false;
 	stunned = false;
@@ -776,50 +770,55 @@ object_event_add(Character,ev_alarm,10,'
 ');
 
 object_event_add(Character,ev_step,ev_step_normal,'
-	if (abilityActive and ability == DASH)
-	{
-		jumpStrength = 0;
-		if (moveStatus != 4) meter[1] -= 2; else if (moveStatus == 4) meter[1] -= 0.8; // lol, I am crazy for this
-		if (meter[1] <= 0) abilityActive = false;
-		if (dashon) {
-			if (moveStatus != 4) {
-				if (image_xscale == -1) {
-					hspeed -= 3;
-					if (lastTurn != image_xscale) { // right
-						hspeed = -4;
-						lastTurn = image_xscale;
+	if (abilityActive) {
+		if (ability == DASH)
+		{
+			jumpStrength = 0;
+			if (moveStatus != 4) meter[1] -= 2; else if (moveStatus == 4) meter[1] -= 0.8; // lol, I am crazy for this
+			if (meter[1] <= 0) abilityActive = false;
+			if (dashon) {
+				if (moveStatus != 4) {
+					if (image_xscale == -1) {
+						hspeed -= 3;
+						if (lastTurn != image_xscale) { // right
+							hspeed = -4;
+							lastTurn = image_xscale;
+						}
+					} else if (image_xscale == 1) {
+						hspeed += 3;
+						if (lastTurn != image_xscale) { // left
+							hspeed = 4;
+							lastTurn = image_xscale;
+						}
 					}
-				} else if (image_xscale == 1) {
-					hspeed += 3;
-					if (lastTurn != image_xscale) { // left
-						hspeed = 4;
-						lastTurn = image_xscale;
-					}
-				}
-			} else {
-				if (image_xscale == -1) {
-					hspeed -= 1.8 + (accel * 0.15);
-					if (lastTurn != image_xscale) {
-						hspeed = -4;
-						lastTurn = image_xscale;
-					}
-				} else if (image_xscale == 1) {
-					hspeed += 1.8 + (accel * 0.15);
-					if (lastTurn != image_xscale) {
-						hspeed = 4;
-						lastTurn = image_xscale;
+				} else {
+					if (image_xscale == -1) {
+						hspeed -= 1.8 + (accel * 0.15);
+						if (lastTurn != image_xscale) {
+							hspeed = -4;
+							lastTurn = image_xscale;
+						}
+					} else if (image_xscale == 1) {
+						hspeed += 1.8 + (accel * 0.15);
+						if (lastTurn != image_xscale) {
+							hspeed = 4;
+							lastTurn = image_xscale;
+						}
 					}
 				}
 			}
+		} else {
+			lastTurn = 0;
+			jumpStrength = 8+(0.6/2);
 		}
-	} else {
-		lastTurn = 0;
-		jumpStrength = 8+(0.6/2);
+		if (weaponType[1] == BANNER) {
+			
+		}
 	}
 
 	//var abilityVisual = string(currentWeapon.abilityVisual);
-	if (rechargeMeter && !abilityActive)
-		if meter[1] < maxMeter[1] meter[1] += meterChargeRate;
+	if (rechargeAbility && !abilityActive)
+		if meter[1] < maxMeter[1] meter[1] += rechargeRate;
 	// todo: add a check for which meter
 	
 	makeBlur = abilityActive && string_count("BLUR",currentWeapon.abilityVisual) != 0;
@@ -972,7 +971,7 @@ object_event_add(Character,ev_step,ev_step_end,'
 	                
 	    sendEventPlayerDeath(player, lastDamageDealer, assistant, lastDamageSource);
 	    doEventPlayerDeath(player, lastDamageDealer, assistant, lastDamageSource);
-	    if (lastDamageDealer.object.meterName[1] == "RAGE") lastDamageDealer.object.meter[1] = min(4, lastDamageDealer.object.meter[1] + 1);
+	    if (lastDamageDealer.object.abilityName[1] == "RAGE") lastDamageDealer.object.meter[1] = min(4, lastDamageDealer.object.meter[1] + 1);
 	    if (!hasReward(player, "GS") && lastDamageSource == WEAPON_FROSTBITE) {
 	    	//var FrozenStatueS
 	    	//FrozenStatueS = sprite_add()
@@ -1490,11 +1489,11 @@ object_event_add(SpecialHud,ev_draw,0,'
 
 	if global.myself.object.meter[0] != -1 {
 		message1 = (global.myself.object.meter[0] / global.myself.object.maxMeter[0]) * 100;
-		title1 = global.myself.object.meterName[0];
+		title1 = global.myself.object.abilityName[0];
 	}
 	if global.myself.object.meter[1] != -1 {
 		message2 = (global.myself.object.meter[1] / global.myself.object.maxMeter[1]) * 100;
-		title2 = global.myself.object.meterName[1];
+		title2 = global.myself.object.abilityName[1];
 	}
 	if message1 != -1 {
         draw_healthbar(xoffset+665, yoffset+500, xoffset+785, yoffset+532,message1,c_black,c_white,c_white,0,true,true);
@@ -1780,6 +1779,8 @@ object_event_add(Character,ev_other,ev_user12,'
 	        
 	        write_ubyte(global.serializeBuffer, abilityActive);
 	        write_ubyte(global.serializeBuffer, accel);
+	        write_ubyte(global.serializeBuffer, meter[0]);
+	        write_ubyte(global.serializeBuffer, meter[1]);
 
 	        temp = 0;
 	        if(cloak) temp |= $01;
@@ -1840,7 +1841,7 @@ object_event_add(Character,ev_other,ev_user13,'
 	    
 	    var temp, newIntel;
 	    if(global.updateType == QUICK_UPDATE) or (global.updateType == FULL_UPDATE) {
-	        receiveCompleteMessage(global.serverSocket,11,global.deserializeBuffer);
+	        receiveCompleteMessage(global.serverSocket,13,global.deserializeBuffer);
 	        x = read_ushort(global.deserializeBuffer)/5;
 	        y = read_ushort(global.deserializeBuffer)/5;
 	        hspeed = read_byte(global.deserializeBuffer)/8.5;
@@ -1854,6 +1855,8 @@ object_event_add(Character,ev_other,ev_user13,'
 	        
 	        abilityActive = read_ubyte(global.deserializeBuffer);
 	        accel = read_ubyte(global.deserializeBuffer);
+	        meter[0] = read_ubyte(global.deserializeBuffer);
+	        meter[1] = read_ubyte(global.deserializeBuffer);
 	        // todo: add meters here too, this is for full syncing to new players just joining in/playing against demoknight
 
 	        temp = read_ubyte(global.deserializeBuffer);

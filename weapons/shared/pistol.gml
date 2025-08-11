@@ -99,5 +99,4 @@ object_event_add(PistolWeapon, ev_other, ev_user3, '
     readyToShoot = false;
     alarm[0] = refireTime / global.delta_factor;
     alarm[5] = (reloadBuffer + reloadTime) / global.delta_factor;
-    alarm[7] = alarm[0] / 2;
 ');

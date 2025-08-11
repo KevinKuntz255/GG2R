@@ -65,7 +65,7 @@ object_event_add(RevolverWeapon, ev_alarm, 1, '
     shot.ownerPlayer = ownerPlayer;
     shot.team = owner.team;
     shot.weapon = id;
-    alarm[2] = 20;
+    alarm[2] = 20 / global.delta_factor;
     playsound(x,y,KnifeSnd);
 ');
 

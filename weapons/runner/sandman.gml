@@ -31,10 +31,9 @@ object_event_add(Sandman,ev_other,ev_user2,'
         oid.weapon=DAMAGE_SOURCE_SCATTERGUN; //temp change
         justShot=true;
         readyToShoot = false;
-        //alarm[0] = refireTime;
         readyToStab = false;
-        alarm[2]=20;
-        alarm[5] = reloadBuffer + reloadTime;
+        alarm[2]= 20 / global.delta_factor;
+        alarm[5] = (reloadBuffer + reloadTime) / global.delta_factor;
     }
 ');
 

@@ -6,8 +6,9 @@ object_event_add(MeleeWeapon, ev_create, 0, '
     refireTime = 18;
     event_inherited();
 
+    SwingreloadTime = 5;
     StabreloadTime = 5;
-    if (alarm[2] <= 0) alarm[2] = 15;
+    if (alarm[2] <= 0) alarm[2] = 5;
     smashing = false;
     isMelee = true;
 
@@ -95,7 +96,7 @@ object_event_add(MeleeWeapon, ev_alarm, 5, '
     event_inherited();
 
     ammoCount = maxAmmo;
-    if meterCount != -1 meterCount = maxMeter;
+    if meter != -1 meter = maxMeter;
 ');
 
 object_event_add(MeleeWeapon, ev_step, ev_step_normal, '
@@ -129,7 +130,7 @@ object_event_add(MeleeWeapon, ev_other, ev_user1, '
 
         justShot=true;
         readyToStab = false;
-        alarm[1] = StabreloadTime / global.delta_factor;
+        alarm[1] = SwingreloadTime / global.delta_factor;
         playsound(x, y, swingSnd);
     } else if (readyToStab && owner.cloak){
         owner.runPower = 0;
@@ -144,13 +145,20 @@ object_event_add(MeleeWeapon, ev_other, ev_user1, '
         stab.ownerPlayer = ownerPlayer;
         stab.team = owner.team;
         stab.hitDamage = 0;
-        stab.weapon = WEAPON_KNIFE;
+        stab.weapon = DAMAGE_SOURCE_KNIFE;
         stab.golden = golden;
-        if owner.stabspeed > 0 {
+        
+        // 'BH' reward - *B*obble *H*ead
+        if(hasClassReward(ownerPlayer, 'BH'))
+        {
+            ds_list_add(stab.overlays, HatBobbleSpyStabS);
+        }
+        readyToStab = false;
+        /*if owner.stabspeed > 0 {
             owner.stabspeed -= 1;
             stab.animationspeed*=2;
             alarm[3] = 32/2;
-        } else alarm[3] = 32;
-        readyToStab = false;
+        } else*/alarm[1] = StabreloadTime / global.delta_factor;
+
     }
 ');
