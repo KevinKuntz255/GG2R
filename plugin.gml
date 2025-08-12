@@ -104,7 +104,7 @@ execute_file(pluginFilePath + "\weapons\qc\blade.gml");
 execute_file(pluginFilePath + "\weapons\qc\machinegun.gml");
 
 execute_file(pluginFilePath + "\weapons\rifleman\bazaarbargain.gml");
-execute_file(pluginFilePath + "\weapons\rifleman\bow.gml");
+//execute_file(pluginFilePath + "\weapons\rifleman\bow.gml");
 execute_file(pluginFilePath + "\weapons\rifleman\huntsman.gml");
 execute_file(pluginFilePath + "\weapons\rifleman\jarate.gml");
 execute_file(pluginFilePath + "\weapons\rifleman\kukri.gml");
