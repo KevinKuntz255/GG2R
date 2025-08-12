@@ -82,6 +82,7 @@ execute_file(pluginFilePath + "\weapons\infiltrator\bigearner.gml");
 execute_file(pluginFilePath + "\weapons\infiltrator\diamondback.gml");
 execute_file(pluginFilePath + "\weapons\infiltrator\diplomat.gml");
 execute_file(pluginFilePath + "\weapons\infiltrator\etranger.gml");
+execute_file(pluginFilePath + "\weapons\infiltrator\shazia.gml");
 execute_file(pluginFilePath + "\weapons\infiltrator\knife.gml");
 execute_file(pluginFilePath + "\weapons\infiltrator\medichain.gml");
 execute_file(pluginFilePath + "\weapons\infiltrator\nordicgold.gml");

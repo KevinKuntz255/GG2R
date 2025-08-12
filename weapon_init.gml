@@ -177,32 +177,25 @@ object_event_add(Weapon,ev_destroy,0,'
 ');
 
 object_event_add(Weapon, ev_other, ev_user2, '
-	if (owner.ability == DASH) {
-		owner.doubleTapped = !owner.doubleTapped;
-        if ((weaponType == MINEGUN || isThrowable) && !owner.doubleTapped) exit; // a sort of buffer for weapons like SandvichHand and Minegun
-		if (!owner.abilityActive && !owner.cloak && owner.meter[1] >= owner.maxMeter[1]) {
-	        owner.abilityActive = true;
-			owner.accel = 0;
-			owner.moveStatus = 0;
-			owner.dashon = true;
-	        // jerry-rigging consistency in charging by makin u slightly jumped
-			if (owner.onground) owner.vspeed -= 0.15; else owner.vspeed += 0.5; 
-	        // as suggested by Cat Al Ghul, start off FAST.
-	        /*if (owner.onground) {
-	            if (owner.image_xscale == -1) {
-	                    owner.hspeed -= 12;
-	            } else if (owner.image_xscale == 1) {
-	                owner.hspeed += 12;
-	            }
-	        }*/
-	        playsound(x,y,ChargeSnd);
-			readyToStab = true;
-		}
-		/*if (owner.abilityActive) {
-            owner.abilityActive = false;
-            owner.meter[1] = 0;
-        } // stop, no matter what*/
-    }
+	if (owner.pressedKeys) {
+		if (owner.ability == DASH) {
+			owner.doubleTapped = !owner.doubleTapped;
+	        if ((weaponType == MINEGUN || isThrowable) && !owner.doubleTapped) exit; // a sort of buffer for weapons like SandvichHand and Minegun
+			if (owner.abilityActive) {
+	            owner.abilityActive = false;
+	            owner.meter[1] = 0;
+	        } // stop, no matter what
+			if (!owner.abilityActive && !owner.cloak && owner.meter[1] >= owner.maxMeter[1]) {
+		        owner.abilityActive = true;
+				owner.accel = 0;
+				owner.moveStatus = 0;
+				owner.dashon = true;
+		        owner.doubleTapped = true;
+		        playsound(x,y,ChargeSnd);
+				readyToStab = true;
+			}
+	    }
+	}
 ');
 
 // Special Variables

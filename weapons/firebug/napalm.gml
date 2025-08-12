@@ -18,4 +18,4 @@ object_event_add(NapalmHand,ev_create,0,' //do this later
 ');
 
 global.weapons[WEAPON_NAPALM] = NapalmHand;
-global.name[WEAPON_NAPALM] = "Napalm Grenade (unfinished)";
+global.name[WEAPON_NAPALM] = "Napalm Grenade";

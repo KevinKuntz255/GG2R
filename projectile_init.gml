@@ -1937,7 +1937,7 @@ object_event_add(NapalmFlame,ev_step,ev_step_normal,'
 ');
 object_event_add(NapalmFlame,ev_collision,Sentry,'
     if(other.team != team) {
-        other.hp -= hitDamage*0.7; // -80% buffed to -30%
+        damageSentry(ownerPlayer, other.id, hitDamage*0.7);
         other.lastDamageDealer = ownerPlayer;
         other.lastDamageSource = weapon;
         instance_destroy();
@@ -2204,7 +2204,7 @@ object_event_add(Grenade, ev_create, 0, '
     {
         blastRadius = 60;
         alarm[2] = 60 / global.delta_factor;
-        alarm[3] = 12 / global.delta_factor;
+        alarm[3] = 24 / global.delta_factor;
         hfric=0.5;
         rotfric=0.7;
         hitSelf = false;
@@ -2221,31 +2221,16 @@ object_event_add(Grenade,ev_alarm,2,'
 ');
 
 object_event_add(Grenade,ev_alarm,3,'
-    hitSelf = true; // stop self-damage
+    hitSelf = true; // stop self-damage when shooting under your feet
 ');
 
 object_event_add(Grenade,ev_collision,Character,'
-    if(other.id == ownerPlayer.object && hitSelf) event_user(2);
-');
-
-object_event_add(Grenade,ev_collision,Sentry,'
+    if(other.id == ownerPlayer.object && !hitSelf) exit;
     event_user(2);
 ');
 
-object_event_add(Grenade,ev_collision,TeamGate,'
-    {
-    //instance_destroy()
-        speed *= -1;
-           // stickied = true;
-    }
-');
-
-object_event_add(Grenade,ev_collision,BulletWall,'
-    {
-    //instance_destroy()
-        speed *= -1;
-           // stickied = true;
-    }
+object_event_add(Grenade,ev_collision,Sentry,'
+    if (other.team != team) event_user(2);
 ');
 
 object_event_add(Grenade, ev_step, ev_step_begin, '      
@@ -2271,12 +2256,13 @@ object_event_add(Grenade, ev_step, ev_step_begin, '
     
     gunSetSolids();
     if (!place_free(x + hspeed, y + vspeed)) {
-        hspeed *= 0.85;
-        vspeed *= -0.75;
         if (place_free(x + hspeed, y)) {
+            hspeed *= 0.85;
+            vspeed *= -0.75;
         } else {
             speed *= -1;
         }
+        playsound(x,y,ImpactSnd);
         hitSelf = true;
     }
     gunUnsetSolids();

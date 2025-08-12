@@ -6,7 +6,7 @@ DoubleTrouble = object_add();
 object_set_parent(DoubleTrouble, GrenadeWeapon);
 
 object_event_add(DoubleTrouble,ev_create,0,'
-    xoffset = 8;
+    xoffset = 0;
     yoffset = 2;
     refireTime = 26;
     spriteBase = "DoubleTrouble";
@@ -14,6 +14,19 @@ object_event_add(DoubleTrouble,ev_create,0,'
     reloadTime = 20;
     maxAmmo = 2;
     ammoCount = maxAmmo;
+
+    normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\"+ spriteBase +"S.png", 1, 1, 0, 10, 7);
+    recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\"+ spriteBase +"FS.png", 1, 1, 0, 10, 7);
+    reloadSprite = sprite_add(pluginFilePath + "\randomizer_sprites\"+ spriteBase +"FS.png", 1, 1, 0, 10, 7);
+
+    sprite_index = normalSprite;
+
+    recoilTime = refireTime;
+    recoilAnimLength = sprite_get_number(recoilSprite) / 2;
+    recoilImageSpeed = recoilAnimLength / recoilTime;
+
+    reloadAnimLength = sprite_get_number(reloadSprite) / 2;
+    reloadImageSpeed = reloadAnimLength / reloadTime;
 ');
 
 object_event_add(DoubleTrouble, ev_other, ev_user3, '
