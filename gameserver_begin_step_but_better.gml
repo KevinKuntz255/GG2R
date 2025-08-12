@@ -12,7 +12,7 @@ if(global.run_virtual_ticks)
 var i;
 for(i=0; i < ds_list_size(global.players); i+=1)
 {
-    var player, noOfPlayers;
+    var player, noOfPlayers, playerId, commandLimitRemaining;
     player = ds_list_find_value(global.players, i);
     
     if(socket_has_error(player.socket) or player.kicked)
@@ -33,8 +33,6 @@ for(i=0; i < ds_list_size(global.players); i+=1)
     }
     else
     {
-        var playerId, commandLimitRemaining;
-
         playerId = i;
 
         // To prevent players from flooding the server, limit the number of commands to process per step and player.
@@ -55,7 +53,7 @@ for(i=0; i < ds_list_size(global.players); i+=1)
             var socket;
             socket = player.socket;
             if(!tcp_receive(socket, player.commandReceiveExpectedBytes)) {
-                return 0;
+                break;
             }
             
             switch(player.commandReceiveState)
@@ -299,7 +297,7 @@ for(i=0; i < ds_list_size(global.players); i+=1)
                 case TOGGLE_ZOOM:
                     if player.object != -1 {
                         if player.class == CLASS_SNIPER {
-                            if global.myself.activeWeapon == 0 && global.myself.object.weaponType[0] != BOW {
+                            if player.activeWeapon == 0 && player.object.weaponType[0] != BOW {
                                 write_ubyte(global.sendBuffer, TOGGLE_ZOOM);
                                 write_ubyte(global.sendBuffer, playerId);
                                 toggleZoom(player.object);
