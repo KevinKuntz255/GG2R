@@ -10,7 +10,6 @@ Kevin's High Priority:
 make consumables/throwables piggyback owner.canEat as a detector
 re-add crit variable/visuals to all projectiles due to buffBanner's addition
 add shared Medic HealBeam/Needle
-Finish NapalmGrenade (nvm, uses ClientBeginStep, ask MCBoss if there needs to be an override, or a different solution)
 
 send and read_ubyte(variable, deserializationBuffer) for many projectiles and some weapons
 move uberCharge from currentWeapon to Character
@@ -31,23 +30,22 @@ Rundown (optional, weapon works akin to Baby Face's Blaster)
 Pyro:
 Phlog (90%) Add Afterburn
 Snowbite (90%) Add ev_draw override to Character for Snow/Freezing
-Napalm Grenade (70%) Add Networking
 Soldier:
 Buff Banner (95%)
 Cow Mangler (50%)
 Heavy:
 Iron Maiden
-Dalokhos Bar (Implement overheal)
 
 Detonator:
-Entire Kit
+5 Weapons Left
 Medic:
 - Entire Kit
 Engineer:
 - Entire Kit
 Spy:
 - Entire Kit
-
+Sniper:
+4 Weapons Left
 Q/C:
 - Add a kit?
 

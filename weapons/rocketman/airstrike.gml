@@ -21,7 +21,7 @@ object_event_add(Airstrike,ev_create,0,'
     reloadImageSpeed = reloadAnimLength/reloadTime;
 ');
 
-object_event_add(Airstrike,ev_other,ev_user1,'
+object_event_add(Airstrike,ev_other,ev_user3,'
     with(Rocket) {
         if ownerPlayer = other.ownerPlayer event_user(5);
     }
@@ -30,12 +30,14 @@ object_event_add(Airstrike,ev_other,ev_user1,'
 
 object_event_add(Airstrike,ev_other,ev_user2,'
     with(Rocket) {
-        if ownerPlayer = other.ownerPlayer && direction != 270 {
-        direction = 270;
-        image_angle = 270;
-        speed -= 2;
-        travelDistance=0;
-        other.alarm[0] = other.refireTime / global.delta_factor;
+        if (travelDistance >= 260) {
+            if ownerPlayer = other.ownerPlayer && direction != 270 {
+            direction = 270;
+            image_angle = 270;
+            speed -= 2;
+            travelDistance=0;
+            other.alarm[0] = other.refireTime / global.delta_factor;
+            }
         }
     }
 ');

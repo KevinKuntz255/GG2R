@@ -17,7 +17,7 @@ object_event_add(Kritzkrieg,ev_create,0,'
     hphealed = 0;
     maxHealDistance = 300;
     ubering = false;
-    uberCharge=0;
+    uberType = KRITZ;
     uberReady=false;
     maxAmmo = 0;
     ammoCount = 0;

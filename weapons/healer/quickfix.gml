@@ -16,7 +16,7 @@ object_event_add(QuickFix,ev_create,0,'
     hphealed = 0;
     maxHealDistance = 300;
     ubering = false;
-    uberCharge=0;
+    uberType = FIX;
     uberReady=false;
     maxAmmo = 2000;
     ammoCount = 0;

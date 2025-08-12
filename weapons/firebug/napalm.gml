@@ -12,10 +12,6 @@ object_event_add(NapalmHand,ev_create,0,' //do this later
     event_inherited();
     reloadTime = 240;
 
-    isMetered = true;
-
-    // todo: meter
-
     throwProjectile = NapalmGrenade;
     shotSpeed = 12.5;
     randomDir = false;

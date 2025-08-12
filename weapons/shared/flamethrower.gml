@@ -17,8 +17,8 @@ object_event_add(FlameWeapon, ev_create, 0, '
     with(owner) { // reminder: activeWeapon is modified before Weapon ev_create is called
         with (player)
             if (!variable_local_exists("activeWeapon")) exit;
-            if !variable_local_exists("PrimaryRefireTime")  alarm[1] = other.blastReloadTime / global.delta_factor;
-            if !variable_local_exists("reloadFlare") alarm[2] = other.flareReloadTime / global.delta_factor;
+            if !variable_local_exists("PrimaryRefireTime")  other.alarm[1] = other.blastReloadTime / global.delta_factor;
+            if !variable_local_exists("reloadFlare") other.alarm[2] = other.flareReloadTime / global.delta_factor;
     }
     readyToBlast = false;
     readyToFlare = false;

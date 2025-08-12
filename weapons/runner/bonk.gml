@@ -13,7 +13,6 @@ object_event_add(BonkHand,ev_create,0,'
     xoffset=-3;
     yoffset=-2;
     event_inherited();
-    isMetered = true;
 
 	maxMeter = 1;
     meter = maxMeter;

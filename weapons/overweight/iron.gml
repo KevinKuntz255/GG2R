@@ -6,7 +6,7 @@ IronMaiden = object_add();
 object_set_parent(IronMaiden, MinigunWeapon);
 
 object_event_add(IronMaiden,ev_create,0,'
-    xoffset = -3;
+    xoffset = -1;
     yoffset = 1;
     refireTime = 2;
     spriteBase = "IronMaiden";
@@ -18,8 +18,7 @@ object_event_add(IronMaiden,ev_create,0,'
     weaponGrade = UNIQUE;
     weaponType = MINIGUN;
     
-    isMetered = true;
-    //meterMax = 400;
+    //maxMeter = 400;
     //meter = maxAmmo;
 
     //Overlays for the overheat

@@ -28,8 +28,8 @@ object_event_add(MinigunWeapon, ev_create, 0, '
 
     if (!variable_local_exists("spriteBase")) spriteBase = "Minigun";
 
-    normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\" + spriteBase + "S.png", 2, 1, 0, 8, -1);
-    recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\" + spriteBase + "FS.png", 4, 1, 0, 8, -1);
+    normalSprite = sprite_add(pluginFilePath + "\randomizer_sprites\" + spriteBase + "S.png", 2, 1, 0, 14, 3);
+    recoilSprite = sprite_add(pluginFilePath + "\randomizer_sprites\" + spriteBase + "FS.png", 4, 1, 0, 14, 3);
     reloadSprite = -1;
 
     sprite_index = normalSprite;

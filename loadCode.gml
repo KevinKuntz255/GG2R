@@ -547,10 +547,12 @@ object_event_add(InGameMenuController,ev_create,0,'
     ");
 ');
 
-/*object_event_add(Character, ev_draw, 0, '
-	if (weapons[1] == WEAPON_BUFFBANNER)
+globalvar BackpackS, DangerShieldS, RazorBackS, SniperBootsS;
+object_event_add(Character, ev_draw, 0, '
+	if (weapons[1] == BuffBanner)  {
 		// draw backpack here
-');*/
+	}
+');
 
 globalvar piss, milk, bleed;
 piss = 0;
@@ -582,6 +584,17 @@ ds_map_add(global.abilityTypes, FLIGHT_HORIZONTAL, FLIGHT_HORIZONTAL);
 ds_map_add(global.abilityTypes, FLIGHT_VERTICAL, FLIGHT_VERTICAL);
 ds_map_add(global.abilityTypes, HEAL, HEAL);
 
+// todo for healbeams
+globalvar KRITZ, FIX, FIRERATE;
+KRITZ = 0;
+FIX = 1;
+FIRERATE = 2;
+global.uberTypes = ds_map_create();
+
+ds_map_add(global.uberTypes, KRITZ, KRITZ);
+ds_map_add(global.abilityTypes, FIX, FIX);
+ds_map_add(global.abilityTypes, FIRERATE, FIRERATE);
+
 object_event_add(Character,ev_create,0,'
 	accel = 0;
 	blurs = 0;
@@ -612,18 +625,18 @@ object_event_add(Character,ev_create,0,'
 	soaked = false;
 	dashon = true;
 	// 3 soakTypes, 3 types, if possibly at the same time
-	for(i=0; i<4; i+=1) soakType[i] = -1;
-	soakType[0]=-1;
-	soakType[1]=-1;
-	soakType[2]=-1;
-
-	for(i=0; i<3; i+=1) {
+	for(i=0; i<4; i+=1) {
 		ammo[i] = -1;
+		soakType[i] = -1;
 		meter[i] = -1;
 		maxMeter[i] = -1;
 		abilityName[i] = "";
 		abilityActive[i] = -1; // todo: this
-		weeaponType[i] = -1;
+ 		weeaponType[i] = -1;
+	}
+
+	for(i=0; i<5; i+=1) {
+		uberType[i] = -1; // sounds bonkers to have more than one, or even 3 types of ubers at the same time but lets cover large public server cases.
 	}
 
 	lastMeter=-1;
@@ -760,7 +773,7 @@ object_event_add(Character,ev_destroy,0,'
 ');
 
 object_event_add(Character,ev_alarm,8,'
-	for(i=0; i<3; i+=1) soakType[i] = -1;
+	for(i=0; i<4; i+=1) soakType[i] = -1;
 	/*milked = 0;
 	bleeding = 0;
 	pissed = 0;*/
@@ -817,13 +830,13 @@ object_event_add(Character,ev_step,ev_step_normal,'
 					}
 				}
 			}
-		} else {
-			lastTurn = 0;
-			jumpStrength = 8+(0.6/2);
 		}
 		if (weaponType[1] == BANNER) {
 			
 		}
+	} else {
+		lastTurn = 0;
+		jumpStrength = 8+(0.6/2);
 	}
 
 	//var abilityVisual = string(currentWeapon.abilityVisual);
@@ -847,10 +860,10 @@ object_event_add(Character,ev_step,ev_step_normal,'
 ');
 
 globalvar DetoTrimpSnd, DetoFlyStartSnd, DetoFlySnd, DetoSlamSnd;
-DetoTrimpSnd = sound_add(directory + '/randomizer_sounds/DetoTrimpSnd.wav', 0, 1);
-DetoFlyStartSnd = sound_add(directory + '/randomizer_sounds/DetoFlyStartSnd.wav', 0, 1);
-DetoFlySnd = sound_add(directory + '/randomizer_sounds/DetoFlySnd.wav', 0, 1);
-DetoSlamSnd = sound_add(directory + '/randomizer_sounds/DetoSlamSnd.wav', 0, 1);
+DetoTrimpSnd = sound_add(pluginFilePath + '/randomizer_sounds/DetoTrimpSnd.wav', 0, 1);
+DetoFlyStartSnd = sound_add(pluginFilePath + '/randomizer_sounds/DetoFlyStartSnd.wav', 0, 1);
+DetoFlySnd = sound_add(pluginFilePath + '/randomizer_sounds/DetoFlySnd.wav', 0, 1);
+DetoSlamSnd = sound_add(pluginFilePath + '/randomizer_sounds/DetoSlamSnd.wav', 0, 1);
 object_event_clear(Character,ev_step,ev_step_end);
 object_event_add(Character,ev_step,ev_step_end,'
 	charSetSolids();
@@ -1068,7 +1081,7 @@ object_event_add(Character,ev_step,ev_step_end,'
 	        hp += nomRate * global.delta_factor;
 	    }
         if (weapons[1] == ChocolateHand) {
-        	if (hp >= maxHp) maxHp = newmaxHp;
+        	if (hp == maxHp) maxHp = newmaxHp;
         	alarm[11] = 900 / global.delta_factor;
         }
 	    if (omnomnomnomindex >= omnomnomnomend)
@@ -1433,6 +1446,8 @@ object_event_add(Medic,ev_create,0,'
 	    sprite_index = MedicBlueS;
 	}
 
+	//uberCharge = 0;
+	
 	event_inherited();
 
 	// Override defaults
@@ -1477,9 +1492,13 @@ object_event_add(GameServer,ev_step,ev_step_begin,readScript);
 
 globalvar SpecialHud;
 SpecialHud = object_add();
+
+object_event_add(SpecialHud,ev_create,0,'depth=-110000');
+
 object_event_add(SpecialHud,ev_step,ev_step_begin,'
 	if global.myself.object == -1 instance_destroy();
 ');
+
 object_event_add(SpecialHud,ev_draw,0,'
 	if global.myself.object == -1 exit;
 	
@@ -1792,6 +1811,7 @@ object_event_add(Character,ev_other,ev_user12,'
 	        write_ubyte(global.serializeBuffer, ceil(hp));
 	        write_ubyte(global.serializeBuffer, currentWeapon.ammoCount);
 	        
+	        // write_ubyte(global.serializeBuffer, ammo[player.activeWeapon];
 	        write_ubyte(global.serializeBuffer, abilityActive);
 	        write_ubyte(global.serializeBuffer, accel);
 	        write_ubyte(global.serializeBuffer, meter[0]);
@@ -1816,6 +1836,7 @@ object_event_add(Character,ev_other,ev_user12,'
 	        break;
 	    case CLASS_MEDIC:
 	        write_ubyte(global.serializeBuffer, currentWeapon.uberCharge*255/2000);
+	        //write_ubyte(global.serializeBuffer, uberCharge*255/2000);
 	        break;
 	    case CLASS_ENGINEER:
 	        write_ubyte(global.serializeBuffer, nutsNBolts);
@@ -1890,6 +1911,7 @@ object_event_add(Character,ev_other,ev_user13,'
 	            break;
 	        case CLASS_MEDIC:
 	            currentWeapon.uberCharge = read_ubyte(global.deserializeBuffer)*2000/255;
+	            //uberCharge = read_ubyte(global.deserializeBuffer)*2000/255;
 	            break;
 	        case CLASS_ENGINEER:
 	            nutsNBolts = read_ubyte(global.deserializeBuffer);
