@@ -16,9 +16,9 @@ MCBoss - Lead Programmer/Networking Implementation
 ## Kits
 Scout's Kit Is finished
 
-Soldier's kit has 2 weappons Left
+Soldier's kit Is finished
 
-Pyro's kit has 3 weapons Left
+Pyro's kit has 2 weapons Left
 
 Demo's kit has 5 weapons left
 

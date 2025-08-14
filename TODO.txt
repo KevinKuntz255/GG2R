@@ -30,9 +30,6 @@ Rundown (optional, weapon works akin to Baby Face's Blaster)
 Pyro:
 Phlog (90%) Add Afterburn
 Snowbite (90%) Add ev_draw override to Character for Snow/Freezing
-Soldier:
-Buff Banner (95%)
-Cow Mangler (50%)
 Heavy:
 Iron Maiden
 

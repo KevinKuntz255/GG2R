@@ -217,7 +217,7 @@ global.dealDamageFunction += '
             }
         }
 		//if (pissed || argument1.object.crit == 2 || (argument0.object.currentWeapon.abilityActive && argument0.object.currentWeapon.ability = MINICRIT)) {
-        if (pissed && argument0.currentWeapon.crit <= 1) {
+        if (pissed && argument0.object.currentWeapon.crit <= 1) { // dont want to double this damage, thats excessive
 			argument2 += 1*0.35; // add this dmg for healing factors
 			argument1.hp -= 1*0.35;
 			var text;

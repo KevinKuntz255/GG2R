@@ -200,9 +200,10 @@ object_event_add(Weapon, ev_other, ev_user2, '
 ');
 
 // Special Variables
-globalvar WEAPON_FIREARROW, WEAPON_KUNAIBACKSTAB, WEAPON_SAPPER, WEAPON_MEDICHAINBACKSTAB, WEAPON_FAILSTAB, WEAPON_ARROWHEADSHOT, WEAPON_SPYCICLEBACKSTAB, WEAPON_BACKSTAB;
-globalvar Fire Arrow, Kunai Backstab, Sapper, Medichain Backstab, Failstab, Arrow Headshot, Spycicle Backstab, Backstab;
+globalvar WEAPON_FIREARROW, WEAPON_KUNAIBACKSTAB, WEAPON_SAPPER, WEAPON_MEDICHAINBACKSTAB, WEAPON_FAILSTAB, WEAPON_ARROWHEADSHOT, WEAPON_SPYCICLEBACKSTAB, WEAPON_BACKSTAB, WEAPON_COWMANGLERFIRE;
+globalvar Fire Arrow, Kunai Backstab, Sapper, Medichain Backstab, Failstab, Arrow Headshot, Spycicle Backstab, Backstab, Cow Mangler Charged;
 WEAPON_FIREARROW = 100;
+WEAPON_COWMANGLERFIRE = 101;
 
 //read the loadout file
 ini_open("Loadout.gg2");

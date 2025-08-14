@@ -5,13 +5,15 @@ object_set_parent(SpyShazia, MeleeWeapon);
 object_event_add(SpyShazia,ev_create,0,'
     xoffset= 5 - 32;
     yoffset= -6;
-    spriteBase = "Knife2";
 	event_inherited();
 	line = false;
 	linex = 0;
 	liney = 0;
 
+	stopspotX = 0;
+	stopspotY = 0;
 	weaponGrade = FUN;
+	motionAdd = 0;
 ');
 
 global.lerp = '
@@ -21,28 +23,39 @@ global.lerp = '
 
 object_event_add(SpyShazia,ev_step,ev_step_normal,'
 	if (line) {
-		linex = execute_string(global.lerp, linex, mouse_x + (1*-image_xscale), 0.5*global.delta_factor);
-		liney = execute_string(global.lerp, liney, mouse_y, 0.5*global.delta_factor);
+		linex = execute_string(global.lerp, linex, stopspotX, 0.4);
+		liney = execute_string(global.lerp, liney, stopspotY, 0.4);
+		gunSetSolids();
+	    //if (!place_free(linex, liney)) 
+	    //if (place_meeting(linex, liney, Obstacle)) 
+	    if collision_line(x, y, linex, liney, Obstacle, true, true) 
+	    {
+	    	with(owner) {
+		    	motion_add(other.motionAdd, 8);
+		        //vspeed*= (liney * 0.1);
+		        //hspeed *= (linex * 0.1);
+		        moveStatus = 4;
+	        }
+	        line = false;
+	    }
+	    gunUnsetSolids();
 	} else {
-		linex = execute_string(global.lerp, linex, x+xoffset*image_xscale, 0.8*global.delta_factor);
-		liney = execute_string(global.lerp, liney, y+yoffset, 0.8*global.delta_factor);
+		linex = execute_string(global.lerp, linex, owner.x, 0.85);
+		liney = execute_string(global.lerp, liney, owner.y, 0.85);
 	}
-	
-	stopspot = mouse_x + (1*-image_xscale);
-	if (linex = stopspot) line = false;
     
   /*if (place_meeting(linex,liney, Character))
 		implement vampiric sucking
-	if (place_meeting(linex,liney, Obstacle))
-		implement motion_add*/
+	*/
 ');
 
 object_event_add(SpyShazia,ev_other,ev_user1,'
 	if (owner.pressedKeys) {
 		line = !line;
 		if (line) {
-			linex = x;
-			liney = y;
+			motionAdd = owner.aimDirection;
+			stopspotX = round(owner.x) + cos(degtorad(owner.aimDirection))*owner.aimDistance;
+			stopspotY = round(owner.y) - sin(degtorad(owner.aimDirection))*owner.aimDistance;
 		}
 	}
 ');
@@ -51,34 +64,17 @@ object_event_add(SpyShazia,ev_draw,0,'
 	var color, xdrawpos, ydrawpos;
     if(owner.team == TEAM_RED) color = c_red;
     else color = c_blue;
-    xdrawpos = round(x+xoffset*image_xscale);
-    ydrawpos = round(y+yoffset);
+    xdrawpos = round(owner.x+xoffset*image_xscale);
+    ydrawpos = round(owner.y+yoffset);
     draw_set_alpha(0.3);
 
-	if (line)
-		draw_line_width_color(xdrawpos+lengthdir_x(20,owner.aimDirection),ydrawpos+lengthdir_y(20,owner.aimDirection), linex, liney, 5, color, color);
+    if (!line)
+	draw_line_width_color(xdrawpos+lengthdir_x(64,owner.aimDirection),ydrawpos+lengthdir_y(64,owner.aimDirection), linex, liney, 3, color, color);
+	else
+		draw_line_width_color(xdrawpos+lengthdir_x(12,owner.aimDirection),ydrawpos+lengthdir_y(-64,owner.aimDirection), linex, liney, 3, color, color);
 ');
 
 /*
-object_event_add(Eyelander,ev_other,ev_user2,'
-    if (!owner.abilityActive && !owner.cloak && owner.meter[1] >= owner.maxMeter[1]) {
-        owner.abilityActive = true;
-		owner.accel = 0;
-		owner.moveStatus = 0;
-        // jerry-rigging consistency in charging by makin u slightly jumped
-		if (owner.onground) owner.vspeed -= 0.15; else owner.vspeed += 0.5; 
-        // as suggested by Cat Al Ghul, start off FAST.
-        if (owner.onground) {
-            if (owner.image_xscale == -1) {
-                    owner.hspeed -= 12;
-            } else if (owner.image_xscale == 1) {
-                owner.hspeed += 12;
-            }
-        }
-        playsound(x,y,ChargeSnd);
-		readyToStab = true;
-    }
-');*/
-/*
 global.weapons[WEAPON_SHAZIA] = SpyShazia;
 global.name[WEAPON_SHAZIA] = "Lock-On";
+*/

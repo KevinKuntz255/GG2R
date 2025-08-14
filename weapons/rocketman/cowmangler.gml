@@ -17,6 +17,7 @@ object_event_add(CowMangler,ev_create,0,'
     weaponType = ROCKETLAUNCHER;
 
     //ability = CHARGE_WEAPON;
+    specialProjectile = ManglerShot;
     rocketSound = ManglerShotSnd;
     abilityVisual = "WEAPON";
     abilityActive = false;
@@ -50,6 +51,7 @@ object_event_add(CowMangler,ev_step,ev_step_normal,'
         if ammoCount < 0 ammoCount = 0;
         else if ammoCount <= maxAmmo ammoCount +=0.9;
     } else {
+        crit = 1;
         owner.runPower = 0.9;
         owner.jumpStrength = 8+(0.6/2);
     }
@@ -58,9 +60,10 @@ object_event_add(CowMangler,ev_step,ev_step_normal,'
 object_event_add(CowMangler,ev_other,ev_user2,'
     if(readyToShoot == true && ammoCount >= maxAmmo && !owner.cloak && !abilityActive) {
         abilityActive = true;
+        crit = 1.43;
         playsound(x,y,ManglerChargesnd);
     }   
 ');
 
 global.weapons[WEAPON_COWMANGLER] = CowMangler;
-global.name[WEAPON_COWMANGLER] = "Cow Mangler 5000 (unfinished)";
+global.name[WEAPON_COWMANGLER] = "Cow Mangler 5000";
