@@ -548,7 +548,8 @@ object_event_add(InGameMenuController,ev_create,0,'
 ');
 
 globalvar BackpackS, DangerShieldS, RazorBackS, SniperBootsS;
-object_event_add(Character, ev_draw, 0, '
+//object_event_clear(Character, ev_draw, 0);
+object_event_add(Character,ev_draw,0, '
 	if (weapons[1] == BuffBanner)  {
 		// draw backpack here
 	}
@@ -618,8 +619,6 @@ object_event_add(Character,ev_create,0,'
     isSaxtonHale = false;
     raged=false;
     canSwitch = true;
-	
-	crit = -1;
 
 	nomRate = 1.6;
 	soaked = false;
@@ -779,7 +778,13 @@ object_event_add(Character,ev_alarm,8,'
 	pissed = 0;*/
 ');
 
+object_event_add(Character,ev_alarm,9,'
+	currentWeapon.crit=1;
+	critting = 0;
+');
+
 object_event_add(Character,ev_alarm,10,'
+	abilityActive = false;
 	buffbanner = false;
 	stunned = false;
 	radioactive = false;
@@ -832,7 +837,12 @@ object_event_add(Character,ev_step,ev_step_normal,'
 			}
 		}
 		if (weaponType[1] == BANNER) {
-			
+			with(Character){
+		        if distance_to_point(other.x,other.y) < 128 && team == other.team {
+		            currentWeapon.crit=1.35;
+		            alarm[9] = 2 / global.delta_factor;
+		        }
+		    }
 		}
 	} else {
 		lastTurn = 0;
@@ -1090,22 +1100,22 @@ object_event_add(Character,ev_step,ev_step_end,'
 	
 	//dripping
 	
-	for(i=0; i<3; i+=1) {
+	for(i=0; i<4; i+=1) {
 		if soakType[i] == piss {
 			repeat(random(floor(2))) instance_create(x+random(32)-16,y+random(32)-16,Piss);
 		}
 		//dripping milk
-		if soakType[i] == milk {
+		else if soakType[i] == milk {
 			repeat(random(floor(2))) instance_create(x+random(32)-16,y+random(32)-16,Milk);
 		}
 		//bleeding
-		if soakType[i] == bleed {
+		else if soakType[i] == bleed {
 			hp-=0.15;
 			repeat(random(floor(2))) instance_create(x+random(32)-16,y+random(32)-16,BloodDrop);
-			lastDamageSource = WEAPON_SHIV;
+			//lastDamageSource = WEAPON_SHIV;
 		}
 		//unpissing/unmilking if ubered
-		if ubered or megaHealed or critting {
+		if ubered or uberType[i] != -1 {
 			soaked = false
 			soakType[i]=-1;
 		}
@@ -1203,7 +1213,7 @@ object_event_add(Weapon,ev_draw,0,'
 	    else
 	        image_alpha = power(owner.cloakAlpha, 2);
 	    draw_sprite_ext(sprite_index, imageOffset, round(x+xoffset*image_xscale), round(y+yoffset) + owner.equipmentOffset, image_xscale, image_yscale, image_angle, c_white, image_alpha);
-	    if (owner.abilityActive && string_count("WEAPON", abilityVisual) > 0) 
+	    if ((owner.abilityActive && string_count("WEAPON", abilityVisual) > 0) || crit > 1) 
 	    {
 				if (owner.team == TEAM_RED)
 					ubercolour = c_orange;

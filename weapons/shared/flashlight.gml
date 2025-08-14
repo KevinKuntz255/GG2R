@@ -122,11 +122,10 @@ object_event_add(FlashlightWeapon,ev_other,ev_user3, '
         with(Player) {
             if(id != other.ownerPlayer and team != other.owner.team and object != -1) {
                 if(collision_line(other.x,other.y,other.a[i],other.b[i],object,true,false)>=0) && object.ubered == 0 {
-                    other.hitDamage *= (1+0*0.35)*1; // re-add crits? maybe!
+                    other.hitDamage *= (1+0*0.35); // re-add crits? done!
                     damageCharacter(other.ownerPlayer, object, other.hitDamage);
                     //if true == true object.hp -= other.hitDamage*(1+0*0.35)*1; //Yeah MCBoss removed crits here
-                    //object.lastDamageCrit=other.crit;
-                    object.timeUnscathed = 0;
+                    //object.lastDamageCrit=other.crit; // not sure if this should be readded, I think its for crit kill log
                     if (object.lastDamageDealer != other.ownerPlayer && object.lastDamageDealer != object.player){
                         object.secondToLastDamageDealer = object.lastDamageDealer;
                         object.alarm[4] = object.alarm[3]

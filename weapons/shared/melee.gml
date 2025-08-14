@@ -53,13 +53,13 @@ object_event_add(MeleeWeapon, ev_alarm, 1, '
         shot.splashAmount = 3;
         shot.knockBack = true;
         if (owner.meter[1] <= 50 || owner.moveStatus == 4 && owner.meter[1] <= 60) { // give grace since youre flying
-            shotDamage = 50; 
+            //1shotDamage = 50; 
             playsound(x,y,CritSnd);
-            shot.crit=1;
+            shot.crit=1.43;
         } else if (owner.meter[1] <= 70 || owner.moveStatus == 4 && owner.meter[1] <= 80) {
-            shotDamage = 40; 
+            //shotDamage = 40; 
             playsound(x,y,CritSnd);
-            shot.crit=2;
+            shot.crit=1.15;
         }
         owner.abilityActive = false;
         owner.meter[1] = 0;

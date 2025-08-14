@@ -45,7 +45,6 @@ object_event_add(FlareWeapon, ev_other, ev_user1, '
             shot = instance_create(x + lengthdir_x(13, owner.aimDirection), y + lengthdir_y(13, owner.aimDirection),specialProjectile);
             shot.direction = owner.aimDirection;
             shot.speed = 15;
-            //shot.crit=crit;
             shot.owner = owner;
             shot.ownerPlayer = ownerPlayer;
             shot.team = owner.team;

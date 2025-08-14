@@ -102,7 +102,8 @@ object_event_add(Weapon,ev_create,0,'
     // necessary variables for weapons not to crash
 	//wrangled = false;
 	readyToStab=false;
-    //crit=1;
+    crit=1;
+    playcrit=false;
     //ubering = false;
     //uberCharge=0;
     t=0;
@@ -181,7 +182,7 @@ object_event_add(Weapon, ev_other, ev_user2, '
 		if (owner.ability == DASH) {
 			owner.doubleTapped = !owner.doubleTapped;
 	        if ((weaponType == MINEGUN || isThrowable) && !owner.doubleTapped) exit; // a sort of buffer for weapons like SandvichHand and Minegun
-			if (owner.abilityActive) {
+			if (owner.abilityActive && owner.meter[1] >= 20) {
 	            owner.abilityActive = false;
 	            owner.meter[1] = 0;
 	        } // stop, no matter what

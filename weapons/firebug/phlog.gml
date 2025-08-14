@@ -95,7 +95,6 @@ object_event_add(Phlog,ev_other,ev_user1,'
 						damageCharacter(ownerPlayer.object, other.id, hitDamage);
 						//object.hp -= other.hitDamage*(1+0*0.35)*1; //other.crit
 						//object.lastDamageCrit=other.crit;
-						object.timeUnscathed = 0;
 						if (object.lastDamageDealer != other.ownerPlayer && object.lastDamageDealer != object.player){
 							object.secondToLastDamageDealer = object.lastDamageDealer;
 							object.alarm[4] = object.alarm[3]

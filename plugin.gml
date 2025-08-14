@@ -5,6 +5,24 @@ randomizer = id;
 pluginFilePath = argument0;
 
 //Loading up other files
+execute_file(pluginFilePath + "\projectiles\misc.gml");
+execute_file(pluginFilePath + "\projectiles\meleemask.gml");
+execute_file(pluginFilePath + "\projectiles\snowflake.gml");
+execute_file(pluginFilePath + "\projectiles\detonationflare.gml");
+execute_file(pluginFilePath + "\projectiles\sap.gml");
+execute_file(pluginFilePath + "\projectiles\arrow.gml");
+execute_file(pluginFilePath + "\projectiles\lasershot.gml");
+execute_file(pluginFilePath + "\projectiles\fanshot.gml");
+execute_file(pluginFilePath + "\projectiles\sandvich.gml");
+execute_file(pluginFilePath + "\projectiles\ball.gml");
+execute_file(pluginFilePath + "\projectiles\milk.gml");
+execute_file(pluginFilePath + "\projectiles\napalm.gml");
+execute_file(pluginFilePath + "\projectiles\piss.gml");
+execute_file(pluginFilePath + "\projectiles\natachashot.gml");
+execute_file(pluginFilePath + "\projectiles\grenade.gml");
+execute_file(pluginFilePath + "\projectiles\jumpermine.gml");
+execute_file(pluginFilePath + "\projectiles\manglershot.gml");
+execute_file(pluginFilePath + "\projectiles\qcshot.gml");
 execute_file(pluginFilePath + "\projectile_init.gml");	//Creates projectile objects
 
 // TODO: make a method that goes over each file in the weapons dir and adds them automatically

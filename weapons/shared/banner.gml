@@ -75,7 +75,8 @@ object_event_add(BannerWeapon,ev_other,ev_user1,'
     if (!owner.cloak && owner.meter[ownerPlayer.activeWeapon] >= owner.maxMeter[ownerPlayer.activeWeapon])
     {
         owner.meter[ownerPlayer.activeWeapon] = 0;
-        playsound(x,y,SpecialSnd);
+        playsound(x,y,specialSnd);
+        owner.abilityActive = true;
         owner.alarm[10] = 150 / global.delta_factor;
     }
 ');

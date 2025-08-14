@@ -24,7 +24,6 @@ object_event_add(Sandman,ev_other,ev_user2,'
         oid.direction=owner.aimDirection;
         oid.speed=15;
         oid.vspeed-=2.5
-        oid.crit=1;
         oid.owner=owner;
         oid.ownerPlayer=ownerPlayer;
         oid.team=owner.team;
@@ -38,4 +37,4 @@ object_event_add(Sandman,ev_other,ev_user2,'
 ');
 
 global.weapons[WEAPON_SANDMAN] = Sandman;
-global.name[WEAPON_SANDMAN] = "Sandman (Unfinished)";
+global.name[WEAPON_SANDMAN] = "Sandman";

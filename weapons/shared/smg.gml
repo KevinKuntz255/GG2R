@@ -76,13 +76,9 @@ object_event_add(smgWeapon, ev_other, ev_user1, '
         randomize();
         
         shot = instance_create(x,y + yoffset + 1,Shot);
-        shot.direction = owner.aimDirection + random(shotDir[0]) - shotDir[1];
-        shot.speed = shotSpeed[0];
-        shot.owner = owner;
-        shot.ownerPlayer = ownerPlayer;
-        shot.team = owner.team;
+        shot = createShot(x,y+yoffset+1,Shot,id,owner.aimDirection,shotSpeed[0]);
+        shot.direction += random(shotDir[0]) - shotDir[1];
         shot.hitDamage = shotDamage;
-        shot.weapon = id;
         with(shot)
             hspeed += owner.hspeed;
         justShot = true;

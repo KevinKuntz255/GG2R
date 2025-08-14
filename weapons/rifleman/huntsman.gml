@@ -56,7 +56,6 @@ object_event_add(HuntsMan,ev_step,ev_step_begin,'
             shot.direction=owner.aimDirection;
             shot.speed=10+(bonus/10)*2.2;
             shot.owner=owner;
-            //shot.crit=crit;
             shot.ownerPlayer=ownerPlayer;
             shot.team=owner.team;
             if burning {
