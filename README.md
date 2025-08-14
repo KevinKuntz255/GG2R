@@ -22,7 +22,7 @@ Pyro's kit has 2 weapons Left
 
 Demo's kit has 5 weapons left
 
-Heavy's kit has 2 weapons left
+Heavy's kit Is finished
 
 Engie's entire kit needs upgradable sentries + mechanics
 

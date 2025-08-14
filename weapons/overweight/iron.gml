@@ -11,9 +11,9 @@ object_event_add(IronMaiden,ev_create,0,'
     refireTime = 2;
     spriteBase = "IronMaiden";
     event_inherited();
-    maxAmmo = 100;
+    if (variable_local_exists("owner.meter[0]")) maxAmmo = 100 + owner.meter[0];
     ammoCount = maxAmmo;
-	extraAmmo = 0;
+	//extraAmmo = 0;
 
     weaponGrade = UNIQUE;
     weaponType = MINIGUN;
@@ -27,4 +27,4 @@ object_event_add(IronMaiden,ev_create,0,'
 ');
 // todo: implement ammo mechanic
 global.weapons[WEAPON_IRON] = IronMaiden;
-global.name[WEAPON_IRON] = "Iron Maiden (unfinished)";
+global.name[WEAPON_IRON] = "Iron Maiden";

@@ -16,7 +16,7 @@ object_event_add(ChocolateHand,ev_create,0,'
         owner.oldmaxHp = owner.maxHp;
         owner.newmaxHp = owner.maxHp + 40;
     }    
-owner.nomRate = 0.85;
+    owner.nomRate = 0.85;
 ');
 
 object_event_add(ChocolateHand,ev_other,ev_user1,'
@@ -58,4 +58,4 @@ object_event_add(ChocolateHand,ev_other,ev_user13,'
 ');
 
 global.weapons[WEAPON_CHOCOLATE] = ChocolateHand;
-global.name[WEAPON_CHOCOLATE] = "Dalokohs Bar (unfinished)"
+global.name[WEAPON_CHOCOLATE] = "Dalokohs Bar"

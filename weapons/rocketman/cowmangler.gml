@@ -46,12 +46,12 @@ object_event_add(CowMangler,ev_step,ev_step_normal,'
             abilityActive = false;
             ammoCount=25;
             event_user(1);
+            owner.alarm[9] = 2 / global.delta_factor;
         }
     } else if readyToShoot {
         if ammoCount < 0 ammoCount = 0;
         else if ammoCount <= maxAmmo ammoCount +=0.9;
     } else {
-        crit = 1;
         owner.runPower = 0.9;
         owner.jumpStrength = 8+(0.6/2);
     }

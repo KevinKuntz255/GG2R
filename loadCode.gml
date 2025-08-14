@@ -726,6 +726,7 @@ object_event_add(Character,ev_create,0,'
 	}
 	with(checkWeapon) instance_destroy();
 	if (currentWeapon.ability != -1) {
+		meter[0] = currentWeapon.meter;
 		maxMeter[0] = currentWeapon.maxMeter;
 		abilityName[0] = currentWeapon.abilityName;
 	}
@@ -1004,7 +1005,19 @@ object_event_add(Character,ev_step,ev_step_end,'
 	                
 	    sendEventPlayerDeath(player, lastDamageDealer, assistant, lastDamageSource);
 	    doEventPlayerDeath(player, lastDamageDealer, assistant, lastDamageSource);
-	    if (lastDamageDealer.object.abilityName[1] == "RAGE") lastDamageDealer.object.meter[1] = min(4, lastDamageDealer.object.meter[1] + 1);
+	    if (lastDamageDealer.object.abilityName[lastDamageDealer.activeWeapon] == "RAGE") lastDamageDealer.object.meter[1] = min(4, lastDamageDealer.object.meter[1] + 1);
+	    if (lastDamageSource == IronMaiden) lastDamageDealer.object.meter[0] = min(400, lastDamageDealer.object.meter[0] + 66);
+	    if (assistant != noone) {
+		    if (assistant.object.weapons[0] == IronMaiden) assistant.object.meter[0] = min(400, lastDamageDealer.object.meter[0] + 33);
+		    if (assistant.object.currentWeapon.object_index == IronMaiden) {
+		    	assistant.object.currentWeapon.maxAmmo += meter[0];
+		    	assistant.object.currentWeapon.ammoCount += 33;
+		    }
+		}
+	    if (lastDamageDealer.object.currentWeapon.object_index == IronMaiden) {
+	    	lastDamageDealer.object.currentWeapon.maxAmmo += meter[0];
+	    	lastDamageDealer.object.currentWeapon.ammoCount += 66;
+	    }
 	    if (!hasReward(player, "GS") && lastDamageSource == WEAPON_FROSTBITE) {
 	    	//var FrozenStatueS
 	    	//FrozenStatueS = sprite_add()
@@ -1091,7 +1104,7 @@ object_event_add(Character,ev_step,ev_step_end,'
 	        hp += nomRate * global.delta_factor;
 	    }
         if (weapons[1] == ChocolateHand) {
-        	if (hp == maxHp) maxHp = newmaxHp;
+        	if (hp >= maxHp) maxHp = newmaxHp;
         	alarm[11] = 900 / global.delta_factor;
         }
 	    if (omnomnomnomindex >= omnomnomnomend)
