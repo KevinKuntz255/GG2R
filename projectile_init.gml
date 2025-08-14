@@ -4,7 +4,6 @@ MeleeHitSnd = sound_add(pluginFilePath + '/randomizer_sounds/MeleeHitSnd.wav', 0
 JarateSnd = sound_add(pluginFilePath + '/randomizer_sounds/JarateSnd.wav', 0, 1);
 CritHitSnd = sound_add(pluginFilePath + '/randomizer_sounds/CritHitSnd.wav', 0, 1);
 
-    					{
 //Some needed mods for existing projectiles
 // modify the projectiles cuz it's cleaner than adding this line on every weapon's ev_user3 and ev_user2 and overriding default weapon events
 // im not touching burningProjectile yet
